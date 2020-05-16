@@ -1,7 +1,7 @@
 local _, ns = ...;
 
 local COMMAND_REGEX = "^!%s*%a%a";
-local SEARCH_REGEX = "^%?%s*([%a%d]+)";
+local SEARCH_REGEX = "^%?%s*([|%a%d]+)";
 
 
 local frame = CreateFrame("Frame");

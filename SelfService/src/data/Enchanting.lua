@@ -112,7 +112,7 @@ ns.Data.Enchanting = {
 		Search = {
 			"enchant",
 			"weapon", "weap",
-			"firey", "fire",
+			"fiery", "fire",
 		}
 	},
 	-- Enchant Weapon - Greater Striking
