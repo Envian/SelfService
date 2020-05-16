@@ -1,0 +1,17 @@
+## Interface: 11303
+## Title: SelfService
+## Author: Envian
+## Version: 0.1
+## SavedVariables: SelfService
+
+localization/en_US.lua
+
+src/Migration.lua
+
+src/data/Enchanting.lua
+
+src/Helpers.lua
+src/Events.lua
+src/Loading.lua
+src/Commands.lua
+src/Customer.lua
