@@ -35,8 +35,6 @@ ns.disableAddon = function()
 	end
 end
 
-DEBUG = ns;
-
 ns.Events.Frame:SetScript("OnEvent", function(_, event, ...)
 	if event == "CRAFT_SHOW" then
 		-- Only enchanting (and a couple irrelevant skills) use this event.
