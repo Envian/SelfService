@@ -18,6 +18,8 @@ ns.enableAddon = function()
 		ns.Enabled = true;
 		ns.Events.Frame:RegisterEvent("CRAFT_SHOW");
 		ns.Events.Frame:RegisterEvent("CHAT_MSG_WHISPER");
+		ns.Events.Frame:RegisterEvent("TRADE_SHOW");
+		ns.Events.Frame:RegisterEvent("TRADE_TARGET_ITEM_CHANGED");
 		ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER", ns.Events.filterInbound);
 		ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER_INFORM", ns.Events.filterOutbound);
 		print(ns.LOG_ENABLED);
@@ -29,6 +31,8 @@ ns.disableAddon = function()
 		ns.Disable = false;
 		ns.Events.Frame:UnregisterEvent("CRAFT_SHOW");
 		ns.Events.Frame:UnregisterEvent("CHAT_MSG_WHISPER");
+		ns.Events.Frame:UnregisterEvent("TRADE_SHOW");
+		ns.Events.Frame:UnregisterEvent("TRADE_TARGET_ITEM_CHANGED");
 		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_WHISPER", ns.Events.filterInbound);
 		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_WHISPER_INFORM", ns.Events.filterOutbound);
 		print(ns.LOG_DISABLED);
@@ -82,5 +86,26 @@ ns.Events.Frame:SetScript("OnEvent", function(_, event, ...)
 			customer.LastWhisper = GetTime();
 			customer.MessagesAvailable = 0;
 		end
+	elseif event == "TRADE_SHOW" then
+		-- allow trade request if there is an active record of the customer, otherwise immediately cancel and send whisper
+		print("Trade Initiated");
+		-- TODO: Detect Realm on load
+		local name = TradeFrameRecipientNameText:GetText().."-Thunderfury";
+
+		-- TODO: Update to use with cart active customers
+		if ns.Customers[name] then
+			print("Customer active, continue trade.");
+			frame:RegisterEvent("TRADE_TARGET_ITEM_CHANGED");
+		else
+			CancelTrade();
+			customer:reply(ns.L.enUS.BUY_FIRST);
+		end
+
+	elseif event == "TRADE_TARGET_ITEM_CHANGED" then
+		local slotChanged = ...;
+		-- Slots 1-7, 7 will not be traded slot
+		print("Trade Item Changed: "..slotChanged);
+		local name, _, quantity, _, _, _ = GetTradeTargetItemInfo(slotChanged);
+		local itemLink = GetTradeTargetItemLink(slotChanged);
 	end
 end);
