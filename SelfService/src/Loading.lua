@@ -1,6 +1,6 @@
 local _, ns = ...
 
-ns.Enabled = true; -- Controls whether or not the addon is enabled or not.
+ns.Enabled = false; -- Controls whether or not the addon is enabled or not.
 ns.Search = {}; -- A map of Search Terms to List of [Recipe] that contain that search term.
 ns.Recipes = {}; -- A map of Id to [Recipe]
 ns.Loaded = {}; -- A map of Profession to Boolean, True when the data is loaded, nil otherwise.

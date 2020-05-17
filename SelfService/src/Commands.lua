@@ -47,7 +47,6 @@ ns.Commands = {
 		end
 	end,
 
-
 	help = function(args, customer)
 		customer:reply(ns.L.enUS.HELP);
 	end,
