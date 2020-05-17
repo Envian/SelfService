@@ -7,6 +7,7 @@ local SEARCH_REGEX = "^%?%s*([|%a%d]+)";
 local frame = CreateFrame("Frame");
 frame:RegisterEvent("CRAFT_SHOW");
 frame:RegisterEvent("CHAT_MSG_WHISPER");
+frame:RegisterEvent("TRADE_SHOW");
 
 frame:SetScript("OnEvent", function(_, event, ...)
 	if event == "CRAFT_SHOW" then
@@ -55,6 +56,9 @@ frame:SetScript("OnEvent", function(_, event, ...)
 			customer.LastWhisper = GetTime();
 			customer.MessagesAvailable = 0;
 		end
+	elseif event == "TRADE_SHOW" then
+		-- allow trade request if there is a record of the customer, otherwise immediately cancel
+		print("Trade Initiated");
 	end
 end);
 
