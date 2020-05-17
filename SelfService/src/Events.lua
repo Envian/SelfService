@@ -57,8 +57,19 @@ frame:SetScript("OnEvent", function(_, event, ...)
 			customer.MessagesAvailable = 0;
 		end
 	elseif event == "TRADE_SHOW" then
-		-- allow trade request if there is a record of the customer, otherwise immediately cancel
+		-- allow trade request if there is an active record of the customer, otherwise immediately cancel and send whisper
 		print("Trade Initiated");
+		-- TODO: Detect Realm on load
+		local name = TradeFrameRecipientNameText:GetText().."-Thunderfury";
+		
+		-- TODO: Update to use with cart active customers
+		if ns.Customers[name] then
+			print("Customer active, continue trade.");
+			frame:RegisterEvent("TRADE_TARGET_ITEM_CHANGED");
+		else
+			CancelTrade();
+			customer:reply(ns.L.enUS.BUY_FIRST);
+		end
 	end
 end);
 

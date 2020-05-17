@@ -25,4 +25,5 @@ ns.L.enUS = {
 	HELP = "haha get wrecked nerd. you're on your own.",
 	RECIPES_OWNED = "I have %s.",
 	RECIPES_UNAVAILABLE = "I do not have that recipe.",
+	BUY_FIRST = "Use command !buy before opening trade.",
 }
