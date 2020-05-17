@@ -21,6 +21,15 @@ ns.getItemIdFromLink = function(link)
 	return id and tonumber(id) or nil;
 end
 
+ns.getLinkedItemIds = function(text, type)
+	type = type or "[^:]+"; -- type by default is any. Callers can pass in "item" or "enchant"
+	local matches = {};
+	for match in text:gmatch("\124c[%a%d]+\124H" .. type .. ":(%d+)[^\124]*\124h[^\124]*\124h\124r") do
+		matches[#matches + 1] = tonumber(match);
+	end
+	return matches;
+end
+
 ns.delink = function(text)
 	return gsub(text, "\124c[^\124]+\124H[^\124]+\124h(%[[^%]]+%])\124h\124r", "%1");
 end

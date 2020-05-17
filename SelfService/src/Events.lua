@@ -3,14 +3,51 @@ local _, ns = ...;
 local COMMAND_REGEX = "^!%s*%a%a";
 local SEARCH_REGEX = "^%?%s*([|%a%d]+)";
 
+ns.Events = {
+	Frame = CreateFrame("Frame"),
+	filterInbound = function(_, event, message, sender)
+		return ns.Enabled and (message:match(COMMAND_REGEX) or message:match(SEARCH_REGEX));
+	end,
+	filterOutbound = function(_, event, message, sender)
+		return ns.Enabled and message:sub(1, #ns.REPLY_PREFIX) == ns.REPLY_PREFIX;
+	end
+}
 
+ns.enableAddon = function()
+	if not ns.Enabled then
+		ns.Enabled = true;
+		ns.Events.Frame:RegisterEvent("CRAFT_SHOW");
+		ns.Events.Frame:RegisterEvent("CHAT_MSG_WHISPER");
+		ns.Events.Frame:RegisterEvent("TRADE_SHOW");
+		ns.Events.Frame:RegisterEvent("TRADE_TARGET_ITEM_CHANGED");
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER", ns.Events.filterInbound);
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER_INFORM", ns.Events.filterOutbound);
+		print(ns.LOG_ENABLED);
+	end
+end
+
+<<<<<<< HEAD
 local frame = CreateFrame("Frame");
 frame:RegisterEvent("CRAFT_SHOW");
 frame:RegisterEvent("CHAT_MSG_WHISPER");
 frame:RegisterEvent("TRADE_SHOW");
 -- Register event so we can disable addon in a BG
+=======
+ns.disableAddon = function()
+	if ns.Enabled then
+		ns.Disable = false;
+		ns.Events.Frame:UnregisterEvent("CRAFT_SHOW");
+		ns.Events.Frame:UnregisterEvent("CHAT_MSG_WHISPER");
+		ns.Events.Frame:UnregisterEvent("TRADE_SHOW");
+		ns.Events.Frame:UnregisterEvent("TRADE_TARGET_ITEM_CHANGED");
+		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_WHISPER", ns.Events.filterInbound);
+		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_WHISPER_INFORM", ns.Events.filterOutbound);
+		print(ns.LOG_DISABLED);
+	end
+end
+>>>>>>> 91d570bce5e37cc00024682daa1e8e3e14dafed0
 
-frame:SetScript("OnEvent", function(_, event, ...)
+ns.Events.Frame:SetScript("OnEvent", function(_, event, ...)
 	if event == "CRAFT_SHOW" then
 		-- Only enchanting (and a couple irrelevant skills) use this event.
 		if GetCraftName() == "Enchanting" and not ns.Loaded.Enchanting then
@@ -40,7 +77,7 @@ frame:SetScript("OnEvent", function(_, event, ...)
 			elseif GetTime() - customer.LastWhisper > 30 * 60 then
 				print(string.format(ns.LOG_NEW_CUSTOMER, customer.Name));
 				customer.MessagesAvailable = 1;
-				customer:reply(ns.L.enUS.FIRST_TIME_CUSTOMER);
+				customer:reply(ns.L.enUS.RETURNING_CUSTOMER);
 			end
 
 			customer.MessagesAvailable = 2; -- Safeguard against spam.
@@ -57,7 +94,10 @@ frame:SetScript("OnEvent", function(_, event, ...)
 			customer.LastWhisper = GetTime();
 			customer.MessagesAvailable = 0;
 		end
+<<<<<<< HEAD
 
+=======
+>>>>>>> 91d570bce5e37cc00024682daa1e8e3e14dafed0
 	elseif event == "TRADE_SHOW" then
 		-- allow trade request if there is an active record of the customer, otherwise immediately cancel and send whisper
 		print("Trade Initiated");
@@ -85,6 +125,7 @@ frame:SetScript("OnEvent", function(_, event, ...)
 		print("Trade Item Changed: "..slotChanged);
 		local itemName, _, quantity, _, _, _ = GetTradeTargetItemInfo(slotChanged);
 		local itemLink = GetTradeTargetItemLink(slotChanged);
+<<<<<<< HEAD
 		-- Test to add item to TradedItems table. Only actually add items to TradedItems if trade is completed
 		if(itemName) then -- If GetTradeTargetItemInfo returns empty, item was removed from window
 			-- Track the state of each slot individually
@@ -109,12 +150,7 @@ frame:SetScript("OnEvent", function(_, event, ...)
 		frame:UnregisterEvent("CHAT_MSG_LOOT");
 		-- Scan bags to ensure transfer of actual materials
 		-- May be easier to record bag contents in pretrade and subtract that from bag contents posttrade
+=======
+>>>>>>> 91d570bce5e37cc00024682daa1e8e3e14dafed0
 	end
 end);
-
-ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER", function(_, event, message, sender)
-	return ns.Enabled and (message:match(COMMAND_REGEX) or message:match(SEARCH_REGEX));
-end)
-ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER_INFORM", function(_, event, message, sender)
-	return ns.Enabled and message:sub(1, #ns.REPLY_PREFIX) == ns.REPLY_PREFIX;
-end)
