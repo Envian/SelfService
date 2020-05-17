@@ -56,29 +56,44 @@ frame:SetScript("OnEvent", function(_, event, ...)
 			customer.LastWhisper = GetTime();
 			customer.MessagesAvailable = 0;
 		end
-		
+
 	elseif event == "TRADE_SHOW" then
 		-- allow trade request if there is an active record of the customer, otherwise immediately cancel and send whisper
 		print("Trade Initiated");
 		-- TODO: Detect Realm on load
 		local name = TradeFrameRecipientNameText:GetText().."-Thunderfury";
-		
+
 		-- TODO: Update to use with cart active customers
 		if ns.Customers[name] then
 			print("Customer active, continue trade.");
+			-- Active customer, register trade events
 			frame:RegisterEvent("TRADE_TARGET_ITEM_CHANGED");
+			frame:RegisterEvent("TRADE_CLOSED");
+			-- RegisterEvent("Bag_Upate_Or_Whatever")
 		else
 			CancelTrade();
 			customer:reply(ns.L.enUS.BUY_FIRST);
 		end
-		
+
 	elseif event == "TRADE_TARGET_ITEM_CHANGED" then
+		-- If we land here, customer is active and available to trade
+		-- TODO: Detect Realm on load
+		local name = TradeFrameRecipientNameText:GetText().."-Thunderfury";
 		local slotChanged = ...;
 		-- Slots 1-7, 7 will not be traded slot
 		print("Trade Item Changed: "..slotChanged);
-		local name, _, quantity, _, _, _ = GetTradeTargetItemInfo(slotChanged);
+		local itemName, _, quantity, _, _, _ = GetTradeTargetItemInfo(slotChanged);
 		local itemLink = GetTradeTargetItemLink(slotChanged);
-		
+		-- Test to add item to TradedItems table
+		ns.Customers[name]:addTradedItem(itemName, quantity);
+
+	elseif event == "TRADE_CLOSED" then
+		-- Unregister all trade events
+		-- dammit i'm super drunk. like turbo drunk.....fuck
+		-- Sorry Derp. ILY
+		frame:UnregisterEvent("TRADE_TARGET_ITEM_CHANGED");
+		frame:UnregisterEvent("TRADE_CLOSED");
+		-- Scan bags to ensure transfer of actual materials
 	end
 end);
 

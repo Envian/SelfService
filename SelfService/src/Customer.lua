@@ -22,7 +22,8 @@ function ns.CustomerClass:new(data, name)
 		Name = name,
 		LastWhisper = 0,
 		LastSearch = 0,
-		MessagesAvailable = 0
+		MessagesAvailable = 0,
+		TradedItems = nil
 	}
 	setmetatable(data, ns.CustomerClass);
 	return data;
@@ -71,4 +72,11 @@ function ns.CustomerClass:replyJoin(message, list, delim)
 	end
 
 	self:reply(message, priority);
+end
+
+function ns.CustomerClass:addTradedItem(item, quantity)
+	if self.TradedItems == nil then
+		self.TradedItems = {};
+	end
+	self.TradedItems.insert({item, quantity});
 end
