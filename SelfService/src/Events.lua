@@ -56,6 +56,7 @@ frame:SetScript("OnEvent", function(_, event, ...)
 			customer.LastWhisper = GetTime();
 			customer.MessagesAvailable = 0;
 		end
+		
 	elseif event == "TRADE_SHOW" then
 		-- allow trade request if there is an active record of the customer, otherwise immediately cancel and send whisper
 		print("Trade Initiated");
@@ -70,6 +71,14 @@ frame:SetScript("OnEvent", function(_, event, ...)
 			CancelTrade();
 			customer:reply(ns.L.enUS.BUY_FIRST);
 		end
+		
+	elseif event == "TRADE_TARGET_ITEM_CHANGED" then
+		local slotChanged = ...;
+		-- Slots 1-7, 7 will not be traded slot
+		print("Trade Item Changed: "..slotChanged);
+		local name, _, quantity, _, _, _ = GetTradeTargetItemInfo(slotChanged);
+		local itemLink = GetTradeTargetItemLink(slotChanged);
+		
 	end
 end);
 
