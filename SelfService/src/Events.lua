@@ -8,6 +8,7 @@ local frame = CreateFrame("Frame");
 frame:RegisterEvent("CRAFT_SHOW");
 frame:RegisterEvent("CHAT_MSG_WHISPER");
 frame:RegisterEvent("TRADE_SHOW");
+-- Register event so we can disable addon in a BG
 
 frame:SetScript("OnEvent", function(_, event, ...)
 	if event == "CRAFT_SHOW" then
@@ -68,8 +69,8 @@ frame:SetScript("OnEvent", function(_, event, ...)
 			print("Customer active, continue trade.");
 			-- Active customer, register trade events
 			frame:RegisterEvent("TRADE_TARGET_ITEM_CHANGED");
-			frame:RegisterEvent("TRADE_CLOSED");
-			-- RegisterEvent("Bag_Upate_Or_Whatever")
+			frame:RegisterEvent("TRADE_ACCEPT_UPDATE");
+			frame:RegisterEvent("CHAT_MSG_LOOT");
 		else
 			CancelTrade();
 			customer:reply(ns.L.enUS.BUY_FIRST);
@@ -80,20 +81,34 @@ frame:SetScript("OnEvent", function(_, event, ...)
 		-- TODO: Detect Realm on load
 		local name = TradeFrameRecipientNameText:GetText().."-Thunderfury";
 		local slotChanged = ...;
-		-- Slots 1-7, 7 will not be traded slot
+		-- Slots 1-7, 7 will not be traded slot. Only care about 1-6 for accounting purposes
 		print("Trade Item Changed: "..slotChanged);
 		local itemName, _, quantity, _, _, _ = GetTradeTargetItemInfo(slotChanged);
 		local itemLink = GetTradeTargetItemLink(slotChanged);
-		-- Test to add item to TradedItems table
-		ns.Customers[name]:addTradedItem(itemName, quantity);
+		-- Test to add item to TradedItems table. Only actually add items to TradedItems if trade is completed
+		if(itemName) then -- If GetTradeTargetItemInfo returns empty, item was removed from window
+			-- Track the state of each slot individually
+			ns.Customers[name]:addTradedItem(itemName, quantity);
+		else
+			--ns.Customers[name]:removeTradedItem()
+		end
+
+	elseif event == "TRADE_ACCEPT_UPDATE" then
+		-- Customer has accepted the trade. Do we accept or reject?
+		-- Minimize number of trades. Require customer to optimize trading of mats, compare to expected optimization
+		-- MVP: 1 trade, 1 enchant. Are exact mats present? Yes: accept, No: reject
+		-- If we accept the trade, register the TRADE_CLOSED event and listen for bag update/chat loot events to cross check traded items
+		frame:RegisterEvent("TRADE_CLOSED");
 
 	elseif event == "TRADE_CLOSED" then
+		-- Listen for CHAT_MSG_LOOT events and look for expected mats
+			-- ^ This method could cause issues
 		-- Unregister all trade events
-		-- dammit i'm super drunk. like turbo drunk.....fuck
-		-- Sorry Derp. ILY
 		frame:UnregisterEvent("TRADE_TARGET_ITEM_CHANGED");
 		frame:UnregisterEvent("TRADE_CLOSED");
+		frame:UnregisterEvent("CHAT_MSG_LOOT");
 		-- Scan bags to ensure transfer of actual materials
+		-- May be easier to record bag contents in pretrade and subtract that from bag contents posttrade
 	end
 end);
 

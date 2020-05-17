@@ -78,5 +78,5 @@ function ns.CustomerClass:addTradedItem(item, quantity)
 	if self.TradedItems == nil then
 		self.TradedItems = {};
 	end
-	self.TradedItems.insert({item, quantity});
+	table.insert(self.TradedItems, {item, quantity});
 end
