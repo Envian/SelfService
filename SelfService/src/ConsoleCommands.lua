@@ -6,7 +6,16 @@ SLASH_SELFSERVICE3 = "/ss";
 
 local SLASH_COMMANDS = {
 	enable = ns.enableAddon,
-	disable = ns.disableAddon
+	disable = ns.disableAddon,
+	reset = function(args)
+		local resetWhat, who = args:match("^(%S+)%s?(.*)$");
+		if not resetWhat or not who then return end;
+
+		local customer = ns.getCustomer(who);
+		if resetWhat:lower() == "cart" then
+			customer.Cart = nil;
+		end
+	end
 }
 
 SlashCmdList["SELFSERVICE"] = function(message, editbox)
@@ -15,7 +24,7 @@ SlashCmdList["SELFSERVICE"] = function(message, editbox)
 	local command, args = message:match("^(%S+)%s?(.*)$");
 	local cmdFunction = SLASH_COMMANDS[command:lower()];
 
-	if (cmdFunction) then
+	if cmdFunction then
 		cmdFunction(args);
 	else
 		print("FUCK")
