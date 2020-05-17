@@ -47,36 +47,7 @@ ns.Commands = {
 		end
 	end,
 
-
 	help = function(args, customer)
 		customer:reply(ns.L.enUS.HELP);
 	end,
 };
-
-SLASH_SelfService1 = "/selfservice"
-SLASH_SelfService2 = "/ss"
-SlashCmdList["SelfService"] = function(msg, editbox)
-	local msg = msg:lower()
-	
-	if(msg == "" or msg == nil) then
-	    print("- Available SelfService Commands -")
-	    print("disable - Turn off the bot")
-	    print("enable - Turn on the bot")
-	elseif(msg == "disable") then
-		-- Call disable function
-		print("Bot Disabled.")
-	elseif(msg == "enable") then
-		-- Call enable function
-		print("Bot Enabled.")
-	else
-		print("Invalid argument.")
-	end
-end
-
-function SelfServiceDisable()
-	-- Disable the bot
-end
-
-function SelfServiceEnable()
-	-- Enable the bot
-end

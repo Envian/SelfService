@@ -3,12 +3,41 @@ local _, ns = ...;
 local COMMAND_REGEX = "^!%s*%a%a";
 local SEARCH_REGEX = "^%?%s*([|%a%d]+)";
 
+ns.Events = {
+	Frame = CreateFrame("Frame"),
+	filterInbound = function(_, event, message, sender)
+		return ns.Enabled and (message:match(COMMAND_REGEX) or message:match(SEARCH_REGEX));
+	end,
+	filterOutbound = function(_, event, message, sender)
+		return ns.Enabled and message:sub(1, #ns.REPLY_PREFIX) == ns.REPLY_PREFIX;
+	end
+}
 
-local frame = CreateFrame("Frame");
-frame:RegisterEvent("CRAFT_SHOW");
-frame:RegisterEvent("CHAT_MSG_WHISPER");
+ns.enableAddon = function()
+	if not ns.Enabled then
+		ns.Enabled = true;
+		ns.Events.Frame:RegisterEvent("CRAFT_SHOW");
+		ns.Events.Frame:RegisterEvent("CHAT_MSG_WHISPER");
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER", ns.Events.filterInbound);
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER_INFORM", ns.Events.filterOutbound);
+		print(ns.LOG_ENABLED);
+	end
+end
 
-frame:SetScript("OnEvent", function(_, event, ...)
+ns.disableAddon = function()
+	if ns.Enabled then
+		ns.Disable = false;
+		ns.Events.Frame:UnregisterEvent("CRAFT_SHOW");
+		ns.Events.Frame:UnregisterEvent("CHAT_MSG_WHISPER");
+		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_WHISPER", ns.Events.filterInbound);
+		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_WHISPER_INFORM", ns.Events.filterOutbound);
+		print(ns.LOG_DISABLED);
+	end
+end
+
+DEBUG = ns;
+
+ns.Events.Frame:SetScript("OnEvent", function(_, event, ...)
 	if event == "CRAFT_SHOW" then
 		-- Only enchanting (and a couple irrelevant skills) use this event.
 		if GetCraftName() == "Enchanting" and not ns.Loaded.Enchanting then
@@ -38,7 +67,7 @@ frame:SetScript("OnEvent", function(_, event, ...)
 			elseif GetTime() - customer.LastWhisper > 30 * 60 then
 				print(string.format(ns.LOG_NEW_CUSTOMER, customer.Name));
 				customer.MessagesAvailable = 1;
-				customer:reply(ns.L.enUS.FIRST_TIME_CUSTOMER);
+				customer:reply(ns.L.enUS.RETURNING_CUSTOMER);
 			end
 
 			customer.MessagesAvailable = 2; -- Safeguard against spam.
@@ -57,10 +86,3 @@ frame:SetScript("OnEvent", function(_, event, ...)
 		end
 	end
 end);
-
-ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER", function(_, event, message, sender)
-	return ns.Enabled and (message:match(COMMAND_REGEX) or message:match(SEARCH_REGEX));
-end)
-ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER_INFORM", function(_, event, message, sender)
-	return ns.Enabled and message:sub(1, #ns.REPLY_PREFIX) == ns.REPLY_PREFIX;
-end)
