@@ -15,7 +15,7 @@ function ns.OrderClass:new(data, customer)
 	data = data or {
 		Customer = customer,
 		Complete = false,
-		Recipes = nil
+		Recipes = nil,
 		RequiredMats = nil,
 		ReceivedMats = nil
 	}
