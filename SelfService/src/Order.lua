@@ -80,6 +80,7 @@ function ns.OrderClass:closeTrade()
 end
 
 function ns.OrderClass:endOrder()
+	self.Complete = true;
 	-- ArchiveOrder();
 	ns.CurrentOrder = nil;
 end

@@ -109,18 +109,16 @@ ns.Events.Frame:SetScript("OnEvent", function(_, event, ...)
 	elseif event == "TRADE_TARGET_ITEM_CHANGED" then
 		-- If we land here, customer is active and available to trade
 		local slotChanged = ...;
-		-- Slots 1-7, 7 will not be traded slot. Only care about 1-6 for accounting purposes
 		print("Trade Item Changed: "..slotChanged);
 		local itemName, _, quantity = GetTradeTargetItemInfo(slotChanged);
 		local itemLink = GetTradeTargetItemLink(slotChanged);
-		-- Test to add item to TradedItems table. Only actually add items to TradedItems if trade is completed
-		if(itemName == "") then -- If GetTradeTargetItemInfo returns empty, item was removed from window
-			-- Track the state of each slot individually
-			print(itemName.." added to slot "..slotChanged);
-			--ns.Customers[name]:addTradedItem(itemName, quantity);
-		else
+
+		if itemName == "" then -- If GetTradeTargetItemInfo returns empty strings, item was removed from window
 			print("Item removed from slot "..slotChanged);
-			--ns.Customers[name]:removeTradedItem()
+			ns.CurrentOrder:removeTradeWindowItem(slotChanged);
+		else
+			print(itemName.." added to slot "..slotChanged);
+			ns.CurrentOrder:addTradeWindowItem(ns.getItemIdFromLink(itemLink), itemName, quantity, slotChanged);
 		end
 
 	elseif event == "TRADE_MONEY_CHANGED" then
