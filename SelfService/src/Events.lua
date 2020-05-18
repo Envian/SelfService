@@ -28,7 +28,7 @@ end
 
 ns.disableAddon = function()
 	if ns.Enabled then
-		ns.Disable = false;
+		ns.Enabled = false;
 		ns.Events.Frame:UnregisterEvent("CRAFT_SHOW");
 		ns.Events.Frame:UnregisterEvent("CHAT_MSG_WHISPER");
 		ns.Events.Frame:UnregisterEvent("TRADE_SHOW");
