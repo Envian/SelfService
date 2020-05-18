@@ -33,3 +33,7 @@ end
 ns.delink = function(text)
 	return gsub(text, "\124c[^\124]+\124H[^\124]+\124h(%[[^%]]+%])\124h\124r", "%1");
 end
+
+ns.hash = function(text)
+
+end

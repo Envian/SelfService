@@ -1,5 +1,19 @@
 local _, ns = ...;
 
+ns.Transactions = {};
+-- TODO: Define a unique id for each transaction.
+-- UID - hash(Customer.Name+Customer.Cart.Order+time())
+ns.getTransaction = function(id, customer)
+  local existing = ns.Transactions[id];
+  if existing then return existing end;
+
+  local id = hash(Customer.Name..Customer.Cart.Order..time());
+  local newTransaction = ns.TransactionClass:new(SelfService.Transactions[id], customer);
+  SelfService.Transactions[id] = newTransaction;
+  ns.Transactions[id] = newTransaction;
+  return newTransaction;
+end
+
 -- Transaction Definition
 ns.TransactionClass = {};
 ns.TransactionClass.__index = ns.TransactionClass;
