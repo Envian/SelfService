@@ -95,7 +95,7 @@ ns.Events.Frame:SetScript("OnEvent", function(_, event, ...)
 		print("Trade Initiated");
 		local name = TradeFrameRecipientNameText:GetText().."-"..GetRealmName();
 
-		if ns.Customers[name]:getCart() then
+		if ns.Customers[name]:getOrder() then
 			print("Customer active, continue trade.");
 			-- Active customer, register trade events and configure window monitor
 			frame:RegisterEvent("TRADE_TARGET_ITEM_CHANGED");
@@ -125,7 +125,12 @@ ns.Events.Frame:SetScript("OnEvent", function(_, event, ...)
 		print("Customer has changed tip value.");
 
 	elseif event == "TRADE_ACCEPT_UPDATE" then
-		-- Customer has accepted the trade. Do we accept or reject?
+		local playerAccepted, customerAccepted = ...;
+
+		print("Trade accept button pressed: ");
+		print("  - Player Accepted: "..playerAccepted);
+		print("  - Customer Accepted: "..customerAccepted);
+
 		-- Minimize number of trades. Require customer to optimize trading of mats, compare to expected optimization
 		-- Gathering: 1 trade, 1 enchant. Are exact mats present?
 		-- Enchant: is slot 7 enchanted properly and does tip match price?
