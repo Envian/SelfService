@@ -48,7 +48,7 @@ ns.Commands = {
 	end,
 
 	buy = function(args, customer)
-		if ns.CurrentOrder then
+		if ns.CurrentOrder and ns.CurrentOrder.Customer ~= customer then
 			customer:reply(ns.L.enUS.BUSY);
 			return;
 		end
@@ -64,6 +64,7 @@ ns.Commands = {
 			local recipe = ns.Recipes[orders[1]];
 			if recipe and recipe.Owned then
 				ns.CurrentOrder:setOrder({ recipe });
+				customer.CurrentOrder = ns.CurrentOrder;
 				customer:replyJoin(ns.L.enUS.ORDER_READY:format(recipe.Name),
 					ns:imap(recipe.mats, function(mat) return mat.Link end));
 			else
