@@ -21,7 +21,6 @@ ns.enableAddon = function()
 		ns.Events.Frame:RegisterEvent("CRAFT_SHOW");
 		ns.Events.Frame:RegisterEvent("CHAT_MSG_WHISPER");
 		ns.Events.Frame:RegisterEvent("TRADE_SHOW");
-		ns.Events.Frame:RegisterEvent("TRADE_TARGET_ITEM_CHANGED");
 		ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER", ns.Events.filterInbound);
 		ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER_INFORM", ns.Events.filterOutbound);
 		print(ns.LOG_ENABLED);
@@ -34,7 +33,6 @@ ns.disableAddon = function()
 		ns.Events.Frame:UnregisterEvent("CRAFT_SHOW");
 		ns.Events.Frame:UnregisterEvent("CHAT_MSG_WHISPER");
 		ns.Events.Frame:UnregisterEvent("TRADE_SHOW");
-		ns.Events.Frame:UnregisterEvent("TRADE_TARGET_ITEM_CHANGED");
 		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_WHISPER", ns.Events.filterInbound);
 		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_WHISPER_INFORM", ns.Events.filterOutbound);
 		print(ns.LOG_DISABLED);
@@ -101,6 +99,7 @@ ns.Events.Frame:SetScript("OnEvent", function(_, event, ...)
 			frame:RegisterEvent("TRADE_TARGET_ITEM_CHANGED");
 			frame:RegisterEvent("TRADE_MONEY_CHANGED"); -- May be TRADE_CURRENCY_CHANGED
 			frame:RegisterEvent("TRADE_ACCEPT_UPDATE");
+			frame:RegisterEvent("TRADE_CLOSED");
 		else
 			CancelTrade();
 			customer:reply(ns.L.enUS.BUY_FIRST);
@@ -136,13 +135,17 @@ ns.Events.Frame:SetScript("OnEvent", function(_, event, ...)
 		-- Enchant: is slot 7 enchanted properly and does tip match price?
 		-- If we accept the trade, register the TRADE_CLOSED event and listen for bag update/chat loot events to cross check traded items
 		frame:RegisterEvent("CHAT_MSG_LOOT"); -- register event only if we accept trade
-		frame:RegisterEvent("TRADE_CLOSED");
 
 	elseif event == "TRADE_CLOSED" then
+		-- Fired when the window closes, not guarantee of successful trade
+		-- May need to check a flag to see if trade was accepted or cancelled
+
 		-- Listen for CHAT_MSG_LOOT events and look for expected mats
 			-- ^ This method could cause issues
 		-- Unregister all trade events
 		frame:UnregisterEvent("TRADE_TARGET_ITEM_CHANGED");
+		frame:UnregisterEvent("TRADE_MONEY_CHANGED"); -- May be TRADE_CURRENCY_CHANGED
+		frame:UnregisterEvent("TRADE_ACCEPT_UPDATE");
 		frame:UnregisterEvent("TRADE_CLOSED");
 		frame:UnregisterEvent("CHAT_MSG_LOOT");
 		-- Scan bags to ensure transfer of actual materials
