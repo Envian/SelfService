@@ -1,5 +1,7 @@
 local _, ns = ...;
 
+local ns.
+
 local COMMAND_REGEX = "^!%s*%a%a";
 local SEARCH_REGEX = "^%?%s*([|%a%d]+)";
 
@@ -112,7 +114,7 @@ ns.Events.Frame:SetScript("OnEvent", function(_, event, ...)
 		local itemName, _, quantity = GetTradeTargetItemInfo(slotChanged);
 		local itemLink = GetTradeTargetItemLink(slotChanged);
 		-- Test to add item to TradedItems table. Only actually add items to TradedItems if trade is completed
-		if(itemName) then -- If GetTradeTargetItemInfo returns empty, item was removed from window
+		if(itemName == "") then -- If GetTradeTargetItemInfo returns empty, item was removed from window
 			-- Track the state of each slot individually
 			print(itemName.." added to slot "..slotChanged);
 			--ns.Customers[name]:addTradedItem(itemName, quantity);

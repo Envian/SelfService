@@ -22,7 +22,8 @@ function ns.CustomerClass:new(data, name)
 		Name = name,
 		LastWhisper = 0,
 		LastSearch = 0,
-		MessagesAvailable = 0
+		MessagesAvailable = 0,
+		CurrentOrder = nil
 	}
 	setmetatable(data, ns.CustomerClass);
 	return data;
@@ -31,25 +32,11 @@ end
 -- Hard coded - used to filter messages. Localization would cause issuses
 ns.REPLY_PREFIX = "<BOT> ";
 
-function ns.CustomerClass:getCart()
+function ns.CustomerClass:getOrder()
 	if GetTime() - (self.LastWhisper or 0) > 30 * 60 then
-		self.Cart = nil;
+		self.CurrentOrder = nil;
 	end
-	return self.Cart;
-end
-
-function ns.CustomerClass:setCart(recipes)
-	local requiredMats = {};
-	for _, recipe in ipairs(recipes) do
-		for _, mat in ipairs(recipe.Mats) do
-			requiredMats[mat.Id] = (requiredMats[mat.Id] or 0) + mat.Count;
-		end
-	end
-
-	self.Cart = {
-		Mats = requiredMats,
-		Order = recipes
-	};
+	return self.CurrentOrder;
 end
 
 function ns.CustomerClass:reply(message)
