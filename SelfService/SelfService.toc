@@ -7,6 +7,7 @@
 localization/en_US.lua
 
 src/Migration.lua
+src/Globals.lua
 
 src/data/Enchanting.lua
 
@@ -17,4 +18,3 @@ src/Commands.lua
 src/ConsoleCommands.lua
 src/Customer.lua
 src/Order.lua
-src/Globals.lua

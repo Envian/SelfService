@@ -1,8 +1,13 @@
 local _, ns = ...;
 
-local TradeWindowContents;
-
 -- Order Definition
+ns.OrderClass.STATUSES = {
+	PENDING = 1,
+	ORDERED = 2,
+	GATHERED = 3,
+	DELIVERED = 4,
+	CANCELLED = 5
+}
 
 -- TODO: PostMVP, add additional fields for archival purposes, i.e. profit
 function ns.OrderClass:new(data, customerName)
@@ -62,10 +67,14 @@ function ns.OrderClass:closeTrade()
 		self.ReceivedMats[stack.id] = (self.ReceivedMats[stack.id] or 0) + stack.quantity;
 		print("Added "..itemLink.."x"..stack.quantity.." to ReceivedMats: "..self.ReceivedMats[stack.id].. " total");
 	end
+
+	ns.CurrentTrade = {};
 end
 
 function ns.OrderClass:endOrder()
-	self.Complete = true;
+	-- Set Status to delivered or cancelled
+	-- self.Status = ns.OrderClass.STATUSES.DELIVERED;
+	-- self.Status = ns.OrderClass.STATUSES.CANCELLED;
 	-- ArchiveOrder();
 	ns.CurrentOrder = nil;
 end

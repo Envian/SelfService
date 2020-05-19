@@ -1,6 +1,5 @@
 local _, ns = ...;
 
-ns.Data = ns.Data or {}
 ns.Data.Enchanting = {
 	-- Enchant Weapon - Mighty Intellect
 	[23804] = {

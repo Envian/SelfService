@@ -1,14 +1,16 @@
 local _, ns = ...;
 
 -- Compile all global ns definitions here
-ns.Customers = {};
-ns.CurrentTrade = {};
-ns.CurrentOrder = nil;
 
-ns.OrderClass.STATUSES = {
-	PENDING = 1,
-	ORDERED = 2,
-	GATHERED = 3,
-	DELIVERED = 4,
-	CANCELLED = 5
-}
+-- List of Craft/Tradeskill data I assume? Should be just a bunch of fields.
+-- Currently ns.Data.Enchanting field defined in data/Enchanting.lua
+ns.Data = {};
+
+-- Map<String:name, Customer> in Customer.lua
+ns.Customers = {};
+
+-- Array<Object<int:id, int:quantity>>[7] in Events.lua, Order.lua
+ns.CurrentTrade = {};
+
+-- OrderClass
+ns.CurrentOrder = nil;
