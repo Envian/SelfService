@@ -105,6 +105,9 @@ ns.Events.Frame:SetScript("OnEvent", function(_, event, ...)
 
 	elseif event == "TRADE_TARGET_ITEM_CHANGED" then
 		-- If we land here, customer is active and available to trade
+		-- TODO: Test ^^ by dragging inventory item to player. I imagine it will
+		--		 fire the event, but if we don't register it until we accept a
+		--		 trade request we shouldn't get unexpected behavior.
 		local slotChanged = ...;
 		print("Trade Item Changed: "..slotChanged);
 		local _, _, quantity = GetTradeTargetItemInfo(slotChanged);
