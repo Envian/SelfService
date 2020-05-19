@@ -76,5 +76,9 @@ function ns.OrderClass:endOrder()
 	-- self.Status = ns.OrderClass.STATUSES.DELIVERED;
 	-- self.Status = ns.OrderClass.STATUSES.CANCELLED;
 	-- ArchiveOrder();
+
+	-- Order is complete, i.e. delivered or cancelled. Reset customer's
+	-- current order and global current order
+	ns.getCustomer(ns.CurrentOrder.CustomerName).CurrentOrder = nil;
 	ns.CurrentOrder = nil;
 end
