@@ -1,20 +1,14 @@
 local _, ns = ...;
 
-ns.CurrentOrder = nil;
-
 local TradeWindowContents;
 
 -- Order Definition
-ns.OrderClass = {};
-ns.OrderClass.__index = ns.OrderClass;
-
-DEBUG = ns.OrderClass;
 
 -- TODO: PostMVP, add additional fields for archival purposes, i.e. profit
-function ns.OrderClass:new(data, customer)
+function ns.OrderClass:new(data, customerName)
 	data = data or {
-		Customer = customer,
-		Complete = false,
+		CustomerName = customerName,
+		Status = ns.OrderClass.STATUSES.PENDING,
 		Recipes = nil,
 		RequiredMats = nil,
 		ReceivedMats = nil
@@ -23,7 +17,7 @@ function ns.OrderClass:new(data, customer)
 	return data;
 end
 
-function ns.OrderClass:setOrder(recipes)
+function ns.OrderClass:addToOrder(recipes)
 	local requiredMats = {};
 	for _, recipe in ipairs(recipes) do
 		for _, mat in ipairs(recipe.Mats) do
@@ -33,26 +27,11 @@ function ns.OrderClass:setOrder(recipes)
 
 	self.RequiredMats = requiredMats;
 	self.Recipes = recipes;
-end
-
-function ns.OrderClass:addTradeWindowItem(id, itemName, quantity, slot)
-	-- Edge case. We should never get a value out of bounds
-	if slot < 1 or slot > 7 then
-		print("Trade Window Slot Index Out Of Bounds: "..slot);
-		return;
-	end
-
-	TradeWindowContents[slot] = {id, itemName, quantity};
-end
-
-function ns.OrderClass:removeTradeWindowItem(slot)
-	TradeWindowContents[slot] = nil;
+	self.Status = ns.OrderClass.STATUSES.ORDERED;
 end
 
 function ns.OrderClass:compareToCart()
-	local requiredMats = self.Customer:getCart().Mats;
-
-	for id, count in pairs(requiredMats) do
+	for id, count in pairs(self.RequiredMats) do
 		local _, itemLink = GetItemInfo(id);
 
 		if self.ReceivedMats[id] and count ~= self.ReceivedMats[id] then
@@ -60,8 +39,14 @@ function ns.OrderClass:compareToCart()
 			print("Required: "..itemLink.."x"..count);
 			print("Received: "..itemLink.."x"..self.ReceivedMats[id]);
 			return;
-		else
-			print("Required material not received: "..itemLink);
+		end
+	end
+
+	for id, count in pairs(self.ReceivedMats) do
+		local _, itemLink = GetItemInfo(id);
+
+		if not self.RequiredMats[id] then
+			print("Received material not required for order: "..itemLink.."x"..count);
 			return;
 		end
 	end
@@ -71,11 +56,11 @@ end
 
 function ns.OrderClass:closeTrade()
 	-- Scan trade window slots and add contents to ReceivedMats
-	for i=1, 7 do
-		local stack = TradeWindowContents[i];
-		local itemID = GetItemInfo(stack[1]);
-		self.ReceivedMats[itemID] = (self.ReceivedMats[itemID] or 0) + stack[3];
-		print("Added "..stack[2].."x"..stack[3].." to ReceivedMats: "..self.ReceivedMats[itemID].. " total");
+	for i=1, 6 do
+		local stack = ns.CurrentTrade[i];
+		local _, itemLink = GetItemInfo(stack.id);
+		self.ReceivedMats[stack.id] = (self.ReceivedMats[stack.id] or 0) + stack.quantity;
+		print("Added "..itemLink.."x"..stack.quantity.." to ReceivedMats: "..self.ReceivedMats[stack.id].. " total");
 	end
 end
 
@@ -83,8 +68,4 @@ function ns.OrderClass:endOrder()
 	self.Complete = true;
 	-- ArchiveOrder();
 	ns.CurrentOrder = nil;
-end
-
-function ns.OrderClass:isComplete()
-	return self.Complete
 end

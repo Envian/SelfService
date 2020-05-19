@@ -1,7 +1,10 @@
 local _, ns = ...;
 
-ns.Customers = {};
 ns.getCustomer = function(name)
+	if not string.find(name, "-") then
+		name = name.."-"..GetRealmName();
+	end
+
 	local existing = ns.Customers[name];
 	if existing then return existing end;
 
@@ -37,6 +40,27 @@ function ns.CustomerClass:getOrder()
 		self.CurrentOrder = nil;
 	end
 	return self.CurrentOrder;
+end
+
+function ns.CustomerClass:addToOrder(recipes)
+	local order = self:getOrder();
+
+	-- Temporary
+	if order then
+		self:reply(ns.L.enUS.ORDER_IN_PROGRESS);
+	elseif not recipes or #recipes ~= 1 then
+		self:reply(ns.L.enUS.ORDER_LIMIT);
+	else
+		local recipe = ns.Recipes[recipes[1]];
+		if recipe and recipe.Owned then
+			order:addToOrder({ recipe });
+			self.CurrentOrder = order;
+			ns.CurrentOrder = self.CurrentOrder;
+			self:replyJoin(ns.L.enUS.ORDER_READY:format(recipe.Name),
+				ns:imap(recipe.Mats, function(mat) return mat.Link end));
+		else
+			self:reply(ns.L.enUS.RECIPES_UNAVAILABLE);
+		end
 end
 
 function ns.CustomerClass:reply(message)

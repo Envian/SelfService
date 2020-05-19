@@ -17,3 +17,4 @@ src/Commands.lua
 src/ConsoleCommands.lua
 src/Customer.lua
 src/Order.lua
+src/Globals.lua

@@ -1,7 +1,5 @@
 local _, ns = ...;
 
-local ns.
-
 local COMMAND_REGEX = "^!%s*%a%a";
 local SEARCH_REGEX = "^%?%s*([|%a%d]+)";
 
@@ -91,9 +89,9 @@ ns.Events.Frame:SetScript("OnEvent", function(_, event, ...)
 		-- allow trade request if there is an active record of the
 		-- customer, otherwise immediately cancel and send whisper
 		print("Trade Initiated");
-		local name = TradeFrameRecipientNameText:GetText().."-"..GetRealmName();
+		local name = TradeFrameRecipientNameText:GetText();
 
-		if ns.Customers[name]:getOrder() then
+		if ns.getCustomer(name):getOrder() then
 			print("Customer active, continue trade.");
 			-- Active customer, register trade events and configure window monitor
 			frame:RegisterEvent("TRADE_TARGET_ITEM_CHANGED");
@@ -109,16 +107,10 @@ ns.Events.Frame:SetScript("OnEvent", function(_, event, ...)
 		-- If we land here, customer is active and available to trade
 		local slotChanged = ...;
 		print("Trade Item Changed: "..slotChanged);
-		local itemName, _, quantity = GetTradeTargetItemInfo(slotChanged);
+		local _, _, quantity = GetTradeTargetItemInfo(slotChanged);
 		local itemLink = GetTradeTargetItemLink(slotChanged);
 
-		if itemName == "" then -- If GetTradeTargetItemInfo returns empty strings, item was removed from window
-			print("Item removed from slot "..slotChanged);
-			ns.CurrentOrder:removeTradeWindowItem(slotChanged);
-		else
-			print(itemName.." added to slot "..slotChanged);
-			ns.CurrentOrder:addTradeWindowItem(ns.getItemIdFromLink(itemLink), itemName, quantity, slotChanged);
-		end
+		ns.CurrentTrade[slotChanged] = itemName ~= "" and { id: ns.getItemIdFromLink(itemLink), quantity: quantity } or nil;
 
 	elseif event == "TRADE_MONEY_CHANGED" then
 		print("Customer has changed tip value.");
