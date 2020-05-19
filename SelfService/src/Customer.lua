@@ -18,8 +18,6 @@ end
 ns.CustomerClass = {};
 ns.CustomerClass.__index = ns.CustomerClass;
 
-DEBUG = ns.CustomerClass;
-
 function ns.CustomerClass:new(data, name)
 	data = data or {
 		Name = name,
@@ -31,9 +29,6 @@ function ns.CustomerClass:new(data, name)
 	setmetatable(data, ns.CustomerClass);
 	return data;
 end
-
--- Hard coded - used to filter messages. Localization would cause issuses
-ns.REPLY_PREFIX = "<BOT> ";
 
 function ns.CustomerClass:getOrder()
 	if GetTime() - (self.LastWhisper or 0) > 30 * 60 then

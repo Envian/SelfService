@@ -1,6 +1,9 @@
 local _, ns = ...;
 
 -- Order Definition
+ns.OrderClass = {};
+ns.OrderClass.__index = ns.OrderClass;
+
 ns.OrderClass.STATUSES = {
 	PENDING = 1,
 	ORDERED = 2,

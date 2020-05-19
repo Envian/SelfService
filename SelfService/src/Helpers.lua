@@ -1,16 +1,16 @@
 local _, ns = ...;
 
-ns.imap = function(table, callback)
+ns.imap = function(list, callback)
 	local result = {};
-	for index, item in ipairs(table) do
+	for index, item in ipairs(list) do
 		result[index] = callback(item);
 	end
 	return result;
 end
 
-ns.ifilter = function(table, callback)
+ns.ifilter = function(list, callback)
 	local result = {};
-	for index, item in ipairs(table) do
+	for index, item in ipairs(list) do
 		if callback(item) then result[#result + 1] = item end;
 	end
 	return result;
@@ -32,8 +32,4 @@ end
 
 ns.delink = function(text)
 	return gsub(text, "\124c[^\124]+\124H[^\124]+\124h(%[[^%]]+%])\124h\124r", "%1");
-end
-
-ns.hash = function(text)
-
 end

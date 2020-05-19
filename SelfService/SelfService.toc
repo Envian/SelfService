@@ -4,6 +4,8 @@
 ## Version: 0.1
 ## SavedVariables: SelfService
 
+src/Definitions.lua
+
 localization/en_US.lua
 
 src/Migration.lua

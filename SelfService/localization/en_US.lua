@@ -16,7 +16,6 @@ ns.LOG_NEW_CUSTOMER = ns.LOG_PREFIX .. "Serving a new customer: %s.";
 ns.LOG_RETURNING_CUSTOMER = ns.LOG_PREFIX .. "Serving a returning customer: %s.";
 
 -- Whispers
-ns.L = ns.L or {}
 ns.L.enUS = {
 	FIRST_TIME_CUSTOMER = "First time customer message",
 	RETURNING_CUSTOMER = "Returning customer message",
