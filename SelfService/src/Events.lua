@@ -22,7 +22,7 @@ ns.enableAddon = function()
 		ns.Events.Frame:RegisterEvent("TRADE_TARGET_ITEM_CHANGED");
 		ns.Events.Frame:RegisterEvent("TRADE_MONEY_CHANGED");
 		ns.Events.Frame:RegisterEvent("TRADE_ACCEPT_UPDATE");
-		ns.Events.Frame:RegisterEvent("TRADE_CLOSED");
+		ns.Events.Frame:RegisterEvent("UI_INFO_MESSAGE");
 		--ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER", ns.Events.filterInbound);
 		--ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER_INFORM", ns.Events.filterOutbound);
 		print(ns.LOG_ENABLED);
@@ -38,7 +38,7 @@ ns.disableAddon = function()
 		ns.Events.Frame:UnregisterEvent("TRADE_TARGET_ITEM_CHANGED");
 		ns.Events.Frame:UnregisterEvent("TRADE_MONEY_CHANGED");
 		ns.Events.Frame:UnregisterEvent("TRADE_ACCEPT_UPDATE");
-		ns.Events.Frame:UnregisterEvent("TRADE_CLOSED");
+		ns.Events.Frame:UnregisterEvent("UI_INFO_MESSAGE");
 		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_WHISPER", ns.Events.filterInbound);
 		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_WHISPER_INFORM", ns.Events.filterOutbound);
 		print(ns.LOG_DISABLED);
@@ -136,7 +136,8 @@ ns.Events.Frame:SetScript("OnEvent", function(_, event, ...)
 
 		if playerAccepted == 0 and customerAccepted == 1 then
 			if ns.CurrentOrder:isTradeAcceptable() then
-				AcceptTrade();
+				--AcceptTrade(); -- Blizzard UI Protected Function
+				print("TRADE ACCEPTABLE, ACCEPT TRADE!");
 			else
 				CancelTrade();
 			end
@@ -147,18 +148,30 @@ ns.Events.Frame:SetScript("OnEvent", function(_, event, ...)
 		-- Enchant: is slot 7 enchanted properly and does tip match price?
 		-- If we accept the trade, register the TRADE_CLOSED event and listen for bag update/chat loot events to cross check traded items
 
-	elseif event == "TRADE_CLOSED" then
-		-- Fired when the window closes, not guarantee of successful trade
-		-- May need to check a flag to see if trade was accepted or cancelled
-		if ns.CurrentOrder then
-			ns.CurrentOrder:closeTrade();
+	--UI_INFO_MESSAGE
+	-- 227 "Trade complete."
+	-- 226 "Trade cancelled."
+	elseif event == "UI_INFO_MESSAGE" then
+		local error, message = ...;
+			-- Fired when the window closes, not guarantee of successful trade
+			-- May need to check a flag to see if trade was accepted or cancelled
+		if message == "Trade complete." then
+			print("Trade complete.");
+			if ns.CurrentOrder then
+				ns.CurrentOrder:closeTrade();
+			end
+		elseif message == "Trade cancelled." then
+			print("Trade cancelled.");
+			if ns.CurrentOrder then
+				print("Keep global CurrentOrder alive.");
+			end
 		else
-			ns.CurrentTrade = {};
+			print("Something else happened.");
 		end
-		-- Listen for CHAT_MSG_LOOT events and look for expected mats
-			-- ^ This method could cause issues
-		-- Unregister all trade events
-		-- Scan bags to ensure transfer of actual materials
-		-- May be easier to record bag contents in pretrade and subtract that from bag contents posttrade
+			-- Listen for CHAT_MSG_LOOT events and look for expected mats
+				-- ^ This method could cause issues
+			-- Unregister all trade events
+			-- Scan bags to ensure transfer of actual materials
+			-- May be easier to record bag contents in pretrade and subtract that from bag contents posttrade
 	end
 end);

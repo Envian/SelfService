@@ -19,11 +19,12 @@ ns.populateEnchantingData = function(enchants)
 			enchant.Mats = {};
 
 			for i = 1,GetCraftNumReagents(n),1 do
-				local matname, itemId, count, _ = GetCraftReagentInfo(n, i);
+				local matname, _, count, _ = GetCraftReagentInfo(n, i);
+				local itemLink = GetCraftReagentItemLink(n, i);
 				enchant.Mats[i] = {
 					Name = matname,
-					Id = itemId,
-					Link = GetCraftReagentItemLink(n, i),
+					Id = ns.getItemIdFromLink(itemLink),
+					Link = itemLink,
 					Count = count
 				};
 			end
