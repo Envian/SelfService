@@ -48,14 +48,19 @@ function ns.CustomerClass:addToOrder(recipes)
 	else
 		local recipe = ns.Recipes[recipes[1]];
 		if recipe and recipe.Owned then
+			order = ns.OrderClass:new(nil, self.Name);
 			order:addToOrder({ recipe });
+			print("Recipe added to order.");
 			self.CurrentOrder = order;
+			print("Customer order assigned: "..self.CurrentOrder.CustomerName);
 			ns.CurrentOrder = self.CurrentOrder;
+			print("Global CurrentOrder assigned: "..ns.CurrentOrder.CustomerName);
 			self:replyJoin(ns.L.enUS.ORDER_READY:format(recipe.Name),
 				ns:imap(recipe.Mats, function(mat) return mat.Link end));
 		else
 			self:reply(ns.L.enUS.RECIPES_UNAVAILABLE);
 		end
+	end
 end
 
 function ns.CustomerClass:reply(message)

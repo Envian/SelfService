@@ -19,8 +19,12 @@ ns.enableAddon = function()
 		ns.Events.Frame:RegisterEvent("CRAFT_SHOW");
 		ns.Events.Frame:RegisterEvent("CHAT_MSG_WHISPER");
 		ns.Events.Frame:RegisterEvent("TRADE_SHOW");
-		ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER", ns.Events.filterInbound);
-		ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER_INFORM", ns.Events.filterOutbound);
+		ns.Events.Frame:RegisterEvent("TRADE_TARGET_ITEM_CHANGED");
+		ns.Events.Frame:RegisterEvent("TRADE_MONEY_CHANGED");
+		ns.Events.Frame:RegisterEvent("TRADE_ACCEPT_UPDATE");
+		ns.Events.Frame:RegisterEvent("TRADE_CLOSED");
+		--ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER", ns.Events.filterInbound);
+		--ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER_INFORM", ns.Events.filterOutbound);
 		print(ns.LOG_ENABLED);
 	end
 end
@@ -31,6 +35,10 @@ ns.disableAddon = function()
 		ns.Events.Frame:UnregisterEvent("CRAFT_SHOW");
 		ns.Events.Frame:UnregisterEvent("CHAT_MSG_WHISPER");
 		ns.Events.Frame:UnregisterEvent("TRADE_SHOW");
+		ns.Events.Frame:UnregisterEvent("TRADE_TARGET_ITEM_CHANGED");
+		ns.Events.Frame:UnregisterEvent("TRADE_MONEY_CHANGED");
+		ns.Events.Frame:UnregisterEvent("TRADE_ACCEPT_UPDATE");
+		ns.Events.Frame:UnregisterEvent("TRADE_CLOSED");
 		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_WHISPER", ns.Events.filterInbound);
 		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_WHISPER_INFORM", ns.Events.filterOutbound);
 		print(ns.LOG_DISABLED);
@@ -86,36 +94,37 @@ ns.Events.Frame:SetScript("OnEvent", function(_, event, ...)
 		end
 
 	elseif event == "TRADE_SHOW" then
-		-- allow trade request if there is an active record of the
-		-- customer, otherwise immediately cancel and send whisper
 		print("Trade Initiated");
-		local name = TradeFrameRecipientNameText:GetText();
+		local customer = ns.getCustomer(TradeFrameRecipientNameText:GetText());
 
-		if ns.getCustomer(name):getOrder() then
-			print("Customer active, continue trade.");
-			-- Active customer, register trade events and configure window monitor
-			frame:RegisterEvent("TRADE_TARGET_ITEM_CHANGED");
-			frame:RegisterEvent("TRADE_MONEY_CHANGED"); -- May be TRADE_CURRENCY_CHANGED
-			frame:RegisterEvent("TRADE_ACCEPT_UPDATE");
-			frame:RegisterEvent("TRADE_CLOSED");
+		if customer then
+			local order = customer:getOrder();
+
+			if order then
+				print("Customer order is active, continue trade.");
+				if order.Status == ns.OrderClass.STATUSES.ORDERED then
+					print("Customer has ordered, waiting on mats.");
+				elseif order.Status == ns.OrderClass.STATUSES.GATHERED then
+					print("Customer has delivered mats, start enchanting");
+				else
+					print("This order is in an insofar unhandled state.");
+				end
+			else
+				CancelTrade();
+				customer:reply(ns.L.enUS.BUY_FIRST);
+			end
 		else
 			CancelTrade();
-			customer:reply(ns.L.enUS.BUY_FIRST);
 		end
 
 	elseif event == "TRADE_TARGET_ITEM_CHANGED" then
-		-- If we land here, customer is active and available to trade
-		-- TODO: Test ^^ by dragging inventory item to player. I imagine it will
-		--		 fire the event, but if we don't register it until we accept a
-		--		 trade request we shouldn't get unexpected behavior.
 		local slotChanged = ...;
-		print("Trade Item Changed: "..slotChanged);
 		local _, _, quantity = GetTradeTargetItemInfo(slotChanged);
 		local itemLink = GetTradeTargetItemLink(slotChanged);
-
-		ns.CurrentTrade[slotChanged] = itemName ~= "" and { id: ns.getItemIdFromLink(itemLink), quantity: quantity } or nil;
+		ns.CurrentTrade[slotChanged] = itemName ~= "" and { id = ns.getItemIdFromLink(itemLink), quantity = quantity } or nil;
 
 	elseif event == "TRADE_MONEY_CHANGED" then
+		-- Money frame getText will be required to determine value
 		print("Customer has changed tip value.");
 
 	elseif event == "TRADE_ACCEPT_UPDATE" then
@@ -125,24 +134,30 @@ ns.Events.Frame:SetScript("OnEvent", function(_, event, ...)
 		print("  - Player Accepted: "..playerAccepted);
 		print("  - Customer Accepted: "..customerAccepted);
 
+		if playerAccepted == 0 and customerAccepted == 1 then
+			if ns.CurrentOrder:isTradeAcceptable() then
+				AcceptTrade();
+			else
+				CancelTrade();
+			end
+		end
+
 		-- Minimize number of trades. Require customer to optimize trading of mats, compare to expected optimization
 		-- Gathering: 1 trade, 1 enchant. Are exact mats present?
 		-- Enchant: is slot 7 enchanted properly and does tip match price?
 		-- If we accept the trade, register the TRADE_CLOSED event and listen for bag update/chat loot events to cross check traded items
-		frame:RegisterEvent("CHAT_MSG_LOOT"); -- register event only if we accept trade
 
 	elseif event == "TRADE_CLOSED" then
 		-- Fired when the window closes, not guarantee of successful trade
 		-- May need to check a flag to see if trade was accepted or cancelled
-
+		if ns.CurrentOrder then
+			ns.CurrentOrder:closeTrade();
+		else
+			ns.CurrentTrade = {};
+		end
 		-- Listen for CHAT_MSG_LOOT events and look for expected mats
 			-- ^ This method could cause issues
 		-- Unregister all trade events
-		frame:UnregisterEvent("TRADE_TARGET_ITEM_CHANGED");
-		frame:UnregisterEvent("TRADE_MONEY_CHANGED"); -- May be TRADE_CURRENCY_CHANGED
-		frame:UnregisterEvent("TRADE_ACCEPT_UPDATE");
-		frame:UnregisterEvent("TRADE_CLOSED");
-		frame:UnregisterEvent("CHAT_MSG_LOOT");
 		-- Scan bags to ensure transfer of actual materials
 		-- May be easier to record bag contents in pretrade and subtract that from bag contents posttrade
 	end

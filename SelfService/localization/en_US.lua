@@ -7,6 +7,7 @@ ns.ADDON_NAME = "SelfService";
 ns.LOG_PREFIX = string.format("[%s] ", ns.ADDON_NAME);
 ns.LOG_ENABLED = ns.LOG_PREFIX .. "Has been enabled.";
 ns.LOG_DISABLED = ns.LOG_PREFIX .. "Has been disabled.";
+ns.LOG_RESET = ns.LOG_PREFIX .. "Order for %s has been reset.";
 ns.LOG_LOADED = ns.LOG_PREFIX .. "Data for %s has been loaded.";
 
 
@@ -24,7 +25,7 @@ ns.L.enUS = {
 	HELP = "haha get wrecked nerd. you're on your own.",
 	RECIPES_OWNED = "I have %s.",
 	RECIPES_UNAVAILABLE = "I do not have that recipe.",
-	ORDER_READY = "Once you have obtained the mats %1, Open trade. Your total is: ",
+	ORDER_READY = "Once you have obtained the mats for %s, open trade. Your total is: ",
 	ORDER_LIMIT = "I only support ordering 1 item at a time. Try again",
 	ORDER_IN_PROGRESS = "I only support ordering 1 item at a time. Finish your order before requesting another",
 	BUY_FIRST = "Use command !buy before opening trade.",
