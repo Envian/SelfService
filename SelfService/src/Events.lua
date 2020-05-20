@@ -49,11 +49,20 @@ ns.Events.Frame:SetScript("OnEvent", function(_, event, ...)
 	if event == "CRAFT_SHOW" then
 		-- Only enchanting (and a couple irrelevant skills) use this event.
 		if GetCraftName() == "Enchanting" and not ns.Loaded.Enchanting then
-			ns.populateEnchantingData(ns.Data.Enchanting);
+			for n = 1,GetNumCrafts(),1 do
+				local id = ns.getItemIdFromLink(GetCraftItemLink(n), "enchant");
+
+				local enchant = ns.Data.Enchanting[id];
+				if enchant then
+					enchant = ns.RecipeClass:newEnchant(id, enchant);
+					enchant:loadFromIndex(n);
+				end
+			end
 
 			-- Connects products (Wands, oils) with their "enchant"
-			ns.populateEnchantExtraData(ns.Data.Enchanting_Results);
-			ns.populateGlobalData(ns.Data.Enchanting);
+			for itemId, recipe in pairs(ns.Data.Enchanting_Results) do
+				ns.Recipes[itemId] = recipe;
+			end
 			ns.Loaded.Enchanting = true;
 			print(ns.LOG_LOADED:format("Enchanting"));
 		end
