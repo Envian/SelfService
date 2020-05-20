@@ -4,19 +4,15 @@
 ## Version: 0.1
 ## SavedVariables: SelfService
 
-src/Definitions.lua
-
 localization/en_US.lua
 
 src/Migration.lua
 
 src/data/Enchanting.lua
 
-src/Recipe.lua
-src/Order.lua
-src/Customer.lua
-
 src/Helpers.lua
 src/Events.lua
+src/Loading.lua
 src/Commands.lua
 src/ConsoleCommands.lua
+src/Customer.lua

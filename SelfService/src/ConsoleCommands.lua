@@ -12,9 +12,8 @@ local SLASH_COMMANDS = {
 		if not resetWhat or not who then return end;
 
 		local customer = ns.getCustomer(who);
-		if resetWhat:lower() == "order" then
-			customer.CurrentOrder = nil;
-			print(ns.LOG_RESET:format(customer.Name));
+		if resetWhat:lower() == "cart" then
+			customer.Cart = nil;
 		end
 	end
 }
@@ -28,6 +27,6 @@ SlashCmdList["SELFSERVICE"] = function(message, editbox)
 	if cmdFunction then
 		cmdFunction(args);
 	else
-		print("FUCK - "..command);
+		print("FUCK")
 	end
 end
