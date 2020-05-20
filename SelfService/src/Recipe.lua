@@ -46,11 +46,12 @@ function EnchantRecipeClass:loadFromIndex(index)
 
 	-- Load mats
 	for n = 1,GetCraftNumReagents(index),1 do
-		local matname, itemId, count, _ = GetCraftReagentInfo(index, n);
+		local matname, _, count, _ = GetCraftReagentInfo(index, n);
+		local link = GetCraftReagentItemLink(index, n);
 		self.Mats[n] = {
 			Name = matname,
-			Id = itemId,
-			Link = GetCraftReagentItemLink(index, n),
+			Id = getItemIdFromLink(link),
+			Link = link,
 			Count = count
 		};
 	end
