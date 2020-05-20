@@ -20,8 +20,11 @@ ns.enableAddon = function()
 		ns.Events.Frame:RegisterEvent("CHAT_MSG_WHISPER");
 		ns.Events.Frame:RegisterEvent("TRADE_SHOW");
 		ns.Events.Frame:RegisterEvent("TRADE_TARGET_ITEM_CHANGED");
-		ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER", ns.Events.filterInbound);
-		ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER_INFORM", ns.Events.filterOutbound);
+		ns.Events.Frame:RegisterEvent("TRADE_MONEY_CHANGED");
+		ns.Events.Frame:RegisterEvent("TRADE_ACCEPT_UPDATE");
+		ns.Events.Frame:RegisterEvent("UI_INFO_MESSAGE");
+		--ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER", ns.Events.filterInbound);
+		--ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER_INFORM", ns.Events.filterOutbound);
 		print(ns.LOG_ENABLED);
 	end
 end
@@ -33,6 +36,9 @@ ns.disableAddon = function()
 		ns.Events.Frame:UnregisterEvent("CHAT_MSG_WHISPER");
 		ns.Events.Frame:UnregisterEvent("TRADE_SHOW");
 		ns.Events.Frame:UnregisterEvent("TRADE_TARGET_ITEM_CHANGED");
+		ns.Events.Frame:UnregisterEvent("TRADE_MONEY_CHANGED");
+		ns.Events.Frame:UnregisterEvent("TRADE_ACCEPT_UPDATE");
+		ns.Events.Frame:UnregisterEvent("UI_INFO_MESSAGE");
 		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_WHISPER", ns.Events.filterInbound);
 		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_WHISPER_INFORM", ns.Events.filterOutbound);
 		print(ns.LOG_DISABLED);
@@ -43,11 +49,20 @@ ns.Events.Frame:SetScript("OnEvent", function(_, event, ...)
 	if event == "CRAFT_SHOW" then
 		-- Only enchanting (and a couple irrelevant skills) use this event.
 		if GetCraftName() == "Enchanting" and not ns.Loaded.Enchanting then
-			ns.populateEnchantingData(ns.Data.Enchanting);
+			for n = 1,GetNumCrafts(),1 do
+				local id = ns.getItemIdFromLink(GetCraftItemLink(n), "enchant");
+
+				local enchant = ns.Data.Enchanting[id];
+				if enchant then
+					enchant = ns.RecipeClass:newEnchant(id, enchant);
+					enchant:loadFromIndex(n);
+				end
+			end
 
 			-- Connects products (Wands, oils) with their "enchant"
-			ns.populateEnchantExtraData(ns.Data.Enchanting_Results);
-			ns.populateGlobalData(ns.Data.Enchanting);
+			for itemId, recipe in pairs(ns.Data.Enchanting_Results) do
+				ns.Recipes[itemId] = recipe;
+			end
 			ns.Loaded.Enchanting = true;
 			print(ns.LOG_LOADED:format("Enchanting"));
 		end
@@ -86,26 +101,86 @@ ns.Events.Frame:SetScript("OnEvent", function(_, event, ...)
 			customer.LastWhisper = GetTime();
 			customer.MessagesAvailable = 0;
 		end
-	elseif event == "TRADE_SHOW" then
-		-- allow trade request if there is an active record of the customer, otherwise immediately cancel and send whisper
-		print("Trade Initiated");
-		-- TODO: Detect Realm on load
-		local name = TradeFrameRecipientNameText:GetText().."-Thunderfury";
 
-		-- TODO: Update to use with cart active customers
-		if ns.Customers[name] then
-			print("Customer active, continue trade.");
-			frame:RegisterEvent("TRADE_TARGET_ITEM_CHANGED");
+	elseif event == "TRADE_SHOW" then
+		print("Trade Initiated");
+		local customer = ns.getCustomer(TradeFrameRecipientNameText:GetText());
+
+		if customer then
+			local order = customer:getOrder();
+
+			if order then
+				print("Customer order is active, continue trade.");
+				if order.Status == ns.OrderClass.STATUSES.ORDERED then
+					print("Customer has ordered, waiting on mats.");
+				elseif order.Status == ns.OrderClass.STATUSES.GATHERED then
+					print("Customer has delivered mats, start enchanting");
+				else
+					print("This order is in an insofar unhandled state.");
+				end
+			else
+				CancelTrade();
+				customer:reply(ns.L.enUS.BUY_FIRST);
+			end
 		else
 			CancelTrade();
-			customer:reply(ns.L.enUS.BUY_FIRST);
 		end
 
 	elseif event == "TRADE_TARGET_ITEM_CHANGED" then
 		local slotChanged = ...;
-		-- Slots 1-7, 7 will not be traded slot
-		print("Trade Item Changed: "..slotChanged);
-		local name, _, quantity, _, _, _ = GetTradeTargetItemInfo(slotChanged);
+		local _, _, quantity = GetTradeTargetItemInfo(slotChanged);
 		local itemLink = GetTradeTargetItemLink(slotChanged);
+		ns.CurrentTrade[slotChanged] = itemName ~= "" and { id = ns.getItemIdFromLink(itemLink), quantity = quantity } or nil;
+
+	elseif event == "TRADE_MONEY_CHANGED" then
+		-- Money frame getText will be required to determine value
+		print("Customer has changed tip value.");
+
+	elseif event == "TRADE_ACCEPT_UPDATE" then
+		local playerAccepted, customerAccepted = ...;
+
+		print("Trade accept button pressed: ");
+		print("  - Player Accepted: "..playerAccepted);
+		print("  - Customer Accepted: "..customerAccepted);
+
+		if playerAccepted == 0 and customerAccepted == 1 then
+			if ns.CurrentOrder:isTradeAcceptable() then
+				--AcceptTrade(); -- Blizzard UI Protected Function
+				print("TRADE ACCEPTABLE, ACCEPT TRADE!");
+			else
+				CancelTrade();
+			end
+		end
+
+		-- Minimize number of trades. Require customer to optimize trading of mats, compare to expected optimization
+		-- Gathering: 1 trade, 1 enchant. Are exact mats present?
+		-- Enchant: is slot 7 enchanted properly and does tip match price?
+		-- If we accept the trade, register the TRADE_CLOSED event and listen for bag update/chat loot events to cross check traded items
+
+	--UI_INFO_MESSAGE
+	-- 227 "Trade complete."
+	-- 226 "Trade cancelled."
+	elseif event == "UI_INFO_MESSAGE" then
+		local error, message = ...;
+			-- Fired when the window closes, not guarantee of successful trade
+			-- May need to check a flag to see if trade was accepted or cancelled
+		if message == "Trade complete." then
+			print("Trade complete.");
+			if ns.CurrentOrder then
+				ns.CurrentOrder:closeTrade();
+			end
+		elseif message == "Trade cancelled." then
+			print("Trade cancelled.");
+			if ns.CurrentOrder then
+				print("Keep global CurrentOrder alive.");
+			end
+		else
+			print("Something else happened.");
+		end
+			-- Listen for CHAT_MSG_LOOT events and look for expected mats
+				-- ^ This method could cause issues
+			-- Unregister all trade events
+			-- Scan bags to ensure transfer of actual materials
+			-- May be easier to record bag contents in pretrade and subtract that from bag contents posttrade
 	end
 end);

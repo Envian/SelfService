@@ -1,24 +1,24 @@
 local _, ns = ...;
 
-ns.imap = function(table, callback)
+ns.imap = function(list, callback)
 	local result = {};
-	for index, item in ipairs(table) do
+	for index, item in ipairs(list) do
 		result[index] = callback(item);
 	end
 	return result;
 end
 
-ns.ifilter = function(table, callback)
+ns.ifilter = function(list, callback)
 	local result = {};
-	for index, item in ipairs(table) do
+	for index, item in ipairs(list) do
 		if callback(item) then result[#result + 1] = item end;
 	end
 	return result;
 end
 
-ns.getItemIdFromLink = function(link)
-	local _, _, id = string.find(link, ".*\124H[^:]+:(%d+).*");
-	return id and tonumber(id) or nil;
+ns.getItemIdFromLink = function(link, type)
+	local results = ns.getLinkedItemIds(link, type);
+	return results and results[1] or nil;
 end
 
 ns.getLinkedItemIds = function(text, type)

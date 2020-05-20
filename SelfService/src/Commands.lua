@@ -48,26 +48,15 @@ ns.Commands = {
 	end,
 
 	buy = function(args, customer)
-		local orders = ns.getLinkedItemIds(args);
-		local cart = customer:getCart();
-
-		if cart then
-			customer:reply(ns.L.enUS.ORDER_IN_PROGRESS);
-		elseif #orders ~= 1 then
-			customer:reply(ns.L.enUS.ORDER_LIMIT);
-		else
-			local recipe = ns.Recipes[orders[1]];
-			if recipe and recipe.Owned then
-				customer:setCart({ recipe });
-				customer:replyJoin(ns.L.enUS.ORDER_READY:format(recipe.Name),
-					ns:imap(recipe.mats, function(mat) return mat.Link end));
-			else
-				customer:reply(ns.L.enUS.RECIPES_UNAVAILABLE);
-			end
+		if ns.CurrentOrder and ns.CurrentOrder.CustomerName ~= customer.Name then
+			customer:reply(ns.L.enUS.BUSY);
+			return;
 		end
+
+		customer:addToOrder(ns.getLinkedItemIds(args));
 	end,
 
 	help = function(args, customer)
 		customer:reply(ns.L.enUS.HELP);
-	end,
+	end
 };

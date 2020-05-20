@@ -1,7 +1,10 @@
 local _, ns = ...;
 
-ns.Customers = {};
 ns.getCustomer = function(name)
+	if not string.find(name, "-") then
+		name = name.."-"..GetRealmName();
+	end
+
 	local existing = ns.Customers[name];
 	if existing then return existing end;
 
@@ -15,42 +18,46 @@ end
 ns.CustomerClass = {};
 ns.CustomerClass.__index = ns.CustomerClass;
 
-DEBUG = ns.CustomerClass;
-
 function ns.CustomerClass:new(data, name)
 	data = data or {
 		Name = name,
 		LastWhisper = 0,
 		LastSearch = 0,
 		MessagesAvailable = 0,
-		TradedItems = nil
+		CurrentOrder = nil
 	}
 	setmetatable(data, ns.CustomerClass);
 	return data;
 end
 
--- Hard coded - used to filter messages. Localization would cause issuses
-ns.REPLY_PREFIX = "<BOT> ";
-
-function ns.CustomerClass:getCart()
+function ns.CustomerClass:getOrder()
 	if GetTime() - (self.LastWhisper or 0) > 30 * 60 then
-		self.Cart = nil;
+		self.CurrentOrder = nil;
 	end
-	return self.Cart;
+	return self.CurrentOrder;
 end
 
-function ns.CustomerClass:setCart(recipes)
-	local requiredMats = {};
-	for _, recipe in ipairs(recipes) do
-		for _, mat in ipairs(recipe.Mats) do
-			requiredMats[mat.Id] = (requiredMats[mat.Id] or 0) + mat.Count;
+function ns.CustomerClass:addToOrder(recipes)
+	local order = self:getOrder();
+
+	-- Temporary
+	if order then
+		self:reply(ns.L.enUS.ORDER_IN_PROGRESS);
+	elseif not recipes or #recipes ~= 1 then
+		self:reply(ns.L.enUS.ORDER_LIMIT);
+	else
+		local recipe = ns.Recipes[recipes[1]];
+		if recipe and recipe.Owned then
+			order = ns.OrderClass:new(nil, self.Name);
+			order:addToOrder({ recipe });
+			self.CurrentOrder = order;
+			ns.CurrentOrder = self.CurrentOrder;
+			self:replyJoin(ns.L.enUS.ORDER_READY:format(recipe.Name),
+				ns:imap(recipe.Mats, function(mat) return mat.Link end));
+		else
+			self:reply(ns.L.enUS.RECIPES_UNAVAILABLE);
 		end
 	end
-
-	self.Cart = {
-		Mats = requiredMats,
-		Order = recipes
-	};
 end
 
 function ns.CustomerClass:reply(message)
@@ -93,11 +100,4 @@ function ns.CustomerClass:replyJoin(message, list, delim)
 	end
 
 	self:reply(message, priority);
-end
-
-function ns.CustomerClass:addTradedItem(item, quantity)
-	if self.TradedItems == nil then
-		self.TradedItems = {};
-	end
-	table.insert(self.TradedItems, {item, quantity});
 end
