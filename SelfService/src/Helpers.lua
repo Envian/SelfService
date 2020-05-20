@@ -16,9 +16,9 @@ ns.ifilter = function(list, callback)
 	return result;
 end
 
-ns.getItemIdFromLink = function(link)
-	local _, _, id = string.find(link, ".*\124H[^:]+:(%d+).*");
-	return id and tonumber(id) or nil;
+ns.getItemIdFromLink = function(link, type)
+	local results = ns.getLinkedItemIds(link, type);
+	return results and results[1] or nil;
 end
 
 ns.getLinkedItemIds = function(text, type)
