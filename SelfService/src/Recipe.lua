@@ -11,7 +11,7 @@ function ns.RecipeClass:newEnchant(id, recipe)
 	recipe.Id = id;
 	recipe.Type = "Enchanting";
 
-	setmetatable(recipe, EnchantRecipeClass);
+	setmetatable(recipe, ns.EnchantRecipeClass);
 	return recipe;
 end
 
@@ -32,11 +32,11 @@ function ns.RecipeClass:register()
 end
 
 
-local EnchantRecipeClass = {};
-EnchantRecipeClass.__index = EnchantRecipeClass;
-setmetatable(EnchantRecipeClass, ns.RecipeClass);
+ns.EnchantRecipeClass = {};
+ns.EnchantRecipeClass.__index = ns.EnchantRecipeClass;
+setmetatable(ns.EnchantRecipeClass, ns.RecipeClass);
 
-function EnchantRecipeClass:loadFromIndex(index)
+function ns.EnchantRecipeClass:loadFromIndex(index)
 	local name, _ = GetCraftInfo(index);
 
 	self.Name = name;
@@ -50,7 +50,7 @@ function EnchantRecipeClass:loadFromIndex(index)
 		local link = GetCraftReagentItemLink(index, n);
 		self.Mats[n] = {
 			Name = matname,
-			Id = getItemIdFromLink(link),
+			Id = ns.getItemIdFromLink(link),
 			Link = link,
 			Count = count
 		};
@@ -60,6 +60,6 @@ function EnchantRecipeClass:loadFromIndex(index)
 end
 
 
-local CraftedRecipeClass = {};
-CraftedRecipeClass.__index = CraftedRecipeClass;
-setmetatable(CraftedRecipeClass, ns.RecipeClass);
+ns.CraftedRecipeClass = {};
+ns.CraftedRecipeClass.__index = ns.CraftedRecipeClass;
+setmetatable(ns.CraftedRecipeClass, ns.RecipeClass);
