@@ -36,12 +36,23 @@ function ns.OrderClass:addToOrder(recipes)
 	self.Recipes = recipes;
 	self.RequiredMats = requiredMats;
 	self.ReceivedMats = {};
+
+	for id, count in pairs(self.RequiredMats) do
+		local _, itemLink = GetItemInfo(id);
+		print("addToOrder - Required Material: "..itemLink.."x"..self.RequiredMats[id]);
+	end
+
 	self.Status = ns.OrderClass.STATUSES.ORDERED;
 end
 
 function ns.OrderClass:isTradeAcceptable()
 	-- TODO: Generalize to support additional statuses
 	local tradeMats = self:totalTradeMats();
+
+	for id, count in pairs(self.RequiredMats) do
+		local _, itemLink = GetItemInfo(id);
+		print("Acceptable - Required Material: "..itemLink.."x"..self.RequiredMats[id]);
+	end
 
 	for id, count in pairs(self.RequiredMats) do
 		local _, itemLink = GetItemInfo(id);
@@ -56,6 +67,9 @@ function ns.OrderClass:isTradeAcceptable()
 
 	for id, count in pairs(tradeMats) do
 		local _, itemLink = GetItemInfo(id);
+		print("Checking "..itemLink.." from tradeMats...");
+		print("itemID: "..ns.getItemIdFromLink(itemLink));
+		print("Checked ID: "..id.."x"..self.RequiredMats[id]);
 
 		if not self.RequiredMats[id] then
 			print("Received material not required for order: "..itemLink.."x"..count);
@@ -74,6 +88,7 @@ function ns.OrderClass:totalTradeMats()
 		local stack = ns.CurrentTrade[i];
 		if stack then
 			local _, itemLink = GetItemInfo(stack.id);
+			print("Adding "..itemLink.." to tradeMats")
 			tradeMats[stack.id] = (tradeMats[stack.id] or 0) + stack.quantity;
 			print("Added "..itemLink.."x"..stack.quantity.." to tradeMats: "..tradeMats[stack.id].." total");
 		end
@@ -84,21 +99,14 @@ end
 
 function ns.OrderClass:addReceivedMats(tradeMats)
 	self.ReceivedMats = self:totalTradeMats(tradeMats);
+	print("Added received mats.");
 	-- Assume we didn't drop mats on the ground while passing them off
 	self.Status = ns.OrderClass.STATUSES.GATHERED;
 end
 
 function ns.OrderClass:closeTrade()
-	-- Scan trade window slots and add contents to ReceivedMats
-	for i=1, 6 do
-		local stack = ns.CurrentTrade[i];
-		if stack then
-			local _, itemLink = GetItemInfo(stack.id);
-			self.ReceivedMats[stack.id] = (self.ReceivedMats[stack.id] or 0) + stack.quantity;
-			print("Added "..itemLink.."x"..stack.quantity.." to ReceivedMats: "..self.ReceivedMats[stack.id].. " total");
-		end
-	end
-
+	-- Scan trade window slots and add contents to ReceivedMats\
+	self:addReceivedMats(self:totalTradeMats());
 	ns.CurrentTrade = {};
 end
 
