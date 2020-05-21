@@ -25,6 +25,16 @@ ns.enableAddon = function()
 		ns.Events.Frame:RegisterEvent("UI_INFO_MESSAGE");
 		--ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER", ns.Events.filterInbound);
 		--ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER_INFORM", ns.Events.filterOutbound);
+
+		local btn = CreateFrame("Button", "SelfService_Secure_Button", UIParent, "SecureActionButtonTemplate");
+		btn:SetSize(42, 42);
+		btn:SetPoint("CENTER");
+
+		local t = btn:CreateTexture(nil,"BACKGROUND")
+		t:SetTexture("Interface\\Glues\\CharacterCreate\\UI-CharacterCreate-Factions.blp")
+		t:SetAllPoints(btn)
+		btn.texture = t
+
 		print(ns.LOG_ENABLED);
 	end
 end
