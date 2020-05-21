@@ -22,8 +22,9 @@ ns.OrderStates = {
 	ORDER_PLACED = baseOrderState:new({
 		Name = "ORDER_PLACED",
 
-		TRADE_SHOW = function()
+		TRADE_SHOW = function(customer)
 			print(ns.LOG_PREFIX.."Trade Initiated.");
+			ns.CurrentTrade = {};
 			return ns.OrderStates["WAIT_FOR_MATS"];
 		end
 	}),
@@ -31,8 +32,8 @@ ns.OrderStates = {
 	WAIT_FOR_MATS = baseOrderState:new({
 		Name = "WAIT_FOR_MATS",
 
-		UI_INFO_MESSAGE = function(customer, message)
-			if message == "Trade cancelled." then
+		UI_INFO_MESSAGE = function(customer, error)
+			if error == 226 then
 				print("Trade cancelled.");
 				return ns.OrderStates["ORDER_PLACED"];
 			else
@@ -41,9 +42,9 @@ ns.OrderStates = {
 			end
 		end,
 		TRADE_TARGET_ITEM_CHANGED = function(customer, slotChanged)
-			local _, _, quantity = GetTradeTargetItemInfo(slotChanged);
+			local itemName, _, quantity = GetTradeTargetItemInfo(slotChanged);
 			local itemLink = GetTradeTargetItemLink(slotChanged);
-			ns.CurrentTrade[slotChanged] = itemName ~= "" and { id = ns.getItemIdFromLink(itemLink), quantity = quantity } or nil;
+			ns.CurrentTrade[slotChanged] = itemName ~= nil and { id = ns.getItemIdFromLink(itemLink), quantity = quantity } or nil;
 
 			return nil;
 		end,
@@ -59,26 +60,27 @@ ns.OrderStates = {
 					return ns.OrderStates["ACCEPT_MATS"]
 				else
 					CancelTrade();
+					return ns.OrderStates["ORDER_PLACED"];
 				end
 			end
-			-- return ns.OrderStates."ACCEPT_MATS"; or
-			-- return self;
 		end
 	}),
 
 	ACCEPT_MATS = baseOrderState:new({
 		Name = "ACCEPT_MATS",
 
-		TRADE_TARGET_ITEM_CHANGED = function()
+		TRADE_TARGET_ITEM_CHANGED = function(customer, slotChanged)
 			print("Traded items changed during trade accept phase. Abort to WAIT_FOR_MATS");
 			return ns.OrderStates["WAIT_FOR_MATS"];
 		end,
-		UI_INFO_MESSAGE = function(customer, message)
-			if message == "Trade cancelled." then
+		UI_INFO_MESSAGE = function(customer, error)
+			if error == 226 then
 				print("Trade cancelled.");
+				ns.CurrentTrade = {};
 				return ns.OrderStates["ORDER_PLACED"];
-			elseif message == "Trade complete." then
+			elseif error == 227 then
 				print("Trade complete.");
+				customer.CurrentOrder:closeTrade();
 				return ns.OrderStates["CRAFT_ORDER"];
 			else
 				print("Unexpected UI_INFO_MESSAGE: "..message);
@@ -96,7 +98,8 @@ ns.OrderStates = {
 		-- Search bank bags for each missing CraftFocus
 		-- When all CraftFocus items are in inventory, update OrderState to READY_FOR_DELIVERY
 
-		UNKNOWN_EVENT_TRIGGERED = function()
+		-- Temporary: TRADE_SHOW is a convenient event to put here to push forward
+		TRADE_SHOW = function(customer)
 			return ns.OrderStates["READY_FOR_DELIVERY"];
 		end
 	}),
@@ -104,32 +107,63 @@ ns.OrderStates = {
 	READY_FOR_DELIVERY = baseOrderState:new({
 		Name = "READY_FOR_DELIVERY",
 
-		TRADE_SHOW = function()
-			-- return ns.OrderStates."DELIVER_ORDER";
+		TRADE_SHOW = function(customer)
+			ns.CurrentTrade = {};
+			return ns.OrderStates["WAIT_FOR_ENCHANTABLE"];
+			--return ns.OrderStates["DELIVER_ORDER"];
 		end
 	}),
 
 	DELIVER_ORDER = baseOrderState:new({
 		Name = "DELIVER_ORDER",
 
-		TRADE_TARGET_ITEM_CHANGED = function()
-			-- return ns.OrderStates."WAIT_FOR_ENCHANTABLE"; or
-			-- return ns.OrderStates."AWAIT_PAYMENT";
+		TRADE_TARGET_ITEM_CHANGED = function(customer, slotChanged)
+			local itemName, _, quantity = GetTradeTargetItemInfo(slotChanged);
+			local itemLink = GetTradeTargetItemLink(slotChanged);
+			ns.CurrentTrade[slotChanged] = itemName ~= nil and { id = ns.getItemIdFromLink(itemLink), quantity = quantity } or nil;
+
+			return nil;
 		end,
-		UI_INFO_MESSAGE = function()
-			-- return ns.OrderStates."READY_FOR_DELIVERY";
+		UI_INFO_MESSAGE = function(customer, error)
+			if error == 226 then
+				print("Trade cancelled.");
+				return ns.OrderStates["READY_FOR_DELIVERY"];
+			else
+				print("Unexpected UI_INFO_MESSAGE: "..message);
+				error("Unexpected UI_INFO_MESSAGE: "..message);
+			end
 		end
 	}),
 
 	WAIT_FOR_ENCHANTABLE = baseOrderState:new({
 		Name = "WAIT_FOR_ENCHANTABLE",
 
-		TRADE_TARGET_ITEM_CHANGED = function()
-			-- return self; or
-			-- return ns.OrderStates."CAST_ENCHANT";
+		TRADE_TARGET_ITEM_CHANGED = function(customer, slotChanged)
+			if slotChanged == 7 then
+				local itemName, _, quantity = GetTradeTargetItemInfo(slotChanged);
+				local itemLink = GetTradeTargetItemLink(slotChanged);
+				ns.CurrentTrade[slotChanged] = itemName ~= nil and { id = ns.getItemIdFromLink(itemLink), quantity = quantity } or nil;
+
+				-- local itemSlot = {};
+				--
+				-- local item = Item:CreateFromItemID(getItemIdFromLink(itemLink));
+				-- item:ContinueOnItemLoad(function()
+				-- 	itemSlot = select(9, GetItemInfo(itemLink));
+				-- end
+
+				return ns.OrderStates["CAST_ENCHANT"];
+			else
+				return nil;
+			end
 		end,
-		UI_INFO_MESSAGE = function()
-			-- return ns.OrderStates."READY_FOR_DELIVERY";
+		UI_INFO_MESSAGE = function(customer, error)
+			if error == 226 then
+				print("Trade cancelled.");
+				return ns.OrderStates["READY_FOR_DELIVERY"];
+			else
+				print("Unexpected UI_INFO_MESSAGE: "..message);
+				error("Unexpected UI_INFO_MESSAGE: "..message);
+			end
 		end
 	}),
 

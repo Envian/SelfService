@@ -84,7 +84,7 @@ function ns.OrderClass:totalTradeMats()
 		local stack = ns.CurrentTrade[i];
 		if stack then
 			local _, itemLink = GetItemInfo(stack.id);
-			print("Adding "..itemLink.." to tradeMats")
+			print("Adding "..itemLink.." to tradeMats");
 			tradeMats[stack.id] = (tradeMats[stack.id] or 0) + stack.quantity;
 			print("Added "..itemLink.."x"..stack.quantity.." to tradeMats: "..tradeMats[stack.id].." total");
 		end
