@@ -1,9 +1,9 @@
 local _, ns = ...;
 
-local noAction = function() return self end;
+local noAction = function() end;
 -- Base state - All events which are not defiend fall back here, and return self.
 local baseOrderState = {
-    EnterState = noAction, -- basically a  "Custom Event"
+	EnterState = noAction, -- basically a  "Custom Event"
 	TRADE_SHOW = noAction,
 	TRADE_TARGET_ITEM_CHANGED = noAction,
 	TRADE_MONEY_CHANGED = noAction,
@@ -14,8 +14,8 @@ local baseOrderState = {
 baseOrderState.__index = baseOrderState;
 
 function baseOrderState:new(state)
-    setmetatable(state, baseOrderState);
-    return state;
+	setmetatable(state, baseOrderState);
+	return state;
 end
 
 ns.OrderStates = {
@@ -45,7 +45,7 @@ ns.OrderStates = {
 			local itemLink = GetTradeTargetItemLink(slotChanged);
 			ns.CurrentTrade[slotChanged] = itemName ~= "" and { id = ns.getItemIdFromLink(itemLink), quantity = quantity } or nil;
 
-			return self;
+			return nil;
 		end,
 		TRADE_ACCEPT_UPDATE = function(playerAccepted, customerAccepted)
 			print("Trade accept button pressed: ");

@@ -17,16 +17,9 @@ function ns.OrderClass:new(data, customerName)
 	return data;
 end
 
-function ns.OrderClass:process(event, args)
+function ns.OrderClass:process(event, ...)
 	print("Old State: "..self.State.Name);
-
-	if(args) then
-		self.State = self.State[event](args);
-		--self.State = self.State[event](unpack(args));
-	else
-		self.State = self.State[event]();
-	end
-
+	self.State = self.State[event](...) or self.State;
 	print("New State: "..self.State.Name);
 end
 
