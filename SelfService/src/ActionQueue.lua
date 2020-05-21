@@ -13,4 +13,8 @@ ns.ActionQueue = {
 		SelfService_Secure_Button:SetAttribute("type", "script");
 		SelfService_Secure_Button:SetAttribute("_script", function() TradeRecipientItem7ItemButton:Click() end);
 	end,
+	openTrade = function(player)
+			SelfService_Secure_Button:SetAttribute("type", "script");
+			SelfService_Secure_Button:SetAttribute("_script", function() InitiateTrade(player) end);
+	end
 };
