@@ -5,7 +5,7 @@ ns.ActionQueue = {
 		SelfService_Secure_Button:SetAttribute("type", "spell");
 		SelfService_Secure_Button:SetAttribute("spell", enchantName);
 	end,
-	acceptTrade = function(enchantName)
+	acceptTrade = function()
 		SelfService_Secure_Button:SetAttribute("type", "script");
 		SelfService_Secure_Button:SetAttribute("_script", function() AcceptTrade() end);
 	end,

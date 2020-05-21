@@ -55,9 +55,9 @@ ns.OrderStates = {
 
 			if playerAccepted == 0 and customerAccepted == 1 then
 				if ns.CurrentOrder:isTradeAcceptable() then
-					--AcceptTrade(); -- Blizzard UI Protected Function
+					ns.ActionQueue.acceptTrade();
 					print("TRADE ACCEPTABLE, ACCEPT TRADE!");
-					return ns.OrderStates["ACCEPT_MATS"]
+					return ns.OrderStates["ACCEPT_MATS"];
 				else
 					CancelTrade();
 					return ns.OrderStates["ORDER_PLACED"];
@@ -170,15 +170,38 @@ ns.OrderStates = {
 	CAST_ENCHANT = baseOrderState:new({
 		Name = "CAST_ENCHANT",
 
-		TRADE_TARGET_ITEM_CHANGED = function()
-			-- return ns.OrderStates."WAIT_FOR_ENCHANTABLE"; or
-			-- return ns.OrderStates."AWAIT_PAYMENT";
+		TRADE_TARGET_ITEM_CHANGED = function(customer, slotChanged)
+			if slotChanged == 7 then
+				local itemName, _, quantity = GetTradeTargetItemInfo(slotChanged);
+				local itemLink = GetTradeTargetItemLink(slotChanged);
+				ns.CurrentTrade[slotChanged] = itemName ~= nil and { id = ns.getItemIdFromLink(itemLink), quantity = quantity } or nil;
+
+				-- local itemSlot = {};
+				--
+				-- local item = Item:CreateFromItemID(getItemIdFromLink(itemLink));
+				-- item:ContinueOnItemLoad(function()
+				-- 	itemSlot = select(9, GetItemInfo(itemLink));
+				-- end
+
+				if itemName then
+					return ns.OrderStates["AWAIT_PAYMENT"];
+				else
+					return ns.OrderStatus["WAIT_FOR_ENCHANTABLE"];
+			else
+				return nil;
+			end
 		end,
-		TRADE_REPLACE_ENCHANT = function()
-			-- return ns.OrderStates."OVERRIDE_ENCHANT";
+		TRADE_REPLACE_ENCHANT = function(newEnchant, currentEnchant)
+			return ns.OrderStatus["OVERRIDE_ENCHANT"];
 		end,
-		UI_INFO_MESSAGE = function()
-			-- return ns.OrderStates."READY_FOR_DELIVERY";
+		UI_INFO_MESSAGE = function(customer, error)
+			if error == 226 then
+				print("Trade cancelled.");
+				return ns.OrderStates["READY_FOR_DELIVERY"];
+			else
+				print("Unexpected UI_INFO_MESSAGE: "..message);
+				error("Unexpected UI_INFO_MESSAGE: "..message);
+			end
 		end
 	}),
 
@@ -186,10 +209,16 @@ ns.OrderStates = {
 		Name = "OVERRIDE_ENCHANT",
 
 		TRADE_TARGET_ITEM_CHANGED = function()
-			-- return ns.OrderStates."AWAIT_PAYMENT";
+			return ns.OrderStates["AWAIT_PAYMENT"];
 		end,
-		UI_INFO_MESSAGE = function()
-			-- return ns.OrderStates."READY_FOR_DELIVERY";
+		UI_INFO_MESSAGE = function(customer, error)
+			if error == 226 then
+				print("Trade cancelled.");
+				return ns.OrderStates["READY_FOR_DELIVERY"];
+			else
+				print("Unexpected UI_INFO_MESSAGE: "..message);
+				error("Unexpected UI_INFO_MESSAGE: "..message);
+			end
 		end
 	}),
 
