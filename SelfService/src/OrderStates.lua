@@ -31,7 +31,7 @@ ns.OrderStates = {
 	WAIT_FOR_MATS = baseOrderState:new({
 		Name = "WAIT_FOR_MATS",
 
-		UI_INFO_MESSAGE = function(message)
+		UI_INFO_MESSAGE = function(customer, message)
 			if message == "Trade cancelled." then
 				print("Trade cancelled.");
 				return ns.OrderStates["ORDER_PLACED"];
@@ -40,14 +40,14 @@ ns.OrderStates = {
 				error("Unexpected UI_INFO_MESSAGE: "..message);
 			end
 		end,
-		TRADE_TARGET_ITEM_CHANGED = function(slotChanged)
+		TRADE_TARGET_ITEM_CHANGED = function(customer, slotChanged)
 			local _, _, quantity = GetTradeTargetItemInfo(slotChanged);
 			local itemLink = GetTradeTargetItemLink(slotChanged);
 			ns.CurrentTrade[slotChanged] = itemName ~= "" and { id = ns.getItemIdFromLink(itemLink), quantity = quantity } or nil;
 
 			return nil;
 		end,
-		TRADE_ACCEPT_UPDATE = function(playerAccepted, customerAccepted)
+		TRADE_ACCEPT_UPDATE = function(customer, playerAccepted, customerAccepted)
 			print("Trade accept button pressed: ");
 			print("  - Player Accepted: "..playerAccepted);
 			print("  - Customer Accepted: "..customerAccepted);
@@ -73,7 +73,7 @@ ns.OrderStates = {
 			print("Traded items changed during trade accept phase. Abort to WAIT_FOR_MATS");
 			return ns.OrderStates["WAIT_FOR_MATS"];
 		end,
-		UI_INFO_MESSAGE = function(message)
+		UI_INFO_MESSAGE = function(customer, message)
 			if message == "Trade cancelled." then
 				print("Trade cancelled.");
 				return ns.OrderStates["ORDER_PLACED"];

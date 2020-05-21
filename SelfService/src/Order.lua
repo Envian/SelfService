@@ -19,7 +19,7 @@ end
 
 function ns.OrderClass:process(event, ...)
 	print("Old State: "..self.State.Name);
-	self.State = self.State[event](...) or self.State;
+	self.State = self.State[event](ns.Customers[ns.CurrentOrder.CustomerName], ...) or self.State;
 	print("New State: "..self.State.Name);
 end
 
