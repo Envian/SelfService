@@ -13,6 +13,7 @@ src/Migration.lua
 src/data/Enchanting.lua
 
 src/Recipe.lua
+src/OrderStates.lua
 src/Order.lua
 src/Customer.lua
 

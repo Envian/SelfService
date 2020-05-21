@@ -5,6 +5,7 @@ local func = function() end; -- TODO: hard fail if this is ever called. Only use
 ns.CustomerClass = nil; -- Customer.lua
 ns.OrderClass = nil; -- Order.lua
 ns.RecipeClass = nil; -- Recipe.lua
+ns.OrderStates = nil; -- OrderStates.lua
 
 -- Members
 ns.Enabled = false; -- Controls whether or not the addon is enabled or not.

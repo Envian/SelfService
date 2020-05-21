@@ -13,6 +13,11 @@ local SLASH_COMMANDS = {
 
 		local customer = ns.getCustomer(who);
 		if resetWhat:lower() == "order" then
+			if ns.CurrentOrder and ns.CurrentOrder == customer.CurrentOrder then
+				ns.CurrentOrder = nil;
+				print(ns.LOG_RESET:format("ns.CurrentOrder"));
+			end
+
 			customer.CurrentOrder = nil;
 			print(ns.LOG_RESET:format(customer.Name));
 		end

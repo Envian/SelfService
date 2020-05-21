@@ -42,6 +42,7 @@ function ns.EnchantRecipeClass:loadFromIndex(index)
 	self.Name = name;
 	self.Owned = true;
 	self.Link = GetCraftItemLink(index);
+	self.CraftFocus = GetCraftSpellFocus(index);
 	self.Mats = {};
 
 	-- Load mats

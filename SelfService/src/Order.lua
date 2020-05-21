@@ -4,25 +4,30 @@ local _, ns = ...;
 ns.OrderClass = {};
 ns.OrderClass.__index = ns.OrderClass;
 
-ns.OrderClass.STATUSES = {
-	PENDING = 1,
-	ORDERED = 2,
-	GATHERED = 3,
-	DELIVERED = 4,
-	CANCELLED = 5
-}
-
 -- TODO: PostMVP, add additional fields for archival purposes, e.g. profit
 function ns.OrderClass:new(data, customerName)
 	data = data or {
 		CustomerName = customerName,
-		Status = ns.OrderClass.STATUSES.PENDING,
+		State = ns.OrderStates["ORDER_PLACED"],
 		Recipes = nil,
 		RequiredMats = nil,
 		ReceivedMats = nil
 	}
 	setmetatable(data, ns.OrderClass);
 	return data;
+end
+
+function ns.OrderClass:process(event, args)
+	print("Old State: "..self.State.Name);
+
+	if(args) then
+		self.State = self.State[event](args);
+		--self.State = self.State[event](unpack(args));
+	else
+		self.State = self.State[event]();
+	end
+
+	print("New State: "..self.State.Name);
 end
 
 function ns.OrderClass:addToOrder(recipes)
@@ -41,8 +46,6 @@ function ns.OrderClass:addToOrder(recipes)
 		local _, itemLink = GetItemInfo(id);
 		print("addToOrder - Required Material: "..itemLink.."x"..self.RequiredMats[id]);
 	end
-
-	self.Status = ns.OrderClass.STATUSES.ORDERED;
 end
 
 function ns.OrderClass:isTradeAcceptable()
@@ -100,8 +103,6 @@ end
 function ns.OrderClass:addReceivedMats(tradeMats)
 	self.ReceivedMats = self:totalTradeMats(tradeMats);
 	print("Added received mats.");
-	-- Assume we didn't drop mats on the ground while passing them off
-	self.Status = ns.OrderClass.STATUSES.GATHERED;
 end
 
 function ns.OrderClass:closeTrade()
