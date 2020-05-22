@@ -26,7 +26,6 @@ ns.OrderStates = {
 
 		TRADE_SHOW = function(customer)
 			print(ns.LOG_PREFIX.."Trade Initiated.");
-			ns.CurrentTrade = {};
 			return ns.OrderStates["WAIT_FOR_MATS"];
 		end
 	}),
@@ -68,7 +67,6 @@ ns.OrderStates = {
 		end,
 		TRADE_CANCELED = function(customer)
 			print("Trade cancelled.");
-			ns.CurrentTrade = {};
 			return ns.OrderStates["ORDER_PLACED"];
 		end,
 		TRADE_COMPLETED = function(customer)
@@ -97,7 +95,6 @@ ns.OrderStates = {
 		Name = "READY_FOR_DELIVERY",
 
 		TRADE_SHOW = function(customer)
-			ns.CurrentTrade = {};
 			return ns.OrderStates["WAIT_FOR_ENCHANTABLE"];
 			--return ns.OrderStates["DELIVER_ORDER"];
 		end
@@ -107,9 +104,9 @@ ns.OrderStates = {
 		Name = "DELIVER_ORDER",
 
 		TRADE_ITEM_CHANGED = function(customer, slotChanged)
-			local itemName, _, quantity = GetTradeTargetItemInfo(slotChanged);
-			local itemLink = GetTradeTargetItemLink(slotChanged);
-			ns.CurrentTrade[slotChanged] = itemName ~= nil and { id = ns.getItemIdFromLink(itemLink), quantity = quantity } or nil;
+			-- local itemName, _, quantity = GetTradeTargetItemInfo(slotChanged);
+			-- local itemLink = GetTradeTargetItemLink(slotChanged);
+			-- ns.CurrentTrade[slotChanged] = itemName ~= nil and { id = ns.getItemIdFromLink(itemLink), quantity = quantity } or nil;
 
 			return nil;
 		end,
@@ -124,9 +121,9 @@ ns.OrderStates = {
 
 		TRADE_ITEM_CHANGED = function(customer, slotChanged)
 			if slotChanged == 7 then
-				local itemName, _, quantity = GetTradeTargetItemInfo(slotChanged);
-				local itemLink = GetTradeTargetItemLink(slotChanged);
-				ns.CurrentTrade[slotChanged] = itemName ~= nil and { id = ns.getItemIdFromLink(itemLink), quantity = quantity } or nil;
+				-- local itemName, _, quantity = GetTradeTargetItemInfo(slotChanged);
+				-- local itemLink = GetTradeTargetItemLink(slotChanged);
+				-- ns.CurrentTrade[slotChanged] = itemName ~= nil and { id = ns.getItemIdFromLink(itemLink), quantity = quantity } or nil;
 
 				-- local itemSlot = {};
 				--
@@ -151,9 +148,9 @@ ns.OrderStates = {
 
 		TRADE_ITEM_CHANGED = function(customer, slotChanged)
 			if slotChanged == 7 then
-				local itemName, _, quantity = GetTradeTargetItemInfo(slotChanged);
-				local itemLink = GetTradeTargetItemLink(slotChanged);
-				ns.CurrentTrade[slotChanged] = itemName ~= nil and { id = ns.getItemIdFromLink(itemLink), quantity = quantity } or nil;
+				-- local itemName, _, quantity = GetTradeTargetItemInfo(slotChanged);
+				-- local itemLink = GetTradeTargetItemLink(slotChanged);
+				-- ns.CurrentTrade[slotChanged] = itemName ~= nil and { id = ns.getItemIdFromLink(itemLink), quantity = quantity } or nil;
 
 				-- local itemSlot = {};
 				--

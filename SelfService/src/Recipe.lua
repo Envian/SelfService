@@ -7,9 +7,12 @@ ns.RecipeClass.__index = ns.RecipeClass;
 function ns.RecipeClass:newEnchant(id, recipe)
 	if not recipe or not recipe.Search then error("Recipes require a template with Search criteria") end
 
+	recipe.Name = nil;
 	recipe.Owned = false;
 	recipe.Id = id;
 	recipe.Type = "Enchanting";
+	recipe.CraftFocus = nil;
+	recipe.Mats = {};
 
 	setmetatable(recipe, ns.EnchantRecipeClass);
 	return recipe;

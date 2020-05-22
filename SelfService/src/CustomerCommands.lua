@@ -22,12 +22,8 @@ ns.CustomerCommands = {
 		-- Search by terms
 		local results = {};
 		for term in message:gmatch("[^+%s]+") do
-			print(term);
 			local matches = ns.Search[string.lower(term)];
-			print("matches")
-			ns.dumpTable(matches);
-			print("search")
-			ns.dumpTable(ns.Search);
+
 			-- Ignore terms that don't match anything
 			if matches then
 				if #results == 0 then
