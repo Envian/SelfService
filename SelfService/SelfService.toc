@@ -2,7 +2,7 @@
 ## Title: SelfService
 ## Author: Envian
 ## Version: 0.1
-## SavedVariables: SelfService
+## SavedVariables: SelfServiceData
 
 src/Definitions.lua
 
@@ -17,10 +17,10 @@ src/OrderStates.lua
 src/Order.lua
 src/Customer.lua
 
-src/Helpers.lua
-src/Events.lua
 src/ActionQueue.lua
+src/Helpers.lua
 src/Trading.lua
 
 src/Console.lua
 src/CustomerCommands.lua
+src/Events.lua

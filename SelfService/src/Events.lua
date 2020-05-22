@@ -4,6 +4,7 @@ local COMMAND_REGEX = "^!%s*%a%a";
 local SEARCH_REGEX = "^%?%s*([|%a%d]+)";
 
 ns.Events = {
+	EventFrame = CreateFrame("Frame"),
 	filterInbound = function(_, event, message, sender)
 		return ns.Enabled and (message:match(COMMAND_REGEX) or message:match(SEARCH_REGEX));
 	end,
@@ -15,7 +16,7 @@ ns.Events = {
 ns.enableAddon = function()
 	if not ns.Enabled then
 		for event, _ in pairs(ns.Events.EventHandlers) do
-			SelfService_EventHandlerFrame:RegisterEvent(event);
+			ns.Events.EventFrame:RegisterEvent(event);
 		end
 		-- Hides outgoing bot whispers, and incoming commands.
 		-- ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER", ns.Events.filterInbound);
@@ -42,7 +43,7 @@ end
 ns.disableAddon = function()
 	if ns.Enabled then
 		for event, _ in pairs(ns.Events.EventHandlers) do
-			SelfService_EventHandlerFrame:UnregisterEvent(event);
+			ns.Events.EventFrame:UnregisterEvent(event);
 		end
 		--ChatFrame_RemoveMessageEventFilter("CHAT_MSG_WHISPER", ns.Events.filterInbound);
 		--ChatFrame_RemoveMessageEventFilter("CHAT_MSG_WHISPER_INFORM", ns.Events.filterOutbound);
@@ -62,25 +63,31 @@ ns.Events.EventHandlers = {
 			ns.getCustomer(sender):handleCommand(command, args);
 		end
 	end,
-	TRADE_SHOW = function() end,
-	TRADE_TARGET_ITEM_CHANGED = function() end,
-	TRADE_MONEY_CHANGED = function() end,
-	TRADE_ACCEPT_UPDATE = function() end,
-	UI_INFO_MESSAGE = function() end,
-},
-
-local eventHandlerFrame = createFrame("SelfService_EventHandlerFrame");
-eventHandlerFrame:SetScript("OnEvent", function(_, event, ...)
-	else
-		print("Another event fired. Checking currentOrder...");
-
-		if(ns.CurrentOrder) then
-			print("CurrentOrder is active. Call process()");
-			ns.CurrentOrder:process(event, ...);
-		else
-			print("CurrentOrder is inactive. Do nothing.");
+	TRADE_SHOW = function() ns.Trading.tradeOpened() end,
+	TRADE_TARGET_ITEM_CHANGED = function(slot) ns.Trading.tradeItemChanged(slot) end,
+	TRADE_MONEY_CHANGED = function() ns.Trading.tradeGoldChanged() end,
+	TRADE_ACCEPT_UPDATE = function(playerAccepted, CustomerAccepted) ns.Trading.tradeAccepted(playerAccepted, CustomerAccepted) end,
+	TRADE_REPLACE_ENCHANT = function() ns.Trading.overrideEnchant() end,
+	UI_INFO_MESSAGE = function(code)
+		if     code == 226 then ns.Trading.tradeCanceled()
+		elseif code == 227 then ns.Trading.tradeCompleted()
 		end
-	end
+	end,
+};
+
+ns.Events.EventFrame:SetScript("OnEvent", function(_, event, ...)
+	ns.Events.EventHandlers[event](...);
+end);
+	-- else
+	-- 	print("Another event fired. Checking currentOrder...");
+	--
+	-- 	if(ns.CurrentOrder) then
+	-- 		print("CurrentOrder is active. Call process()");
+	-- 		ns.CurrentOrder:process(event, ...);
+	-- 	else
+	-- 		print("CurrentOrder is inactive. Do nothing.");
+	-- 	end
+	-- end
 	-- elseif event == "TRADE_SHOW" then
 	-- 	print("Trade Initiated");
 	-- 	local customer = ns.getCustomer(TradeFrameRecipientNameText:GetText());
@@ -162,12 +169,12 @@ eventHandlerFrame:SetScript("OnEvent", function(_, event, ...)
 	-- 		-- Scan bags to ensure transfer of actual materials
 	-- 		-- May be easier to record bag contents in pretrade and subtract that from bag contents posttrade
 	-- end
-end);
+-- end);
 
 -- Loading events are always captured.
-local loadingFrame = CreateFrame("SelfService_LoadHandlerFrame");
+local loadingFrame = CreateFrame("Frame");
 loadingFrame:RegisterEvent("CRAFT_SHOW");
-loadingFrame:setScript("OnEvent", function(_, event, ...)
+loadingFrame:SetScript("OnEvent", function(_, event, ...)
 	if event == "CRAFT_SHOW" then
 		-- Only enchanting (and a couple irrelevant skills) use this event.
 		if GetCraftName() == "Enchanting" and not ns.Loaded.Enchanting then

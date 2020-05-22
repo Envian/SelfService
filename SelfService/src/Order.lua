@@ -17,15 +17,15 @@ function ns.OrderClass:new(data, customerName)
 	return data;
 end
 
-function ns.OrderClass:handleEvent(customer, event, ...)
+function ns.OrderClass:handleEvent(event, ...)
 	local currentState = self.State;
-	repeat
-		self.State = self.State[event](customer, ...) or self.State;
-		if currentState ~= self.State then
-			currentState = self.State;
-			self.State.EnterState(customer);
-		end
-	until (currentState == self.State)
+	local customer = ns.Customers[self.CustomerName];
+
+	self.State = self.State[event](customer, ...) or self.State;
+	while self.State ~= currentState do
+		self.State = currentState;
+		self.State = self.State.EnterState(customer) or self.State;
+	end
 end
 
 function ns.OrderClass:addToOrder(recipes)
