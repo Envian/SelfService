@@ -51,7 +51,7 @@ ns.Trading = {
 	end,
 	tradeAccepted = function(playerAccepted, CustomerAccepted)
 		if not ns.CurrentTrade.Customer then return end;
-		ns.CurrentTrade.Customer.CurrentOrder:handleEvent("TRADE_ACCEPT_UPDATE", playerAccepted, CustomerAccepted);
+		ns.CurrentTrade.Customer.CurrentOrder:handleEvent("TRADE_ACCEPTED", playerAccepted, CustomerAccepted);
 	end,
 	overrideEnchant = function()
 		if not ns.CurrentTrade.Customer then return end;
@@ -60,13 +60,13 @@ ns.Trading = {
 	tradeCanceled = function()
 		if not ns.CurrentTrade.Customer then return end;
 
-		ns.CurrentTrade.Customer = nil;
 		ns.CurrentTrade.Customer.CurrentOrder:handleEvent("TRADE_CANCELED");
+		ns.CurrentTrade.Customer = nil;
 	end,
 	tradeCompleted = function()
 		if not ns.CurrentTrade.Customer then return end;
 
-		ns.CurrentTrade.Customer = nil;
 		ns.CurrentTrade.Customer.CurrentOrder:handleEvent("TRADE_COMPLETED");
+		ns.CurrentTrade.Customer = nil;
 	end,
 }

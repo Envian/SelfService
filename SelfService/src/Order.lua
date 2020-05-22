@@ -13,6 +13,7 @@ function ns.OrderClass:new(data, customerName)
 		RequiredMats = nil,
 		ReceivedMats = nil
 	}
+	data.State = ns.OrderStates[data.State.Name];
 	setmetatable(data, ns.OrderClass);
 	return data;
 end
@@ -55,7 +56,7 @@ function ns.OrderClass:isTradeAcceptable()
 	-- 	local _, itemLink = GetItemInfo(id);
 	-- 	print("Acceptable - Required Material: "..itemLink.."x"..self.RequiredMats[id]);
 	-- end
-	-- 
+	--
 	-- for id, count in pairs(self.RequiredMats) do
 	-- 	local _, itemLink = GetItemInfo(id);
 	--

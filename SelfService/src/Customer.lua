@@ -26,6 +26,7 @@ function ns.CustomerClass:new(data, name)
 		MessagesAvailable = 0,
 		CurrentOrder = nil
 	}
+	data.CurrentOrder = data.CurrentOrder && ns.OrderClass:new(data.CurrentOrder, name);
 	setmetatable(data, ns.CustomerClass);
 	return data;
 end
