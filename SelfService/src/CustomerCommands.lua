@@ -1,15 +1,16 @@
 local _, ns = ...;
 
 ns.CustomerCommands = {
-	search = function(terms, customer)
+	search = function(customer, message)
+		print(message)
 		-- Only allow searching with a small delay.
 		if GetTime() - customer.LastSearch < 2 then return end;
 		customer.LastSearch = GetTime();
 
 		-- Do we have links? Check links
-		local linkId = ns.getItemIdFromLink(terms);
-		if linkId then
-			local requestedRecipe = ns.Recipes[linkId];
+		local links = ns.getLinkedItemIds(message);
+		if #links > 0 then
+			local requestedRecipe = ns.Recipes[links[1]];
 			if requestedRecipe and requestedRecipe.Owned then
 				customer:replyf(ns.L.enUS.RECIPES_OWNED, requestedRecipe.Link);
 			else
@@ -20,8 +21,13 @@ ns.CustomerCommands = {
 
 		-- Search by terms
 		local results = {};
-		for term in terms:gmatch("[^+%s]+") do
+		for term in message:gmatch("[^+%s]+") do
+			print(term);
 			local matches = ns.Search[string.lower(term)];
+			print("matches")
+			ns.dumpTable(matches);
+			print("search")
+			ns.dumpTable(ns.Search);
 			-- Ignore terms that don't match anything
 			if matches then
 				if #results == 0 then
@@ -47,16 +53,16 @@ ns.CustomerCommands = {
 		end
 	end,
 
-	buy = function(args, customer)
+	buy = function(customer, message)
 		if ns.CurrentOrder and ns.CurrentOrder.CustomerName ~= customer.Name then
 			customer:reply(ns.L.enUS.BUSY);
 			return;
 		end
 
-		customer:addToOrder(ns.getLinkedItemIds(args));
+		customer:addToOrder(ns.getLinkedItemIds(message));
 	end,
 
-	help = function(args, customer)
+	help = function(customer, message)
 		customer:reply(ns.L.enUS.HELP);
 	end
 };

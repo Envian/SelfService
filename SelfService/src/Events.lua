@@ -55,12 +55,13 @@ ns.disableAddon = function()
 end
 
 ns.Events.EventHandlers = {
-	CHAT_MSG_WHISPER = function(_, _, message, sender)
+	CHAT_MSG_WHISPER = function(message, sender)
 		-- Convert messages including "?term" to "!search term"
 		message = message:gsub(SEARCH_REGEX, "!search %1");
 		if message:match(COMMAND_REGEX) then
-			local command, args = message:match("^%!(%S+)%s?(.*)$");
-			ns.getCustomer(sender):handleCommand(command, args);
+			print(message);
+			local command, term = message:match("^%!(%S+)%s?(.*)$");
+			ns.getCustomer(sender):handleCommand(command, term);
 		end
 	end,
 	TRADE_SHOW = function() ns.Trading.tradeOpened() end,

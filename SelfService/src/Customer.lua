@@ -8,8 +8,8 @@ ns.getCustomer = function(name)
 	local existing = ns.Customers[name];
 	if existing then return existing end;
 
-	local newCustomer = ns.CustomerClass:new(SelfService.Customers[name], name);
-	SelfService.Customers[name] = newCustomer;
+	local newCustomer = ns.CustomerClass:new(SelfServiceData.Customers[name], name);
+	SelfServiceData.Customers[name] = newCustomer;
 	ns.Customers[name] = newCustomer;
 	return newCustomer;
 end
@@ -48,7 +48,7 @@ function ns.CustomerClass:handleCommand(command, message)
 	if not cmdFunction then
 		self:reply(ns.L.enUS.UNKNOWN_COMMAND);
 	else
-		cmdFunction(args, self);
+		cmdFunction(self, message);
 	end
 
 	self.LastWhisper = GetTime();

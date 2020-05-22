@@ -41,15 +41,21 @@ ns.dumpTable = function(table, indent)
 	if #indent >= 20 then
 		print("< Truncated >")
 		return;
-	end
-
-	for key,value in pairs(table) do
-		if type(value) == "table" then
-			print(indent..(type(key) == "string" and "\""..key.."\"" or key)..": {");
-			ns.dumpTable(value, indent.."  ");
-			print("}")
-		else
-			print(indent..(type(key) == "string" and "\""..key.."\"" or key)..": "..(type(value) == "string" and "\""..value.."\"" or value) or "nil");
+	elseif not table then
+		print(indent.."nil");
+		return;
+	elseif #table == 0 then
+		print(indent.."{ }");
+		return;
+	else
+		for key,value in pairs(table) do
+			if type(value) == "table" then
+				print(indent..(type(key) == "string" and "\""..key.."\"" or key)..": {");
+				ns.dumpTable(value, indent.."  ");
+				print("}")
+			else
+				print(indent..(type(key) == "string" and "\""..key.."\"" or key)..": "..(type(value) == "string" and "\""..value.."\"" or value) or "nil");
+			end
 		end
 	end
 end
