@@ -1,6 +1,6 @@
 local _, ns = ...;
 
-ns.Commands = {
+ns.CustomerCommands = {
 	search = function(terms, customer)
 		-- Only allow searching with a small delay.
 		if GetTime() - customer.LastSearch < 2 then return end;

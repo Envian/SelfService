@@ -19,6 +19,8 @@ src/Customer.lua
 
 src/Helpers.lua
 src/Events.lua
-src/Commands.lua
-src/ConsoleCommands.lua
 src/ActionQueue.lua
+src/Trading.lua
+
+src/Console.lua
+src/CustomerCommands.lua
