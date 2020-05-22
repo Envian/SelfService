@@ -23,8 +23,10 @@ function ns.OrderClass:handleEvent(event, ...)
 	local customer = ns.Customers[self.CustomerName];
 
 	self.State = self.State[event](customer, ...) or self.State;
-	while self.State ~= currentState do
-		self.State = currentState;
+	for n = 1,10 do
+		if self.State == currentState then break; end;
+
+		currentState = self.State;
 		self.State = self.State.ENTER_STATE(customer) or self.State;
 	end
 end
