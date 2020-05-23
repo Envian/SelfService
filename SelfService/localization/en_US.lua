@@ -4,17 +4,15 @@ ns.LOCALIZATION = "enUS";
 ns.ADDON_NAME = "SelfService";
 
 -- Logging
-ns.LOG_PREFIX = string.format("[%s] ", ns.ADDON_NAME);
-ns.LOG_ENABLED = ns.LOG_PREFIX .. "Has been enabled.";
-ns.LOG_DISABLED = ns.LOG_PREFIX .. "Has been disabled.";
-ns.LOG_RESET = ns.LOG_PREFIX .. "Order for %s has been reset.";
-ns.LOG_LOADED = ns.LOG_PREFIX .. "Data for %s has been loaded.";
+ns.LOG_ENABLED = "Has been enabled.";
+ns.LOG_DISABLED = "Has been disabled.";
+ns.LOG_RESET = "Order for %s has been reset.";
+ns.LOG_LOADED = "Data for %s has been loaded.";
 
-
-ns.LOG_CONFLICT = ns.LOG_PREFIX .. "Recipe conflict found. %s and %s share the same Id, and will not work as expected.";
-ns.LOG_CONFLICT_HIDING = ns.LOG_PREFIX .. "The recipe %s will not be available.";
-ns.LOG_NEW_CUSTOMER = ns.LOG_PREFIX .. "Serving a new customer: %s.";
-ns.LOG_RETURNING_CUSTOMER = ns.LOG_PREFIX .. "Serving a returning customer: %s.";
+ns.LOG_CONFLICT = "Recipe conflict found. %s and %s share the same Id, and will not work as expected.";
+ns.LOG_CONFLICT_HIDING = "The recipe %s will not be available.";
+ns.LOG_NEW_CUSTOMER = "Serving a new customer: %s.";
+ns.LOG_RETURNING_CUSTOMER = "Serving a returning customer: %s.";
 
 -- Whispers
 ns.L.enUS = {

@@ -9,6 +9,7 @@ src/Definitions.lua
 localization/en_US.lua
 
 src/Migration.lua
+src/Logging.lua
 
 src/data/Enchanting.lua
 
