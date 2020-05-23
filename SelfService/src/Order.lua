@@ -82,6 +82,28 @@ function ns.OrderClass:isTradeAcceptable()
 	return true;
 end
 
+function ns.OrderClass:reconcile(recipe)
+	ns.info("Reconciling "..recipe.Name.." for the current order.");
+
+	if not recipe then
+		ns.error("ns.OrderClass:reconcile called with nil parameter.");
+		return;
+	end
+
+	for _, mat in ipairs(recipe.Mats) do
+		if not self.ReceivedMats[mat.Id] then
+			ns.error("reconcile tried to remove mats we didn't receive").
+			return;
+		else
+			self.ReceivedMats[mat.Id] = self.ReceivedMats[mat.Id] - mat.Count;
+
+			if self.ReceivedMats[mat.Id] < 0 then
+				ns.fatal("reconcile resulted in negative ReceivedMats.");
+			end
+		end
+	end
+end
+
 function ns.OrderClass:closeTrade()
 	-- Scan trade window slots and add contents to ReceivedMats\
 	-- self:addReceivedMats(self:totalTradeMats());

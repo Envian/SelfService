@@ -56,10 +56,10 @@ ns.Trading = {
 		if not ns.CurrentTrade.Customer or not ns.CurrentTrade.Customer.CurrentOrder then return end;
 		ns.CurrentTrade.Customer.CurrentOrder:handleEvent("REPLACE_ENCHANT");
 	end,
-	tradeCanceled = function()
+	tradeCancelled = function()
 		if not ns.CurrentTrade.Customer or not ns.CurrentTrade.Customer.CurrentOrder then return end;
 
-		ns.CurrentTrade.Customer.CurrentOrder:handleEvent("TRADE_CANCELED");
+		ns.CurrentTrade.Customer.CurrentOrder:handleEvent("TRADE_CANCELLED");
 		ns.CurrentTrade.Customer = nil;
 	end,
 	tradeCompleted = function()

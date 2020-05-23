@@ -100,6 +100,10 @@ function ns.CustomerClass:replyf(message, ...)
 	self:reply(message:format(...));
 end
 
+function ns.CustomerClass:whisper(message)
+	SendChatMessage(ns.REPLY_PREFIX .. message, "WHISPER", nil, self.Name);
+end
+
 function ns.CustomerClass:replyJoin(message, list, delim)
 	delim = delim or "";
 	message = message or "";

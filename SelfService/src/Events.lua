@@ -69,7 +69,7 @@ ns.Events.EventHandlers = {
 	TRADE_ACCEPT_UPDATE = function(playerAccepted, CustomerAccepted) ns.Trading.tradeAccepted(playerAccepted, CustomerAccepted) end,
 	TRADE_REPLACE_ENCHANT = function() ns.Trading.overrideEnchant() end,
 	UI_INFO_MESSAGE = function(code)
-		if     code == 226 then ns.Trading.tradeCanceled()
+		if     code == 226 then ns.Trading.tradeCancelled()
 		elseif code == 227 then ns.Trading.tradeCompleted()
 		end
 	end,
@@ -93,9 +93,12 @@ ns.Events.EventHandlers = {
 			ns.CurrentTrade.Customer.CurrentOrder:handleEvent("ENCHANT_FAILED", spellId);
 		end
 	end,
+	UNIT_SPELLCAST_SUCCEEDED = function(_, _, spellId)
+		if ns.CurrentTrade.Customer and ns.CurrentTrade.Customer.CurrentOrder then
+			ns.CurrentTrade.Customer.CurrentOrder:handleEvent("ENCHANT_SUCCEEDED", spellId);
+		end
+	end
 };
-
--- UNIT_SPELLCAST_FAILED_QUIET 3rd param will be Enchant ID
 
 ns.Events.EventFrame:SetScript("OnEvent", function(_, event, ...)
 	ns.Events.EventHandlers[event](...);
