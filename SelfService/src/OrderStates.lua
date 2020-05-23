@@ -219,12 +219,8 @@ ns.OrderStates = {
 		end,
 
 		TRADE_COMPLETED = function(customer)
-<<<<<<< Updated upstream
-
-=======
 			-- TODO: if we have more things to do, return to READY_FOR_DELIVERY
 			return ns.OrderStates.TRANSACTION_COMPLETE;
->>>>>>> Stashed changes
 		end,
 	}),
 
