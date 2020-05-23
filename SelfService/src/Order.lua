@@ -92,7 +92,7 @@ function ns.OrderClass:reconcile(recipe)
 
 	for _, mat in ipairs(recipe.Mats) do
 		if not self.ReceivedMats[mat.Id] then
-			ns.error("reconcile tried to remove mats we didn't receive").
+			ns.error("reconcile tried to remove mats we didn't receive");
 			return;
 		else
 			self.ReceivedMats[mat.Id] = self.ReceivedMats[mat.Id] - mat.Count;
