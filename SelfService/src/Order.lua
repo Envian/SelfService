@@ -24,9 +24,7 @@ function ns.OrderClass:handleEvent(event, ...)
 	local currentState = self.State;
 	local customer = ns.Customers[self.CustomerName];
 
-	print("Current State: "..self.State.Name);
 	self.State = self.State[event](customer, ...) or self.State;
-	print("Next State: "..self.State.Name);
 	for n = 1,10 do
 		if self.State == currentState then break; end;
 

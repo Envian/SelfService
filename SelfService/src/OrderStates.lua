@@ -87,9 +87,10 @@ ns.OrderStates = {
 		-- Search bank bags for each missing CraftFocus
 		-- When all CraftFocus items are in inventory, update OrderState to READY_FOR_DELIVERY
 
-		-- Temporary: TRADE_SHOW is a convenient event to put here to push forward
-		TRADE_SHOW = function(customer)
-			return ns.OrderStates["READY_FOR_DELIVERY"];
+		ENTER_STATE = function(customer)
+			if customer.CurrentOrder.Recipes[1].Type == "Enchanting" then
+				return ns.OrderStates["READY_FOR_DELIVERY"];
+			end
 		end
 	}),
 
@@ -97,8 +98,11 @@ ns.OrderStates = {
 		Name = "READY_FOR_DELIVERY",
 
 		TRADE_SHOW = function(customer)
-			return ns.OrderStates["WAIT_FOR_ENCHANTABLE"];
-			--return ns.OrderStates["DELIVER_ORDER"];
+			if customer.CurrentOrder.Recipes[1].Type == "Enchanting" then
+				return ns.OrderStates["WAIT_FOR_ENCHANTABLE"];
+			else
+				return ns.OrderStates["DELIVER_ORDER"];
+			end
 		end
 	}),
 
