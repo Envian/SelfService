@@ -33,6 +33,19 @@ ns.delink = func(text); -- Removes all links from a string, but leaves the text 
 ns.enableAddon = func(); -- Enables bot event handling.
 ns.disableAddon = func() -- Disables bot event handling.
 
+-- Logging
+ns.setLogLevel = func(level); -- Sets the log level to a specified value.
+ns.debug = func(message); -- Prints a debug message to the console.
+ns.debugf = func(message, ...); -- Prints a formatted debug message to the console.
+ns.info = func(message); -- Prints a info message to the console.
+ns.infof = func(message, ...); -- Prints a formatted info message to the console.
+ns.warning = func(message); -- Prints a warning message to the console.
+ns.warningf = func(message, ...); -- Prints a formatted warning message to the console.
+ns.error = func(message); -- Prints a error message to the console.
+ns.errorf = func(message, ...); -- Prints a formatted error message to the console.
+ns.fatal = func(message); -- Prints a fatal message to the console.
+ns.fatalf = func(message, ...); -- Prints a formatted fatal message to the console.
+
 -- Specialized helpers
 ns.populateEnchantingData = func(enchants); -- Loads data about each enchant, and saves it back on the passed in list.
 ns.populateEnchantExtraData = func(extra); -- Loads special enchant products (oils, wands) into the global map.

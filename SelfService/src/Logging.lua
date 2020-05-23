@@ -19,34 +19,22 @@ local logf = function(message, ...)
 	end
 end
 
-ns.Log = {
-	debug = nolog,
-	debugf = nolog,
-	info = nolog,
-	infof = nolog,
-	warning = nolog,
-	warningf = nolog,
-	error = nolog,
-	errorf = nolog,
-	fatal = nolog,
-	fatalf = nolog,
-	setLogLevel = function(level)
-		if type(level) ~= "number" or level < 1 or level > 5 then
-			error("Invalid level. Expected a number between 1 and 5. Got: "..tostring(level or "nil"));
-		end
-
-		SelfServiceData.LogLevel = level;
-		ns.Log.debug = level >= 5 and log or nolog;
-		ns.Log.debugf = level >= 5 and logf or nolog;
-		ns.Log.info = level >= 4 and log or nolog;
-		ns.Log.infof = level >= 4 and logf or nolog;
-		ns.Log.warning = level >= 3 and log or nolog;
-		ns.Log.warningf = level >= 3 and logf or nolog;
-		ns.Log.error = level >= 2 and log or nolog;
-		ns.Log.errorf = level >= 2 and logf or nolog;
-		ns.Log.fatal = level >= 1 and log or nolog;
-		ns.Log.fatalf = level >= 1 and logf or nolog;
+ns.setLogLevel = function(level)
+	if type(level) ~= "number" or level < 1 or level > 5 then
+		error("Invalid level. Expected a number between 1 and 5. Got: "..tostring(level or "nil"));
 	end
-}
 
-ns.Log.setLogLevel(SelfServiceData.LogLevel);
+	SelfServiceData.LogLevel = level;
+	ns.debug = level >= 5 and log or nolog;
+	ns.debugf = level >= 5 and logf or nolog;
+	ns.info = level >= 4 and log or nolog;
+	ns.infof = level >= 4 and logf or nolog;
+	ns.warning = level >= 3 and log or nolog;
+	ns.warningf = level >= 3 and logf or nolog;
+	ns.error = level >= 2 and log or nolog;
+	ns.errorf = level >= 2 and logf or nolog;
+	ns.fatal = level >= 1 and log or nolog;
+	ns.fatalf = level >= 1 and logf or nolog;
+end
+
+ns.setLogLevel(SelfServiceData.LogLevel);
