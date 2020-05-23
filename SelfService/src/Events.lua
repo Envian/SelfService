@@ -74,6 +74,15 @@ ns.Events.EventHandlers = {
 	UI_INFO_MESSAGE = function(code)
 		if     code == 226 then ns.Trading.tradeCanceled()
 		elseif code == 227 then ns.Trading.tradeCompleted()
+		elseif code == 374 then -- Invalid Target for Enchant
+		end
+	end,
+	CURRENT_SPELL_CAST_CHANGED = function()
+		local type, _, _, spellID = GetCursorInfo();
+		if type == "spell" then
+			if ns.CurrentTrade.Customer and ns.CurrentTrade.Customer.CurrentOrder then
+				ns.CurrentTrade.Customer.CurrentOrder:handleEvent("CURSOR_CHANGE", spellId);
+			end
 		end
 	end,
 };

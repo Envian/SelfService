@@ -152,43 +152,42 @@ ns.OrderStates = {
 	CAST_ENCHANT = baseOrderState:new({
 		Name = "CAST_ENCHANT",
 
-		TRADE_ITEM_CHANGED = function(customer, slotChanged)
-			if slotChanged == 7 then
-				-- local itemName, _, quantity = GetTradeTargetItemInfo(slotChanged);
-				-- local itemLink = GetTradeTargetItemLink(slotChanged);
-				-- ns.CurrentTrade[slotChanged] = itemName ~= nil and { id = ns.getItemIdFromLink(itemLink), quantity = quantity } or nil;
-
-				-- local itemSlot = {};
-				--
-				-- local item = Item:CreateFromItemID(getItemIdFromLink(itemLink));
-				-- item:ContinueOnItemLoad(function()
-				-- 	itemSlot = select(9, GetItemInfo(itemLink));
-				-- end
-
-				if itemName then
-					return ns.OrderStates["AWAIT_PAYMENT"];
-				else
-					return ns.OrderStatus["WAIT_FOR_ENCHANTABLE"];
-				end
-			else
-				return nil;
-			end
+		ENTER_STATE = function(customer)
+			ns.ActionQueue.castEnchant(customer.CurrentOrder.Recipes[1].Name);
 		end,
-		REPLACE_ENCHANT = function(newEnchant, currentEnchant)
-			return ns.OrderStatus["OVERRIDE_ENCHANT"];
+		CURSOR_CHANGE = function(spellId)
+			return ns.OrderStates.APPLY_ENCHANT;
+		end,
+		REPLACE_ENCHANT = function(customer, newEnchant, currentEnchant)
+			return ns.OrderStatus.OVERRIDE_ENCHANT;
 		end,
 		TRADE_CANCELED = function(customer)
-			print("Trade cancelled.");
-			return ns.OrderStates["READY_FOR_DELIVERY"];
+			return ns.OrderStates.READY_FOR_DELIVERY;
 		end
 	}),
+
+	APPLY_ENCHANT = baseOrderState:new({
+		Name = "APPLY_ENCHANT",
+
+		ENTER_STATE = function(customer)
+			ns.ActionQueue.applyEnchant();
+		end,
+		REPLACE_ENCHANT = function(customer, newEnchant, currentEnchant)
+			return ns.OrderStatus.OVERRIDE_ENCHANT;
+		end,
+		TRADE_CANCELED = function(customer)
+			return ns.OrderStates.READY_FOR_DELIVERY;
+		end
+	}),
+
 
 	OVERRIDE_ENCHANT = baseOrderState:new({
 		Name = "OVERRIDE_ENCHANT",
 		ENTER_STATE = function()
-
+			ReplaceEnchant();
 		end,
 		TRADE_ITEM_CHANGED = function()
+			-- TODO: did they remove the item they are enchanting? Or did they modify something else
 			return ns.OrderStates.AWAIT_PAYMENT;
 		end,
 		TRADE_CANCELED = function(customer)
