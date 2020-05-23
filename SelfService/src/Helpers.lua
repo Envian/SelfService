@@ -17,14 +17,15 @@ ns.ifilter = function(list, callback)
 end
 
 ns.getItemIdFromLink = function(link, type)
-	local results = ns.getLinkedItemIds(link, type);
-	return results and results[1] or nil;
+	type = type or "[^:]+"; -- type by default is any. Callers can pass in "item" or "enchant"
+	local _, _, result = link:find("\124c[%a%d]+\124H"..type..":(%d+)[^\124]*\124h[^\124]*\124h\124r");
+	return tonumber(result);
 end
 
 ns.getLinkedItemIds = function(text, type)
 	type = type or "[^:]+"; -- type by default is any. Callers can pass in "item" or "enchant"
 	local matches = {};
-	for match in text:gmatch("\124c[%a%d]+\124H" .. type .. ":(%d+)[^\124]*\124h[^\124]*\124h\124r") do
+	for match in text:gmatch("\124c[%a%d]+\124H"..type..":(%d+)[^\124]*\124h[^\124]*\124h\124r") do
 		matches[#matches + 1] = tonumber(match);
 	end
 	return matches;
@@ -32,4 +33,52 @@ end
 
 ns.delink = function(text)
 	return gsub(text, "\124c[^\124]+\124H[^\124]+\124h(%[[^%]]+%])\124h\124r", "%1");
+end
+
+ns.dumpTable = function(table, indent)
+	indent = indent or "";
+
+	if #indent >= 20 then
+		print("< Truncated >")
+		return;
+	elseif type(table) == "table" then
+		if ns.isEmpty(table) then
+			print("{ }");
+			return;
+		end
+
+		for key,value in pairs(table) do
+			if type(value) == "table" then
+				print(indent..ns.printType(key)..": {");
+				ns.dumpTable(value, indent.."  ");
+				print("}")
+			else
+				print(indent..ns.printType(key)..": "..ns.printType(value));
+			end
+		end
+	else
+		print(ns.printType);
+	end
+end
+
+ns.printType = function(value)
+	local actualType = type(value);
+	if actualType == "function" then
+		return "< Function >";
+	elseif actualType == "string" then
+		return "\""..value.."\"";
+	elseif actualType == "boolean" then
+		return value and "true" or "false";
+	elseif actualType == "nil" then
+		return "nil";
+	else
+		return value;
+	end
+end
+
+ns.isEmpty = function(table)
+	for _, _ in pairs(table) do
+		return false
+	end
+	return true
 end

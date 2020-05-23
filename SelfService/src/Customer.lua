@@ -8,8 +8,8 @@ ns.getCustomer = function(name)
 	local existing = ns.Customers[name];
 	if existing then return existing end;
 
-	local newCustomer = ns.CustomerClass:new(SelfService.Customers[name], name);
-	SelfService.Customers[name] = newCustomer;
+	local newCustomer = ns.CustomerClass:new(SelfServiceData.Customers[name], name);
+	SelfServiceData.Customers[name] = newCustomer;
 	ns.Customers[name] = newCustomer;
 	return newCustomer;
 end
@@ -26,14 +26,37 @@ function ns.CustomerClass:new(data, name)
 		MessagesAvailable = 0,
 		CurrentOrder = nil
 	}
+	data.CurrentOrder = data.CurrentOrder and ns.OrderClass:new(data.CurrentOrder, name);
 	setmetatable(data, ns.CustomerClass);
 	return data;
 end
 
-function ns.CustomerClass:getOrder()
-	if GetTime() - (self.LastWhisper or 0) > 30 * 60 then
-		self.CurrentOrder = nil;
+function ns.CustomerClass:handleCommand(command, message)
+	-- Do we send a greeting?
+	if self.LastWhisper == 0 then
+		print(string.format(ns.LOG_NEW_CUSTOMER, self.Name));
+		self.MessagesAvailable = 1; -- Allows an extra message in this case.
+		self:reply(ns.L.enUS.FIRST_TIME_CUSTOMER);
+	elseif GetTime() - self.LastWhisper > 30 * 60 then
+		print(string.format(ns.LOG_RETURNING_CUSTOMER, self.Name));
+		self.MessagesAvailable = 1;
+		self:reply(ns.L.enUS.RETURNING_CUSTOMER);
 	end
+
+	self.MessagesAvailable = 2; -- Safeguard against spam.
+
+	local cmdFunction = ns.CustomerCommands[command:lower()];
+	if not cmdFunction then
+		self:reply(ns.L.enUS.UNKNOWN_COMMAND);
+	else
+		cmdFunction(self, message);
+	end
+
+	self.LastWhisper = GetTime();
+	self.MessagesAvailable = 0;
+end
+
+function ns.CustomerClass:getOrder()
 	return self.CurrentOrder;
 end
 

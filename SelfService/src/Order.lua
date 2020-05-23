@@ -4,25 +4,34 @@ local _, ns = ...;
 ns.OrderClass = {};
 ns.OrderClass.__index = ns.OrderClass;
 
-ns.OrderClass.STATUSES = {
-	PENDING = 1,
-	ORDERED = 2,
-	GATHERED = 3,
-	DELIVERED = 4,
-	CANCELLED = 5
-}
-
 -- TODO: PostMVP, add additional fields for archival purposes, e.g. profit
 function ns.OrderClass:new(data, customerName)
 	data = data or {
 		CustomerName = customerName,
-		Status = ns.OrderClass.STATUSES.PENDING,
+		State = ns.OrderStates["ORDER_PLACED"],
 		Recipes = nil,
 		RequiredMats = nil,
-		ReceivedMats = nil
+		RequiredMoney = 0,
+		ReceivedMats = {},
+		ReceivedMoney = 0,
 	}
+	data.State = ns.OrderStates[data.State.Name];
 	setmetatable(data, ns.OrderClass);
 	return data;
+end
+
+function ns.OrderClass:handleEvent(event, ...)
+	local currentState = self.State;
+	local customer = ns.Customers[self.CustomerName];
+
+	self.State = self.State[event](customer, ...) or self.State;
+	for n = 1,10 do
+		if self.State == currentState then break; end;
+
+		print("Entered New State: "..self.State.Name);
+		currentState = self.State;
+		self.State = self.State.ENTER_STATE(customer) or self.State;
+	end
 end
 
 function ns.OrderClass:addToOrder(recipes)
@@ -35,44 +44,39 @@ function ns.OrderClass:addToOrder(recipes)
 
 	self.Recipes = recipes;
 	self.RequiredMats = requiredMats;
-	self.ReceivedMats = {};
 
 	for id, count in pairs(self.RequiredMats) do
 		local _, itemLink = GetItemInfo(id);
 		print("addToOrder - Required Material: "..itemLink.."x"..self.RequiredMats[id]);
 	end
+end
 
-	self.Status = ns.OrderClass.STATUSES.ORDERED;
+function ns.OrderClass:addTradedItems(items, money)
+	self.ReceivedMoney = self.ReceivedMoney + money;
+	for n = 1,6 do
+		if items[n].Id then
+			self.ReceivedMats[items[n].Id] = (self.ReceivedMats[items[n].Id] or 0) + items[n].Quantity;
+		end
+	end
 end
 
 function ns.OrderClass:isTradeAcceptable()
 	-- TODO: Generalize to support additional statuses
-	local tradeMats = self:totalTradeMats();
+	local tradeMats = ns.Trading.totalTrade();
+	ns.dumpTable(tradeMats);
 
 	for id, count in pairs(self.RequiredMats) do
-		local _, itemLink = GetItemInfo(id);
-		print("Acceptable - Required Material: "..itemLink.."x"..self.RequiredMats[id]);
-	end
-
-	for id, count in pairs(self.RequiredMats) do
-		local _, itemLink = GetItemInfo(id);
-
 		if tradeMats[id] and count ~= tradeMats[id] then
 			print("Discrepancy between received and required mats!");
-			print("Required: "..itemLink.."x"..count);
-			print("In window: "..itemLink.."x"..tradeMats[id]);
+			print("Required: ["..id.."]x"..count);
+			print("In window: ["..id.."]x"..tradeMats[id]);
 			return false;
 		end
 	end
 
 	for id, count in pairs(tradeMats) do
-		local _, itemLink = GetItemInfo(id);
-		print("Checking "..itemLink.." from tradeMats...");
-		print("itemID: "..ns.getItemIdFromLink(itemLink));
-		print("Checked ID: "..id.."x"..self.RequiredMats[id]);
-
 		if not self.RequiredMats[id] then
-			print("Received material not required for order: "..itemLink.."x"..count);
+			print("Received material not required for order: ["..id.."]x"..count);
 			return false;
 		end
 	end
@@ -81,33 +85,10 @@ function ns.OrderClass:isTradeAcceptable()
 	return true;
 end
 
-function ns.OrderClass:totalTradeMats()
-	local tradeMats = {};
-
-	for i=1, 6 do
-		local stack = ns.CurrentTrade[i];
-		if stack then
-			local _, itemLink = GetItemInfo(stack.id);
-			print("Adding "..itemLink.." to tradeMats")
-			tradeMats[stack.id] = (tradeMats[stack.id] or 0) + stack.quantity;
-			print("Added "..itemLink.."x"..stack.quantity.." to tradeMats: "..tradeMats[stack.id].." total");
-		end
-	end
-
-	return tradeMats;
-end
-
-function ns.OrderClass:addReceivedMats(tradeMats)
-	self.ReceivedMats = self:totalTradeMats(tradeMats);
-	print("Added received mats.");
-	-- Assume we didn't drop mats on the ground while passing them off
-	self.Status = ns.OrderClass.STATUSES.GATHERED;
-end
-
 function ns.OrderClass:closeTrade()
 	-- Scan trade window slots and add contents to ReceivedMats\
-	self:addReceivedMats(self:totalTradeMats());
-	ns.CurrentTrade = {};
+	-- self:addReceivedMats(self:totalTradeMats());
+	-- ns.CurrentTrade = {};
 end
 
 function ns.OrderClass:endOrder()
@@ -118,6 +99,6 @@ function ns.OrderClass:endOrder()
 
 	-- Order is complete, i.e. delivered or cancelled. Reset customer's
 	-- current order and global current order
-	ns.getCustomer(ns.CurrentOrder.CustomerName).CurrentOrder = nil;
-	ns.CurrentOrder = nil;
+	-- ns.getCustomer(ns.CurrentOrder.CustomerName).CurrentOrder = nil;
+	-- ns.CurrentOrder = nil;
 end

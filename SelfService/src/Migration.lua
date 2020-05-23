@@ -1,8 +1,8 @@
 local _, ns = ...;
 
-if not SelfService then
-	SelfService = {
+if not SelfServiceData then
+	SelfServiceData = {
 		Version = 0,
 		Customers = {}
-	};	
+	};
 end
