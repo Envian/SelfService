@@ -24,7 +24,7 @@ ns.Trading = {
 			-- New trade, reset parameters
 			for n = 1,7 do
 				ns.CurrentTrade.Items[n].Id = nil;
-				ns.CurrentTrade.Items[n].Count = nil;
+				ns.CurrentTrade.Items[n].Quantity = nil;
 			end
 			ns.CurrentTrade.Money = 0;
 			ns.CurrentTrade.Customer = customer;
@@ -37,10 +37,9 @@ ns.Trading = {
 
 		local itemName, _, quantity = GetTradeTargetItemInfo(slot);
 
-		ns.CurrentTrade.Items[slot].Id = itemName and ns.getItemIdFromLink(GetTradeTargetItemLink(slot), "item") or 0;
-		ns.CurrentTrade.Items[slot].Quantity = itemName and quantity or 0;
+		ns.CurrentTrade.Items[slot].Id = itemName and ns.getItemIdFromLink(GetTradeTargetItemLink(slot), "item") or nil;
+		ns.CurrentTrade.Items[slot].Quantity = itemName and quantity or nil;
 
-		ns.dumpTable(ns.CurrentTrade.Items);
 		ns.CurrentTrade.Customer.CurrentOrder:handleEvent("TRADE_ITEM_CHANGED", ns.CurrentTrade.Items);
 	end,
 	tradeGoldChanged = function()
@@ -69,4 +68,16 @@ ns.Trading = {
 		ns.CurrentTrade.Customer.CurrentOrder:handleEvent("TRADE_COMPLETED");
 		ns.CurrentTrade.Customer = nil;
 	end,
+	totalTrade = function()
+		local tradeMats = {};
+
+		for i=1, 6 do
+			local stack = ns.CurrentTrade.Items[i];
+			if stack.Id then
+				tradeMats[stack.Id] = (tradeMats[stack.Id] or 0) + stack.Quantity;
+			end
+		end
+
+		return tradeMats;
+	end
 }

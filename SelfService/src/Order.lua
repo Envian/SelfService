@@ -22,7 +22,9 @@ function ns.OrderClass:handleEvent(event, ...)
 	local currentState = self.State;
 	local customer = ns.Customers[self.CustomerName];
 
+	print("Current State: "..self.State.Name);
 	self.State = self.State[event](customer, ...) or self.State;
+	print("Next State: "..self.State.Name);
 	for n = 1,10 do
 		if self.State == currentState then break; end;
 
@@ -50,56 +52,28 @@ function ns.OrderClass:addToOrder(recipes)
 end
 
 function ns.OrderClass:isTradeAcceptable()
-	return true;
-	-- -- TODO: Generalize to support additional statuses
-	-- local tradeMats = self:totalTradeMats();
-	--
-	-- for id, count in pairs(self.RequiredMats) do
-	-- 	local _, itemLink = GetItemInfo(id);
-	-- 	print("Acceptable - Required Material: "..itemLink.."x"..self.RequiredMats[id]);
-	-- end
-	--
-	-- for id, count in pairs(self.RequiredMats) do
-	-- 	local _, itemLink = GetItemInfo(id);
-	--
-	-- 	if tradeMats[id] and count ~= tradeMats[id] then
-	-- 		print("Discrepancy between received and required mats!");
-	-- 		print("Required: "..itemLink.."x"..count);
-	-- 		print("In window: "..itemLink.."x"..tradeMats[id]);
-	-- 		return false;
-	-- 	end
-	-- end
-	--
-	-- for id, count in pairs(tradeMats) do
-	-- 	local _, itemLink = GetItemInfo(id);
-	-- 	print("Checking "..itemLink.." from tradeMats...");
-	-- 	print("itemID: "..ns.getItemIdFromLink(itemLink));
-	-- 	print("Checked ID: "..id.."x"..self.RequiredMats[id]);
-	--
-	-- 	if not self.RequiredMats[id] then
-	-- 		print("Received material not required for order: "..itemLink.."x"..count);
-	-- 		return false;
-	-- 	end
-	-- end
-	--
-	-- print("Got exact materials.");
-	-- return true;
-end
+	-- TODO: Generalize to support additional statuses
+	local tradeMats = ns.Trading.totalTrade();
+	ns.dumpTable(tradeMats);
 
-function ns.OrderClass:totalTradeMats()
-	-- local tradeMats = {};
-	--
-	-- for i=1, 6 do
-	-- 	local stack = ns.CurrentTrade[i];
-	-- 	if stack then
-	-- 		local _, itemLink = GetItemInfo(stack.id);
-	-- 		print("Adding "..itemLink.." to tradeMats");
-	-- 		tradeMats[stack.id] = (tradeMats[stack.id] or 0) + stack.quantity;
-	-- 		print("Added "..itemLink.."x"..stack.quantity.." to tradeMats: "..tradeMats[stack.id].." total");
-	-- 	end
-	-- end
-	--
-	-- return tradeMats;
+	for id, count in pairs(self.RequiredMats) do
+		if tradeMats[id] and count ~= tradeMats[id] then
+			print("Discrepancy between received and required mats!");
+			print("Required: ["..id.."]x"..count);
+			print("In window: ["..id.."]x"..tradeMats[id]);
+			return false;
+		end
+	end
+
+	for id, count in pairs(tradeMats) do
+		if not self.RequiredMats[id] then
+			print("Received material not required for order: ["..id.."]x"..count);
+			return false;
+		end
+	end
+
+	print("Got exact materials.");
+	return true;
 end
 
 function ns.OrderClass:addReceivedMats(tradeMats)

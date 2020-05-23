@@ -34,7 +34,7 @@ ns.OrderStates = {
 		Name = "WAIT_FOR_MATS",
 
 		TRADE_ITEM_CHANGED = function(customer, enteredItems)
-
+			return nil;
 		end,
 		TRADE_ACCEPTED = function(customer, playerAccepted, customerAccepted)
 			print("Trade accept button pressed: ");
@@ -73,7 +73,7 @@ ns.OrderStates = {
 			print("Trade complete.");
 			customer.CurrentOrder:closeTrade();
 			return ns.OrderStates["CRAFT_ORDER"];
-		end,
+		end
 	}),
 
 	CRAFT_ORDER = baseOrderState:new({
