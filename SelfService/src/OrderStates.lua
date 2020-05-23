@@ -145,7 +145,6 @@ ns.OrderStates = {
 			end
 		end,
 		TRADE_CANCELED = function(customer)
-			print("Trade cancelled.");
 			return ns.OrderStates.READY_FOR_DELIVERY;
 		end
 	}),
@@ -157,11 +156,11 @@ ns.OrderStates = {
 			ns.ActionQueue.castEnchant(customer.CurrentOrder.Recipes[1].Name);
 		end,
 		CURSOR_CHANGE = function(spellId)
-			-- TODO: check spellId
-			return ns.OrderStates.APPLY_ENCHANT;
-		end,
-		REPLACE_ENCHANT = function(customer, newEnchant, currentEnchant)
-			return ns.OrderStatus.OVERRIDE_ENCHANT;
+			if IsCurrentSpell(customer.CurrentOrder.Recipes[1].Id) then
+				return ns.OrderStates.APPLY_ENCHANT;
+			else
+				ns.ActionQueue.castEnchant(customer.CurrentOrder.Recipes[1].Name);
+			end
 		end,
 		TRADE_CANCELED = function(customer)
 			return ns.OrderStates.READY_FOR_DELIVERY;
@@ -174,32 +173,41 @@ ns.OrderStates = {
 		ENTER_STATE = function(customer)
 			ns.ActionQueue.applyEnchant();
 		end,
-		UNIT_SPELLCAST_FAILED = function()
-			print("Spellcast Failed, do something.");
-			return ns.OrderStates.CAST_ENCHANT
+		TRADE_ITEM_CHANGED = function()
+			local _, _, _, _, _, givenEnchant = GetTradeTargetItemInfo(7);
+			print("Listed Enchant: " + givenEnchant or "NONE");
+			if givenEnchant == customer.CurrentOrder.Recipes[1].Name then
+				return ns.OrderStates.AWAIT_PAYMENT;
+			end
+		end,
+		ENCHANT_FAILED = function(spellId)
+			if spellId == customer.CurrentOrder.Recipes[1].Id then
+				print("Spellcast Failed, do something.");
+				return ns.OrderStates.CAST_ENCHANT;
+			end
 		end,
 		REPLACE_ENCHANT = function(customer, newEnchant, currentEnchant)
-			return ns.OrderStatus.OVERRIDE_ENCHANT;
-		end,
-		TRADE_CANCELED = function(customer)
-			return ns.OrderStates.READY_FOR_DELIVERY;
-		end
-	}),
-
-
-	OVERRIDE_ENCHANT = baseOrderState:new({
-		Name = "OVERRIDE_ENCHANT",
-		ENTER_STATE = function()
 			ReplaceEnchant();
 		end,
-		TRADE_ITEM_CHANGED = function()
-			-- TODO: did they remove the item they are enchanting? Or did they modify something else
-			return ns.OrderStates.AWAIT_PAYMENT;
-		end,
 		TRADE_CANCELED = function(customer)
 			return ns.OrderStates.READY_FOR_DELIVERY;
 		end,
 	}),
+
+
+	-- OVERRIDE_ENCHANT = baseOrderState:new({
+	-- 	Name = "OVERRIDE_ENCHANT",
+	-- 	ENTER_STATE = function()
+	-- 		ReplaceEnchant();
+	-- 	end,
+	-- 	TRADE_ITEM_CHANGED = function()
+	-- 		-- TODO: did they remove the item they are enchanting? Or did they modify something else
+	-- 		return ns.OrderStates.AWAIT_PAYMENT;
+	-- 	end,
+	-- 	TRADE_CANCELED = function(customer)
+	-- 		return ns.OrderStates.READY_FOR_DELIVERY;
+	-- 	end,
+	-- }),
 
 	AWAIT_PAYMENT = baseOrderState:new({
 		Name = "AWAIT_PAYMENT",

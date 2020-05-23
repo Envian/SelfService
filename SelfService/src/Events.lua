@@ -81,14 +81,24 @@ ns.Events.EventHandlers = {
 			ns.CurrentTrade.Customer.CurrentOrder:handleEvent("CURSOR_CHANGE");
 		end
 	end,
-	UNIT_SPELLCAST_FAILED = function()
+	CURSOR_UPDATE = function()
 		if ns.CurrentTrade.Customer and ns.CurrentTrade.Customer.CurrentOrder then
-			ns.CUrrentTrade.Customer.CurrentOrder:handleEvent("UNIT_SPELLCAST_FAILED");
+			ns.CurrentTrade.Customer.CurrentOrder:handleEvent("CURSOR_CHANGE");
 		end
 	end,
-	UNIT_SPELLCAST_SUCCEEDED = function()
-	end
+	UNIT_SPELLCAST_FAILED_QUIET = function(_, _, spellId)
+		if ns.CurrentTrade.Customer and ns.CurrentTrade.Customer.CurrentOrder then
+			ns.CUrrentTrade.Customer.CurrentOrder:handleEvent("ENCHANT_FAILED", spellId);
+		end
+	end,
+	UNIT_SPELLCAST_FAILED = function(_, _, spellId)
+		if ns.CurrentTrade.Customer and ns.CurrentTrade.Customer.CurrentOrder then
+			ns.CUrrentTrade.Customer.CurrentOrder:handleEvent("ENCHANT_FAILED", spellId);
+		end
+	end,
 };
+
+-- UNIT_SPELLCAST_FAILED_QUIET 3rd param will be Enchant ID
 
 ns.Events.EventFrame:SetScript("OnEvent", function(_, event, ...)
 	ns.Events.EventHandlers[event](...);
