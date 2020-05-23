@@ -1,6 +1,9 @@
 local _, ns = ...;
 
 ns.ActionQueue = {
+	clearButton = function()
+		SelfService_SecureButton:SetAttribute("type", nil);
+	end,
 	castEnchant = function(enchantName)
 		SelfService_SecureButton:SetAttribute("type", "spell");
 		SelfService_SecureButton:SetAttribute("spell", enchantName);
@@ -16,5 +19,9 @@ ns.ActionQueue = {
 	openTrade = function(player)
 		SelfService_SecureButton:SetAttribute("type", "script");
 		SelfService_SecureButton:SetAttribute("_script", function() InitiateTrade(player) end);
-	end
+	end,
+	overrideEnchant = function()
+		SelfService_SecureButton:SetAttribute("type", "script");
+		SelfService_SecureButton:SetAttribute("_script", function() InitiateTrade(player) end);
+	end,
 };

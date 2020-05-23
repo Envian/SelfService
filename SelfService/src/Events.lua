@@ -31,6 +31,8 @@ ns.enableAddon = function()
 			t:SetTexture("Interface\\Glues\\CharacterCreate\\UI-CharacterCreate-Factions.blp")
 			t:SetAllPoints(btn)
 			btn.texture = t
+
+			btn:HookScript("OnClick", function() ns.ActionQueue.clearButton() end);
 		else
 			SelfService_SecureButton:Show();
 		end

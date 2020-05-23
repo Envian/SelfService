@@ -181,25 +181,28 @@ ns.OrderStates = {
 
 	OVERRIDE_ENCHANT = baseOrderState:new({
 		Name = "OVERRIDE_ENCHANT",
+		ENTER_STATE = function()
 
+		end,
 		TRADE_ITEM_CHANGED = function()
-			return ns.OrderStates["AWAIT_PAYMENT"];
+			return ns.OrderStates.AWAIT_PAYMENT;
 		end,
 		TRADE_CANCELED = function(customer)
-			print("Trade cancelled.");
-			return ns.OrderStates["READY_FOR_DELIVERY"];
-		end
+			return ns.OrderStates.READY_FOR_DELIVERY;
+		end,
 	}),
 
 	AWAIT_PAYMENT = baseOrderState:new({
 		Name = "AWAIT_PAYMENT",
 
+		ENTER_STATE = function()
+			-- TODO: check if money is needed to complete trade.
+			return ns.OrderStates.ACCEPT_DELIVERY;
+		end,
 		TRADE_MONEY_CHANGED = function()
-			-- return ns.OrderStates."ACCEPT_DELIVERY"; or
-			-- return self;
+			-- TODO: check if money is needed to complete trade.
 		end,
 		TRADE_CANCELED = function(customer)
-			print("Trade cancelled.");
 			return ns.OrderStates["READY_FOR_DELIVERY"];
 		end
 	}),
@@ -216,7 +219,12 @@ ns.OrderStates = {
 		end,
 
 		TRADE_COMPLETED = function(customer)
+<<<<<<< Updated upstream
 
+=======
+			-- TODO: if we have more things to do, return to READY_FOR_DELIVERY
+			return ns.OrderStates.TRANSACTION_COMPLETE;
+>>>>>>> Stashed changes
 		end,
 	}),
 
