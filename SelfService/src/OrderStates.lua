@@ -34,6 +34,10 @@ ns.OrderStates = {
 		Name = "WAIT_FOR_MATS",
 
 		TRADE_ITEM_CHANGED = function(customer, enteredItems)
+			if ns.CurrentOrder:isTradeAcceptable() then
+				return ns.OrderStates["ACCEPT_MATS"];
+			end
+
 			return nil;
 		end,
 		TRADE_ACCEPTED = function(customer, playerAccepted, customerAccepted)
@@ -42,25 +46,23 @@ ns.OrderStates = {
 			print("  - Customer Accepted: "..customerAccepted);
 
 			if playerAccepted == 0 and customerAccepted == 1 then
-				if ns.CurrentOrder:isTradeAcceptable() then
-					ns.ActionQueue.acceptTrade();
-					print("TRADE ACCEPTABLE, ACCEPT TRADE!");
-					return ns.OrderStates["ACCEPT_MATS"];
-				else
-					CancelTrade();
-					return ns.OrderStates["ORDER_PLACED"];
-				end
+				print("Trade not acceptable.");
+				return ns.OrderStates["ORDER_PLACED"];
 			end
 		end,
 		TRADE_CANCELED = function(customer)
 			print("Trade cancelled.");
 			return ns.OrderStates["ORDER_PLACED"];
-		end,
+		end
 	}),
 
 	ACCEPT_MATS = baseOrderState:new({
 		Name = "ACCEPT_MATS",
 
+		ENTER_STATE = function(customer)
+			ns.ActionQueue.acceptTrade();
+			return nil;
+		end,
 		TRADE_ITEM_CHANGED = function(customer, slotChanged)
 			print("Traded items changed during trade accept phase. Abort to WAIT_FOR_MATS");
 			return ns.OrderStates["WAIT_FOR_MATS"];
@@ -214,7 +216,7 @@ ns.OrderStates = {
 		end,
 
 		TRADE_COMPLETED = function(customer)
-			
+
 		end,
 	}),
 

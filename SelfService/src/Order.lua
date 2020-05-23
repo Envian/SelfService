@@ -11,6 +11,7 @@ function ns.OrderClass:new(data, customerName)
 		State = ns.OrderStates["ORDER_PLACED"],
 		Recipes = nil,
 		RequiredMats = nil,
+		RequiredMoney = 0,
 		ReceivedMats = {},
 		ReceivedMoney = 0,
 	}
