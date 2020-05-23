@@ -26,7 +26,7 @@ ns.OrderStates = {
 
 		TRADE_SHOW = function(customer)
 			print(ns.LOG_PREFIX.."Trade Initiated.");
-			return ns.OrderStates["WAIT_FOR_MATS"];
+			return ns.OrderStates.WAIT_FOR_MATS;
 		end
 	}),
 
@@ -35,7 +35,7 @@ ns.OrderStates = {
 
 		TRADE_ITEM_CHANGED = function(customer, enteredItems)
 			if ns.CurrentOrder:isTradeAcceptable() then
-				return ns.OrderStates["ACCEPT_MATS"];
+				return ns.OrderStates.ACCEPT_MATS;
 			end
 
 			return nil;
@@ -47,12 +47,12 @@ ns.OrderStates = {
 
 			if playerAccepted == 0 and customerAccepted == 1 then
 				print("Trade not acceptable.");
-				return ns.OrderStates["ORDER_PLACED"];
+				return ns.OrderStates.ORDER_PLACED;
 			end
 		end,
 		TRADE_CANCELED = function(customer)
 			print("Trade cancelled.");
-			return ns.OrderStates["ORDER_PLACED"];
+			return ns.OrderStates.ORDER_PLACED;
 		end
 	}),
 
@@ -65,16 +65,16 @@ ns.OrderStates = {
 		end,
 		TRADE_ITEM_CHANGED = function(customer, slotChanged)
 			print("Traded items changed during trade accept phase. Abort to WAIT_FOR_MATS");
-			return ns.OrderStates["WAIT_FOR_MATS"];
+			return ns.OrderStates.WAIT_FOR_MATS;
 		end,
 		TRADE_CANCELED = function(customer)
 			print("Trade cancelled.");
-			return ns.OrderStates["ORDER_PLACED"];
+			return ns.OrderStates.ORDER_PLACED;
 		end,
 		TRADE_COMPLETED = function(customer)
 			print("Trade complete.");
 			customer.CurrentOrder:closeTrade();
-			return ns.OrderStates["CRAFT_ORDER"];
+			return ns.OrderStates.CRAFT_ORDER;
 		end
 	}),
 
@@ -89,7 +89,7 @@ ns.OrderStates = {
 
 		ENTER_STATE = function(customer)
 			if customer.CurrentOrder.Recipes[1].Type == "Enchanting" then
-				return ns.OrderStates["READY_FOR_DELIVERY"];
+				return ns.OrderStates.READY_FOR_DELIVERY;
 			end
 		end
 	}),
@@ -99,9 +99,9 @@ ns.OrderStates = {
 
 		TRADE_SHOW = function(customer)
 			if customer.CurrentOrder.Recipes[1].Type == "Enchanting" then
-				return ns.OrderStates["WAIT_FOR_ENCHANTABLE"];
+				return ns.OrderStates.WAIT_FOR_ENCHANTABLE;
 			else
-				return ns.OrderStates["DELIVER_ORDER"];
+				return ns.OrderStates.DELIVER_ORDER;
 			end
 		end
 	}),
@@ -109,7 +109,7 @@ ns.OrderStates = {
 	DELIVER_ORDER = baseOrderState:new({
 		Name = "DELIVER_ORDER",
 
-		TRADE_ITEM_CHANGED = function(customer, slotChanged)
+		TRADE_ITEM_CHANGED = function(customer, enteredItems)
 			-- local itemName, _, quantity = GetTradeTargetItemInfo(slotChanged);
 			-- local itemLink = GetTradeTargetItemLink(slotChanged);
 			-- ns.CurrentTrade[slotChanged] = itemName ~= nil and { id = ns.getItemIdFromLink(itemLink), quantity = quantity } or nil;
@@ -118,15 +118,15 @@ ns.OrderStates = {
 		end,
 		TRADE_CANCELED = function(customer)
 			print("Trade cancelled.");
-			return ns.OrderStates["READY_FOR_DELIVERY"];
+			return ns.OrderStates.READY_FOR_DELIVERY;
 		end
 	}),
 
 	WAIT_FOR_ENCHANTABLE = baseOrderState:new({
 		Name = "WAIT_FOR_ENCHANTABLE",
 
-		TRADE_ITEM_CHANGED = function(customer, slotChanged)
-			if slotChanged == 7 then
+		TRADE_ITEM_CHANGED = function(customer, enteredItems)
+			if enteredItems[7].Id then
 				-- local itemName, _, quantity = GetTradeTargetItemInfo(slotChanged);
 				-- local itemLink = GetTradeTargetItemLink(slotChanged);
 				-- ns.CurrentTrade[slotChanged] = itemName ~= nil and { id = ns.getItemIdFromLink(itemLink), quantity = quantity } or nil;
@@ -137,15 +137,16 @@ ns.OrderStates = {
 				-- item:ContinueOnItemLoad(function()
 				-- 	itemSlot = select(9, GetItemInfo(itemLink));
 				-- end
-
-				return ns.OrderStates["CAST_ENCHANT"];
+				-- error code 374
+				-- UNIT_SPELLCAST_FAILED arg1:"player" arg3: spell id
+				return ns.OrderStates.CAST_ENCHANT;
 			else
 				return nil;
 			end
 		end,
 		TRADE_CANCELED = function(customer)
 			print("Trade cancelled.");
-			return ns.OrderStates["READY_FOR_DELIVERY"];
+			return ns.OrderStates.READY_FOR_DELIVERY;
 		end
 	}),
 
@@ -156,6 +157,7 @@ ns.OrderStates = {
 			ns.ActionQueue.castEnchant(customer.CurrentOrder.Recipes[1].Name);
 		end,
 		CURSOR_CHANGE = function(spellId)
+			-- TODO: check spellId
 			return ns.OrderStates.APPLY_ENCHANT;
 		end,
 		REPLACE_ENCHANT = function(customer, newEnchant, currentEnchant)
@@ -171,6 +173,10 @@ ns.OrderStates = {
 
 		ENTER_STATE = function(customer)
 			ns.ActionQueue.applyEnchant();
+		end,
+		UNIT_SPELLCAST_FAILED = function()
+			print("Spellcast Failed, do something.");
+			return ns.OrderStates.CAST_ENCHANT
 		end,
 		REPLACE_ENCHANT = function(customer, newEnchant, currentEnchant)
 			return ns.OrderStatus.OVERRIDE_ENCHANT;
