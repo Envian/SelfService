@@ -205,9 +205,24 @@ ns.OrderStates = {
 	ACCEPT_DELIVERY = baseOrderState:new({
 		Name = "ACCEPT_DELIVERY",
 
+		ENTER_STATE = function(customer)
+			ns.ActionQueue.acceptTrade();
+		end,
+
 		TRADE_CANCELED = function(customer)
-			print("Trade cancelled.");
-			return ns.OrderStates["READY_FOR_DELIVERY"];
+			return ns.OrderStates.READY_FOR_DELIVERY;
+		end,
+
+		TRADE_COMPLETED = function(customer)
+			
+		end,
+	}),
+
+	TRANSACTION_COMPLETE = baseOrderState:new({
+		Name = "TRANSACTION_COMPLETE",
+
+		ENTER_STATE = function(customer)
+			customer.CurrentOrder = nil;
 		end
 	})
 }

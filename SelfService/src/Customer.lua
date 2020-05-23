@@ -57,9 +57,6 @@ function ns.CustomerClass:handleCommand(command, message)
 end
 
 function ns.CustomerClass:getOrder()
-	if GetTime() - (self.LastWhisper or 0) > 30 * 60 then
-		self.CurrentOrder = nil;
-	end
 	return self.CurrentOrder;
 end
 

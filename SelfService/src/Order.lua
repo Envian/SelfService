@@ -11,7 +11,8 @@ function ns.OrderClass:new(data, customerName)
 		State = ns.OrderStates["ORDER_PLACED"],
 		Recipes = nil,
 		RequiredMats = nil,
-		ReceivedMats = nil
+		ReceivedMats = {},
+		ReceivedMoney = 0,
 	}
 	data.State = ns.OrderStates[data.State.Name];
 	setmetatable(data, ns.OrderClass);
@@ -28,6 +29,7 @@ function ns.OrderClass:handleEvent(event, ...)
 	for n = 1,10 do
 		if self.State == currentState then break; end;
 
+		print("Entered New State: "..self.State.Name);
 		currentState = self.State;
 		self.State = self.State.ENTER_STATE(customer) or self.State;
 	end
@@ -43,11 +45,19 @@ function ns.OrderClass:addToOrder(recipes)
 
 	self.Recipes = recipes;
 	self.RequiredMats = requiredMats;
-	self.ReceivedMats = {};
 
 	for id, count in pairs(self.RequiredMats) do
 		local _, itemLink = GetItemInfo(id);
 		print("addToOrder - Required Material: "..itemLink.."x"..self.RequiredMats[id]);
+	end
+end
+
+function ns.OrderClass:addTradedItems(items, money)
+	self.ReceivedMoney = self.ReceivedMoney + money;
+	for n = 1,6 do
+		if items[n].Id then
+			self.ReceivedMats[items[n].Id] = (self.ReceivedMats[items[n].Id] or 0) + items[n].Quantity;
+		end
 	end
 end
 
@@ -74,11 +84,6 @@ function ns.OrderClass:isTradeAcceptable()
 
 	print("Got exact materials.");
 	return true;
-end
-
-function ns.OrderClass:addReceivedMats(tradeMats)
-	-- self.ReceivedMats = self:totalTradeMats(tradeMats);
-	-- print("Added received mats.");
 end
 
 function ns.OrderClass:closeTrade()
