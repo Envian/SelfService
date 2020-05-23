@@ -252,13 +252,13 @@ ns.OrderStates = {
 
 			if customer.CurrentOrder.ReceivedMats == {} then
 				ns.debug("ReceivedMats currently empty. Order is complete.");
+				ns.ActionQueue.clearButton();
 				return ns.OrderStates.TRANSACTION_COMPLETE;
 			else
 				ns.debug("ReceivedMats not empty, more things to do.");
+				ns.ActionQueue.clearButton();
+				return ns.OrderStates.READY_FOR_DELIVERY;
 			end
-
-			ns.ActionQueue.clearButton();
-			return ns.OrderStates.TRANSACTION_COMPLETE;
 		end,
 	}),
 
