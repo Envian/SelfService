@@ -31,8 +31,6 @@ ns.enableAddon = function()
 			t:SetTexture("Interface\\Glues\\CharacterCreate\\UI-CharacterCreate-Factions.blp")
 			t:SetAllPoints(btn)
 			btn.texture = t
-
-			btn:HookScript("OnClick", function() ns.ActionQueue.clearButton() end);
 		else
 			SelfService_SecureButton:Show();
 		end
@@ -86,14 +84,14 @@ ns.Events.EventHandlers = {
 			ns.CurrentTrade.Customer.CurrentOrder:handleEvent("CURSOR_CHANGE");
 		end
 	end,
-	UNIT_SPELLCAST_FAILED_QUIET = function(_, _, spellId)
-		if ns.CurrentTrade.Customer and ns.CurrentTrade.Customer.CurrentOrder then
-			ns.CUrrentTrade.Customer.CurrentOrder:handleEvent("ENCHANT_FAILED", spellId);
-		end
-	end,
+	-- UNIT_SPELLCAST_FAILED_QUIET = function(_, _, spellId)
+	-- 	if ns.CurrentTrade.Customer and ns.CurrentTrade.Customer.CurrentOrder then
+	-- 		ns.CurrentTrade.Customer.CurrentOrder:handleEvent("ENCHANT_FAILED", spellId);
+	-- 	end
+	-- end,
 	UNIT_SPELLCAST_FAILED = function(_, _, spellId)
 		if ns.CurrentTrade.Customer and ns.CurrentTrade.Customer.CurrentOrder then
-			ns.CUrrentTrade.Customer.CurrentOrder:handleEvent("ENCHANT_FAILED", spellId);
+			ns.CurrentTrade.Customer.CurrentOrder:handleEvent("ENCHANT_FAILED", spellId);
 		end
 	end,
 };

@@ -12,6 +12,8 @@ local baseOrderState = {
 	REPLACE_ENCHANT = noAction,
 	TRADE_CANCELED = noAction,
 	TRADE_COMPLETED = noAction,
+	CURSOR_CHANGE = noAction,
+	ENCHANT_FAILED = noAction,
 }
 baseOrderState.__index = baseOrderState;
 
@@ -60,20 +62,22 @@ ns.OrderStates = {
 		Name = "ACCEPT_MATS",
 
 		ENTER_STATE = function(customer)
-			ns.ActionQueue.acceptTrade();
+			ns.ActionQueue.clearButton();
 			return nil;
 		end,
-		TRADE_ITEM_CHANGED = function(customer, slotChanged)
+		TRADE_ITEM_CHANGED = function(customer)
 			print("Traded items changed during trade accept phase. Abort to WAIT_FOR_MATS");
+			ns.ActionQueue.clearButton();
 			return ns.OrderStates.WAIT_FOR_MATS;
 		end,
 		TRADE_CANCELED = function(customer)
 			print("Trade cancelled.");
+			ns.ActionQueue.clearButton();
 			return ns.OrderStates.ORDER_PLACED;
 		end,
 		TRADE_COMPLETED = function(customer)
 			print("Trade complete.");
-			customer.CurrentOrder:closeTrade();
+			ns.ActionQueue.clearButton();
 			return ns.OrderStates.CRAFT_ORDER;
 		end
 	}),
@@ -155,14 +159,16 @@ ns.OrderStates = {
 		ENTER_STATE = function(customer)
 			ns.ActionQueue.castEnchant(customer.CurrentOrder.Recipes[1].Name);
 		end,
-		CURSOR_CHANGE = function(spellId)
+		CURSOR_CHANGE = function(customer, spellId)
 			if IsCurrentSpell(customer.CurrentOrder.Recipes[1].Id) then
+				ns.ActionQueue.clearButton();
 				return ns.OrderStates.APPLY_ENCHANT;
 			else
 				ns.ActionQueue.castEnchant(customer.CurrentOrder.Recipes[1].Name);
 			end
 		end,
 		TRADE_CANCELED = function(customer)
+			ns.ActionQueue.clearButton();
 			return ns.OrderStates.READY_FOR_DELIVERY;
 		end
 	}),
@@ -173,23 +179,27 @@ ns.OrderStates = {
 		ENTER_STATE = function(customer)
 			ns.ActionQueue.applyEnchant();
 		end,
-		TRADE_ITEM_CHANGED = function()
+		TRADE_ITEM_CHANGED = function(customer)
 			local _, _, _, _, _, givenEnchant = GetTradeTargetItemInfo(7);
-			print("Listed Enchant: " + givenEnchant or "NONE");
+			print("Listed Enchant: " .. (givenEnchant or "NONE"));
 			if givenEnchant == customer.CurrentOrder.Recipes[1].Name then
+				ns.ActionQueue.clearButton();
 				return ns.OrderStates.AWAIT_PAYMENT;
 			end
 		end,
-		ENCHANT_FAILED = function(spellId)
+		ENCHANT_FAILED = function(customer, spellId)
 			if spellId == customer.CurrentOrder.Recipes[1].Id then
 				print("Spellcast Failed, do something.");
+					ns.ActionQueue.clearButton();
 				return ns.OrderStates.CAST_ENCHANT;
 			end
 		end,
 		REPLACE_ENCHANT = function(customer, newEnchant, currentEnchant)
-			ReplaceEnchant();
+			ReplaceTradeEnchant();
+			--ns.ActionQueue.overrideEnchant();
 		end,
 		TRADE_CANCELED = function(customer)
+			ns.ActionQueue.clearButton();
 			return ns.OrderStates.READY_FOR_DELIVERY;
 		end,
 	}),
@@ -212,11 +222,11 @@ ns.OrderStates = {
 	AWAIT_PAYMENT = baseOrderState:new({
 		Name = "AWAIT_PAYMENT",
 
-		ENTER_STATE = function()
+		ENTER_STATE = function(customer)
 			-- TODO: check if money is needed to complete trade.
 			return ns.OrderStates.ACCEPT_DELIVERY;
 		end,
-		TRADE_MONEY_CHANGED = function()
+		TRADE_MONEY_CHANGED = function(customer)
 			-- TODO: check if money is needed to complete trade.
 		end,
 		TRADE_CANCELED = function(customer)
@@ -232,11 +242,13 @@ ns.OrderStates = {
 		end,
 
 		TRADE_CANCELED = function(customer)
+			ns.ActionQueue.clearButton();
 			return ns.OrderStates.READY_FOR_DELIVERY;
 		end,
 
 		TRADE_COMPLETED = function(customer)
 			-- TODO: if we have more things to do, return to READY_FOR_DELIVERY
+			ns.ActionQueue.clearButton();
 			return ns.OrderStates.TRANSACTION_COMPLETE;
 		end,
 	}),
