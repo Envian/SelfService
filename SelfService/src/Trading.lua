@@ -12,12 +12,12 @@ ns.Trading = {
 
 		-- Temporary, single-order logic
 		if not ns.CurrentOrder or ns.CurrentOrder.CustomerName ~= customer.Name then
-			print("Canceling Trade - No Active Order or Incorrect Customer")
+			warningf(ns.LOG_TRADE_SERVING_OTHER, customer.Name, ns.CurrentOrder and ns.CurrentOrder.CustomerName or "nobody");
 			CancelTrade();
 			return;
 		elseif not customer.CurrentOrder then
 			 -- Redundent, but "permanent"
-			print("Canceling Trade - No Active Order")
+			warningf(ns.LOG_TRADE_BLOCKED_NO_ORDER, customer.Name);
  			CancelTrade();
  			return;
 		else

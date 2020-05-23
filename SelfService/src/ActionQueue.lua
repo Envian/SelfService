@@ -3,26 +3,26 @@ local _, ns = ...;
 ns.ActionQueue = {
 	clearButton = function()
 		SelfService_SecureButton:SetAttribute("type", nil);
-		print("New Button State: No Action");
+		ns.debugf(ns.LOG_SECURE_BUTTON_TRADE_ACTION, ns.LOG_SECURE_BUTTON_TYPES.CLEAR);
 	end,
 	castEnchant = function(enchantName)
 		SelfService_SecureButton:SetAttribute("type", "spell");
 		SelfService_SecureButton:SetAttribute("spell", enchantName);
-		print("New Button State: Cast Enchant: "..enchantName);
+		ns.debugf(ns.LOG_SECURE_BUTTON_TRADE_ACTION, ns.LOG_SECURE_BUTTON_TYPES.CAST_ENCHANT);
 	end,
 	acceptTrade = function()
 		SelfService_SecureButton:SetAttribute("type", "script");
 		SelfService_SecureButton:SetAttribute("_script", function() AcceptTrade() end);
-		print("New Button State: Accept Trade");
+		ns.debugf(ns.LOG_SECURE_BUTTON_TRADE_ACTION, ns.LOG_SECURE_BUTTON_TYPES.ACCEPT_TRADE);
 	end,
 	applyEnchant = function()
 		SelfService_SecureButton:SetAttribute("type", "script");
 		SelfService_SecureButton:SetAttribute("_script", function() ClickTargetTradeButton(7) end);
-		print("New Button State: Click the Will Not Be Traded");
+		ns.debugf(ns.LOG_SECURE_BUTTON_TRADE_ACTION, ns.LOG_SECURE_BUTTON_TYPES.APPLY_ENCHANT);
 	end,
 	openTrade = function(player)
 		SelfService_SecureButton:SetAttribute("type", "script");
 		SelfService_SecureButton:SetAttribute("_script", function() InitiateTrade(player) end);
-		print("New Button State: Opening a trade");
+		ns.debugf(ns.LOG_SECURE_BUTTON_TRADE_ACTION, ns.LOG_SECURE_BUTTON_TYPES.OPEN_TRADE);
 	end,
 };

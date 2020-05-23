@@ -28,7 +28,7 @@ function ns.OrderClass:handleEvent(event, ...)
 	for n = 1,10 do
 		if self.State == currentState then break; end;
 
-		print("Entered New State: "..self.State.Name);
+		ns.debugf(ns.LOG_ORDER_STATE_CHANGE, customer.Name, self:State.Name);
 		currentState = self.State;
 		self.State = self.State.ENTER_STATE(customer) or self.State;
 	end
@@ -47,7 +47,6 @@ function ns.OrderClass:addToOrder(recipes)
 
 	for id, count in pairs(self.RequiredMats) do
 		local _, itemLink = GetItemInfo(id);
-		print("addToOrder - Required Material: "..itemLink.."x"..self.RequiredMats[id]);
 	end
 end
 
@@ -67,21 +66,19 @@ function ns.OrderClass:isTradeAcceptable()
 
 	for id, count in pairs(self.RequiredMats) do
 		if tradeMats[id] and count ~= tradeMats[id] then
-			print("Discrepancy between received and required mats!");
-			print("Required: ["..id.."]x"..count);
-			print("In window: ["..id.."]x"..tradeMats[id]);
+			ns.debugf(ns.LOG_ORDER_ITEM_QUANTITY_MISMATCH, id, count, id, tradeMats[id]);
 			return false;
 		end
 	end
 
 	for id, count in pairs(tradeMats) do
 		if not self.RequiredMats[id] then
-			print("Received material not required for order: ["..id.."]x"..count);
+			ns.debugf(ns.LOG_ORDER_UNDESIRED_ITEM, id, count);
 			return false;
 		end
 	end
 
-	print("Got exact materials.");
+	ns.debug(ns.LOG_ORDER_TRADE_ACCEPTABLE);
 	return true;
 end
 
