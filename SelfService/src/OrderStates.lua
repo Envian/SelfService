@@ -132,6 +132,7 @@ ns.OrderStates = {
 		Name = "WAIT_FOR_ENCHANTABLE",
 
 		TRADE_ITEM_CHANGED = function(customer, enteredItems)
+			ns.debug("enteredItem: "..enteredItems[7].Id);
 			if enteredItems[7].Id then
 				-- local itemName, _, quantity = GetTradeTargetItemInfo(slotChanged);
 				-- local itemLink = GetTradeTargetItemLink(slotChanged);
@@ -239,7 +240,7 @@ ns.OrderStates = {
 			return ns.OrderStates.READY_FOR_DELIVERY;
 		end,
 		ENCHANT_SUCCEEDED = function(customer, spellId)
-			if spellId == customer.CurrentOrder.Recipes[1].id then
+			if spellId == customer.CurrentOrder.Recipes[1].Id then
 				ns.debug("Enchant succeeded!");
 				ns.ActionQueue.clearButton();
 			end
@@ -248,9 +249,9 @@ ns.OrderStates = {
 			-- TODO: if we have more things to do, return to READY_FOR_DELIVERY
 			ns.debug("Trade completed!");
 
-			customer.CurrentOrder.reconcile(customer.CurrentOrder.Recipes[1]);
+			customer.CurrentOrder:reconcile(customer.CurrentOrder.Recipes[1]);
 
-			if customer.CurrentOrder.ReceivedMats == {} then
+			if ns.isEmpty(customer.CurrentOrder.ReceivedMats) then
 				ns.debug("ReceivedMats currently empty. Order is complete.");
 				ns.ActionQueue.clearButton();
 				return ns.OrderStates.TRANSACTION_COMPLETE;

@@ -71,6 +71,7 @@ function ns.OrderClass:isTradeAcceptable()
 
 	for id, count in pairs(tradeMats) do
 		if not self.RequiredMats[id] then
+			ns.debugf(ns.LOG_ORDER_UNDESIRED_ITEM, id, count);
 			receivedExactMats = false;
 		end
 	end
@@ -79,8 +80,6 @@ function ns.OrderClass:isTradeAcceptable()
 end
 
 function ns.OrderClass:reconcile(recipe)
-	ns.info("Reconciling "..recipe.Name.." for the current order.");
-
 	if not recipe then
 		ns.error("ns.OrderClass:reconcile called with nil parameter.");
 		return;
@@ -95,6 +94,8 @@ function ns.OrderClass:reconcile(recipe)
 
 			if self.ReceivedMats[mat.Id] < 0 then
 				ns.fatal("reconcile resulted in negative ReceivedMats.");
+			elseif self.ReceivedMats[mat.Id] == 0 then
+				self.ReceivedMats[mat.Id] = nil;
 			end
 		end
 	end
