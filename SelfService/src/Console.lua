@@ -15,11 +15,11 @@ local SLASH_COMMANDS = {
 		if resetWhat:lower() == "order" then
 			if ns.CurrentOrder and ns.CurrentOrder == customer.CurrentOrder then
 				ns.CurrentOrder = nil;
-				print(ns.LOG_RESET:format("ns.CurrentOrder"));
+				ns.infof(ns.LOG_RESET, "ns.CurrentOrder");
 			end
 
 			customer.CurrentOrder = nil;
-			print(ns.LOG_RESET:format(customer.Name));
+			ns.infof(ns.LOG_RESET, customer.Name);
 		end
 	end
 }
@@ -33,6 +33,6 @@ SlashCmdList["SELFSERVICE"] = function(message, editbox)
 	if cmdFunction then
 		cmdFunction(args);
 	else
-		print("FUCK - "..command);
+		ns.errorf(ns.LOG_UNKNOWN_COMMAND, command);
 	end
 end

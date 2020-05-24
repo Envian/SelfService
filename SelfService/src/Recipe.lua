@@ -22,8 +22,8 @@ function ns.RecipeClass:register()
 	if ns.Recipes[self.Id] then
 		-- Conflict, likely between enchanting Id and other craft Id
 		-- This code will likely never run.
-		print(string.format(ns.LOG_CONFLICT, self.Name, ns.Recipes[self.Id].Name));
-		print(string.format(ns.LOG_CONFLICT_HIDING, self.Name));
+		errorf(ns.LOG_CONFLICT, self.Name, ns.Recipes[self.Id].Name);
+		errorf(ns.LOG_CONFLICT_HIDING, self.Name);
 	else
 		ns.Recipes[self.Id] = self;
 		for _, searchTerm in ipairs(self.Search) do

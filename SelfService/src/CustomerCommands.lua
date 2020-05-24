@@ -2,7 +2,6 @@ local _, ns = ...;
 
 ns.CustomerCommands = {
 	search = function(customer, message)
-		print(message)
 		-- Only allow searching with a small delay.
 		if GetTime() - customer.LastSearch < 2 then return end;
 		customer.LastSearch = GetTime();
@@ -55,7 +54,9 @@ ns.CustomerCommands = {
 			return;
 		end
 
-		customer:addToOrder(ns.getLinkedItemIds(message));
+		local orders = ns.getLinkedItemIds(message);
+		customer:addToOrder(orders);
+		ns.infof(ns.LOG_ORDER_PLACED, customer.Name, #orders);
 	end,
 
 	help = function(customer, message)

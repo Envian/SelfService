@@ -34,11 +34,11 @@ end
 function ns.CustomerClass:handleCommand(command, message)
 	-- Do we send a greeting?
 	if self.LastWhisper == 0 then
-		print(string.format(ns.LOG_NEW_CUSTOMER, self.Name));
+		ns.infof(ns.LOG_NEW_CUSTOMER, self.Name);
 		self.MessagesAvailable = 1; -- Allows an extra message in this case.
 		self:reply(ns.L.enUS.FIRST_TIME_CUSTOMER);
 	elseif GetTime() - self.LastWhisper > 30 * 60 then
-		print(string.format(ns.LOG_RETURNING_CUSTOMER, self.Name));
+		ns.infof(ns.LOG_RETURNING_CUSTOMER, self.Name);
 		self.MessagesAvailable = 1;
 		self:reply(ns.L.enUS.RETURNING_CUSTOMER);
 	end

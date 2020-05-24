@@ -36,7 +36,7 @@ ns.enableAddon = function()
 		end
 
 		ns.Enabled = true;
-		print(ns.LOG_ENABLED);
+		ns.warning(ns.LOG_ENABLED);
 	end
 end
 
@@ -50,7 +50,7 @@ ns.disableAddon = function()
 		SelfService_SecureButton:Hide();
 
 		ns.Enabled = false;
-		print(ns.LOG_DISABLED);
+		ns.warning(ns.LOG_DISABLED);
 	end
 end
 
@@ -59,7 +59,6 @@ ns.Events.EventHandlers = {
 		-- Convert messages including "?term" to "!search term"
 		message = message:gsub(SEARCH_REGEX, "!search %1");
 		if message:match(COMMAND_REGEX) then
-			print(message);
 			local command, term = message:match("^%!(%S+)%s?(.*)$");
 			ns.getCustomer(sender):handleCommand(command, term);
 		end
@@ -216,7 +215,7 @@ loadingFrame:SetScript("OnEvent", function(_, event, ...)
 				ns.Recipes[itemId] = recipe;
 			end
 			ns.Loaded.Enchanting = true;
-			print(ns.LOG_LOADED:format("Enchanting"));
+			ns.infof(ns.LOG_LOADED, "Enchanting");
 		end
 	end
 end);
