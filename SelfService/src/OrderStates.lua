@@ -27,7 +27,7 @@ ns.OrderStates = {
 		Name = "ORDER_PLACED",
 
 		TRADE_SHOW = function(customer)
-			ns.debug(ns.LOG_PREFIX.."Trade Initiated.");
+			ns.debug("Trade Initiated.");
 			customer:whisper("Place the exact materials for your order in the trade window.");
 			return ns.OrderStates.WAIT_FOR_MATS;
 		end
