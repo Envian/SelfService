@@ -91,6 +91,8 @@ ns.processCommand = function(commandObject, commandString)
 	local commandStack = {};
 	while type(commandObject) == "table" do
 		command, commandString = commandString:match("^%s*(%S+)%s*(.*)$");
+		if not command then break end;
+
 		commandObject = commandObject[command];
 		commandStack[#commandStack + 1] = command;
 	end
