@@ -4,12 +4,12 @@ local LOG_PREFIX = string.format("|cffcccccc[%s]|r ", ns.ADDON_NAME);
 local nolog = function() end;
 
 local log = function(message)
-	if type(message) ~= "string" then error("Invalid operand to log: "..tostring(message)) end;
+	if type(message) ~= "string" then error("Invalid operand to log: "..tostring(message), 2) end;
 	print(LOG_PREFIX..message);
 end
 
 local logf = function(message, ...)
-	if type(message) ~= "string" then error("Invalid operand to logf: "..tostring(message)) end;
+	if type(message) ~= "string" then error("Invalid operand to logf: "..tostring(message), 2) end;
 
 	local success, result = pcall(string.format, message, ...);
 	if success then
@@ -21,7 +21,7 @@ end
 
 ns.setLogLevel = function(level)
 	if type(level) ~= "number" or level < 1 or level > 5 then
-		error("Invalid level. Expected a number between 1 and 5. Got: "..tostring(level or "nil"));
+		error("Invalid level. Expected a number between 1 and 5. Got: "..tostring(level or "nil"), 2);
 	end
 
 	SelfServiceData.LogLevel = level;

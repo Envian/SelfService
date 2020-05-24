@@ -23,6 +23,7 @@ ns.LOG_ORDER_TRADE_ACCEPTABLE = "Received all mats required for trade!";
 
 ns.LOG_TRADE_BLOCKED_NO_ORDER = "Cancelled trade with %s: No active order.";
 ns.LOG_TRADE_SERVING_OTHER = "Canceled trade with %s: Currently serving %s.";
+ns.LOG_TRADE_ACCEPTED = "Accepted trade with %s.";
 
 -- Level 4 Info
 ns.LOG_RESET = "Order for %s has been reset.";

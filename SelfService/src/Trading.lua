@@ -29,7 +29,7 @@ ns.Trading = {
 			ns.CurrentTrade.Customer = customer;
 
 			ns.CurrentTrade.Customer.CurrentOrder:handleEvent("TRADE_SHOW");
-			debugf(ns.LOG_TRADE_ACCEPTED, customer.Name);
+			ns.debugf(ns.LOG_TRADE_ACCEPTED, customer.Name);
 		end
 	end,
 	tradeItemChanged = function(slot)
