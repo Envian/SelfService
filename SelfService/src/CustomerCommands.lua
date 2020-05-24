@@ -54,7 +54,9 @@ ns.CustomerCommands = {
 			return;
 		end
 
-		customer:addToOrder(ns.getLinkedItemIds(message));
+		local orders = ns.getLinkedItemIds(message);
+		customer:addToOrder(orders);
+		ns.infof(ns.LOG_ORDER_PLACED, customer.Name, #orders);
 	end,
 
 	help = function(customer, message)

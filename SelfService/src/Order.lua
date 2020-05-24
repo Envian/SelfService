@@ -28,7 +28,7 @@ function ns.OrderClass:handleEvent(event, ...)
 	for n = 1,10 do
 		if self.State == currentState then break; end;
 
-		ns.debugf(ns.LOG_ORDER_STATE_CHANGE, customer.Name, self:State.Name);
+		ns.debugf(ns.LOG_ORDER_STATE_CHANGE, customer.Name, self.State.Name);
 		currentState = self.State;
 		self.State = self.State.ENTER_STATE(customer) or self.State;
 	end

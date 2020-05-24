@@ -14,13 +14,15 @@ ns.LOG_SECURE_BUTTON_TYPES = {
 	APPLY_ENCHANT = "APPLY_ENCHANT",
 	OPEN_TRADE = "OPEN_TRADE",
 }
+
+ns.LOG_ORDER_PLACED = "%s has placed an order for %i items.";
 ns.LOG_ORDER_STATE_CHANGE = "Order for %s has transitioned to the %s state.";
 ns.LOG_ORDER_ITEM_QUANTITY_MISMATCH = "Trade requires [%s]x%i however [%s]x%i was given.";
 ns.LOG_ORDER_UNDESIRED_ITEM = "Received [%s]x%i from trade, but not required for the transaction.";
 ns.LOG_ORDER_TRADE_ACCEPTABLE = "Received all mats required for trade!";
 
 ns.LOG_TRADE_BLOCKED_NO_ORDER = "Cancelled trade with %s: No active order.";
-ns.LOG_TRADE_SERVING_OTHER = "Canceled trade with %s: Serving another customer.";
+ns.LOG_TRADE_SERVING_OTHER = "Canceled trade with %s: Currently serving %s.";
 
 -- Level 4 Info
 ns.LOG_RESET = "Order for %s has been reset.";
@@ -35,6 +37,7 @@ ns.LOG_DISABLED = "Has been disabled.";
 -- Level 2 Error
 ns.LOG_CONFLICT = "Recipe conflict found. %s and %s share the same Id, and will not work as expected.";
 ns.LOG_CONFLICT_HIDING = "The recipe %s will not be available.";
+ns.LOG_UNKNOWN_COMMAND = "Unknown command: %s";
 
 -- Level 1 Fatal
 

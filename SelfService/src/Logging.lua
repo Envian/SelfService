@@ -1,6 +1,6 @@
 local _, ns = ...;
 
-local LOG_PREFIX = string.format("|ccccccc[%s]|r ", ns.ADDON_NAME);
+local LOG_PREFIX = string.format("|cffcccccc[%s]|r ", ns.ADDON_NAME);
 local nolog = function() end;
 
 local log = function(message)

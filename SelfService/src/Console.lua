@@ -33,6 +33,6 @@ SlashCmdList["SELFSERVICE"] = function(message, editbox)
 	if cmdFunction then
 		cmdFunction(args);
 	else
-		print("FUCK - "..command);
+		ns.errorf(ns.LOG_UNKNOWN_COMMAND, command);
 	end
 end
