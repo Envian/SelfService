@@ -12,12 +12,12 @@ ns.Trading = {
 
 		-- Temporary, single-order logic
 		if not ns.CurrentOrder or ns.CurrentOrder.CustomerName ~= customer.Name then
-			warningf(ns.LOG_TRADE_SERVING_OTHER, customer.Name, ns.CurrentOrder and ns.CurrentOrder.CustomerName or "nobody");
+			ns.warningf(ns.LOG_TRADE_SERVING_OTHER, customer.Name, ns.CurrentOrder and ns.CurrentOrder.CustomerName or "nobody");
 			CancelTrade();
 			return;
 		elseif not customer.CurrentOrder then
 			 -- Redundent, but "permanent"
-			warningf(ns.LOG_TRADE_BLOCKED_NO_ORDER, customer.Name);
+			ns.warningf(ns.LOG_TRADE_BLOCKED_NO_ORDER, customer.Name);
  			CancelTrade();
  			return;
 		else
