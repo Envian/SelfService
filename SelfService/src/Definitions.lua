@@ -46,6 +46,8 @@ ns.error = func(message); -- Prints a error message to the console.
 ns.errorf = func(message, ...); -- Prints a formatted error message to the console.
 ns.fatal = func(message); -- Prints a fatal message to the console.
 ns.fatalf = func(message, ...); -- Prints a formatted fatal message to the console.
+ns.print = func(message); -- Prints a message to the console, regardless of log settings.
+ns.printf = func(message, ...); -- Prints a formatted message to the console, regardless of log settings.
 
 -- Specialized helpers
 ns.pullFromCommandTable = func(commandTable, command); -- Parses the command string and returns the object requested by the command string.

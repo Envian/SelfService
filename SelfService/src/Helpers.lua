@@ -83,7 +83,7 @@ ns.isEmpty = function(table)
 	return true
 end
 
--- Returns targetObject, remainingString, commandStack
+-- Returns targetObject, remainingString, commandStack. 
 ns.pullFromCommandTable = function(commandObject, commandString)
 	if type(commandString) ~= "string" or #commandString == 0 then return commandObject, commandString, {} end;
 
@@ -98,8 +98,8 @@ ns.pullFromCommandTable = function(commandObject, commandString)
 		end
 
 		commandString = remainder;
-		commandObject = commandObject[command];
-		commandStack[#commandStack + 1] = command;
+		commandObject = commandObject[command:lower()];
+		commandStack[#commandStack + 1] = command:lower();
 	end
 
 	return commandObject, commandString, commandStack;

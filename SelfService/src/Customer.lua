@@ -20,8 +20,6 @@ ns.normalizeName = function(name)
 	return name:gsub("^([\128-\255]?.)", string.upper).."-"..GetRealmName();
 end
 
-DEBUG  = ns.normalizeName;
-
 -- Customer Definition
 ns.CustomerClass = {};
 ns.CustomerClass.__index = ns.CustomerClass;
