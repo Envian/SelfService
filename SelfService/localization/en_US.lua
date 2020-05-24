@@ -44,6 +44,7 @@ ns.LOG_MORE_COMMANDS_NEEDED = "%s requires more subcommands to run.";
 -- Level 1 Fatal
 
 -- Console Command Messages
+ns.LOG_RESET_BAD_NAME = "Reset requires a customer name."
 ns.LOG_RESET_ORDER = "Order for %s has been reset.";
 ns.LOG_RESET_CURRENT_ORDER = "Current order for %s has been reset.";
 ns.LOG_RESET_ORDER_BAD_NAME = "Unable to reset order for %s, Customer not found.";
