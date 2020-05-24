@@ -103,12 +103,21 @@ ns.OrderStates = {
 	READY_FOR_DELIVERY = baseOrderState:new({
 		Name = "READY_FOR_DELIVERY",
 
+		ENTER_STATE = function(customer)
+			InitiateTrade(customer.Name);
+		end,
 		TRADE_SHOW = function(customer)
 			if customer.CurrentOrder.Recipes[1].Type == "Enchanting" then
 				customer:whisper("Place the item you want enchanted in the \"Will Not Be Traded\" slot.");
 				return ns.OrderStates.WAIT_FOR_ENCHANTABLE;
 			else
 				return ns.OrderStates.DELIVER_ORDER;
+			end
+		end,
+		-- Temporary stop-gap for drag and drop items for enchanting
+		TRADE_ITEM_CHANGED = function(customer, enteredItems)
+			if enteredItems[7].Id then
+				return ns.OrderStates.CAST_ENCHANT;
 			end
 		end
 	}),
@@ -123,7 +132,7 @@ ns.OrderStates = {
 		end,
 		TRADE_CANCELLED = function(customer)
 			ns.debug("Trade cancelled.");
-			customer:whisper("The trade was cancelled before I completed your order.");
+			customer:whisper("The trade was cancelled before I completed your order. Open a trade window when you are ready to continue.");
 			return ns.OrderStates.READY_FOR_DELIVERY;
 		end
 	}),
@@ -152,7 +161,7 @@ ns.OrderStates = {
 			end
 		end,
 		TRADE_CANCELLED = function(customer)
-			customer:whisper("The trade was cancelled before I completed the enchant.");
+			customer:whisper("The trade was cancelled before I completed your order. Open a trade window when you are ready to continue.");
 			return ns.OrderStates.READY_FOR_DELIVERY;
 		end
 	}),
@@ -172,7 +181,7 @@ ns.OrderStates = {
 			end
 		end,
 		TRADE_CANCELLED = function(customer)
-			customer:whisper("The trade was cancelled before I completed the enchant.");
+			customer:whisper("The trade was cancelled before I completed your order. Open a trade window when you are ready to continue.");
 			ns.ActionQueue.clearButton();
 			return ns.OrderStates.READY_FOR_DELIVERY;
 		end
@@ -204,7 +213,7 @@ ns.OrderStates = {
 			customer:whisper("I am replacing "..currentEnchant.." on your item.");
 		end,
 		TRADE_CANCELLED = function(customer)
-			customer:whisper("The trade was cancelled before I completed the enchant.");
+			customer:whisper("The trade was cancelled before I completed your order. Open a trade window when you are ready to continue.");
 			ns.ActionQueue.clearButton();
 			return ns.OrderStates.READY_FOR_DELIVERY;
 		end,
@@ -223,7 +232,7 @@ ns.OrderStates = {
 			-- TODO: check if money is needed to complete trade.
 		end,
 		TRADE_CANCELLED = function(customer)
-			customer:whisper("The trade was cancelled before I received payment.");
+			customer:whisper("The trade was cancelled before I completed your order. Open a trade window when you are ready to continue.");
 			return ns.OrderStates["READY_FOR_DELIVERY"];
 		end
 	}),
@@ -237,6 +246,7 @@ ns.OrderStates = {
 
 		TRADE_CANCELLED = function(customer)
 			ns.ActionQueue.clearButton();
+			customer:whisper("The trade was cancelled before I completed your order. Open a trade window when you are ready to continue.");
 			return ns.OrderStates.READY_FOR_DELIVERY;
 		end,
 		ENCHANT_SUCCEEDED = function(customer, spellId)
@@ -246,7 +256,6 @@ ns.OrderStates = {
 			end
 		end,
 		TRADE_COMPLETED = function(customer)
-			-- TODO: if we have more things to do, return to READY_FOR_DELIVERY
 			ns.debug("Trade completed!");
 
 			customer.CurrentOrder:reconcile(customer.CurrentOrder.Recipes[1]);
@@ -267,7 +276,7 @@ ns.OrderStates = {
 		Name = "TRANSACTION_COMPLETE",
 
 		ENTER_STATE = function(customer)
-			customer:whisper("Your transaction is complete.");
+			customer:whisper("Your transaction is complete. Come back again y'all!");
 			customer.CurrentOrder = nil;
 		end
 	})
