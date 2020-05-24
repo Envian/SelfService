@@ -25,6 +25,7 @@ ns.CurrentOrder = nil; -- A reference to the current OrderClass.
 
 -- Helper Methods
 ns.getCustomer = func(name); -- Gets a customer by their name.
+ns.normalizeName = func(name); -- Normalizes a name so that it can safely be used to access ns.Customers. Returns nil when the name couldn't be normalized.
 ns.imap = func(list, callback); -- Passes each element in list to callback, and returns a new list with the results from callback.
 ns.ifilter = func(list, callback); -- returns a new list with only the items that return true from callback.
 ns.getItemIdFromLink = func(link, type); -- Gets the first itemId from the given string.
@@ -47,6 +48,7 @@ ns.fatal = func(message); -- Prints a fatal message to the console.
 ns.fatalf = func(message, ...); -- Prints a formatted fatal message to the console.
 
 -- Specialized helpers
+ns.processCommand = func(commandList, command); -- Parses the command string and calls the corresponding command from CommandList.
 ns.populateEnchantingData = func(enchants); -- Loads data about each enchant, and saves it back on the passed in list.
 ns.populateEnchantExtraData = func(extra); -- Loads special enchant products (oils, wands) into the global map.
 ns.populateGlobalData = func(crafts); -- Takes (loaded) data about a profession and stores it in the Recipes and Search tables.
