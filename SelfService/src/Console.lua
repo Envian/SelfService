@@ -4,9 +4,10 @@ SLASH_SELFSERVICE1 = "/selfservice";
 SLASH_SELFSERVICE2 = "/service";
 SLASH_SELFSERVICE3 = "/ss";
 
-local SLASH_COMMANDS = {
+local slashCommands = {
 	enable = ns.enableAddon,
 	disable = ns.disableAddon,
+	help = function() end,
 	reset = {
 		order = function(who)
 			if not who or #who == 0 then
@@ -43,14 +44,19 @@ local SLASH_COMMANDS = {
 }
 
 SlashCmdList["SELFSERVICE"] = function(message, editbox)
-	local success, stack, resultType = ns.processCommand(SLASH_COMMANDS, message);
-	-- No commands passed, ignore for now.
-	if not stack or #stack == 0 then return end;
+	local target, arguments, stack = ns.pullFromCommandTable(slashCommands, message);
 
-	print(success, strjoin(" ", unpack(stack)), resultType);
+	if target == slashCommands then
+		slashCommands.help();
+		return;
+	end
 
-	if not success then
-		if resultType == "nil" then
+	if not target then
+		ns.errorf(ns.LOG_UNKNOWN_COMMAND, strjoin(" ", unpack(stack)));
+	else
+		if type(target) == "function" then
+			target(arguments);
+		elseif type(target) == "nil" then
 			-- Nil is the type when an unknown command or subcommand is sent
 			if #stack == 1 then
 				ns.errorf(ns.LOG_UNKNOWN_COMMAND, stack[1]);
@@ -58,8 +64,8 @@ SlashCmdList["SELFSERVICE"] = function(message, editbox)
 				local unknownSubcmd = table.remove(stack, #stack);
 				ns.errorf(ns.LOG_UNKNOWN_SUBCOMMAND, unknownSubcmd, strjoin(" ", unpack(stack)));
 			end
-		else
-			-- All other types means that there are more commands needed.
+		elseif type(target) == "table" then
+			-- table means that there are more commands needed.
 			ns.errorf(ns.LOG_MORE_COMMANDS_NEEDED, strjoin(" ", unpack(stack)));
 		end
 	end

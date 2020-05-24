@@ -48,7 +48,7 @@ ns.fatal = func(message); -- Prints a fatal message to the console.
 ns.fatalf = func(message, ...); -- Prints a formatted fatal message to the console.
 
 -- Specialized helpers
-ns.processCommand = func(commandList, command); -- Parses the command string and calls the corresponding command from CommandList.
+ns.pullFromCommandTable = func(commandTable, command); -- Parses the command string and returns the object requested by the command string.
 ns.populateEnchantingData = func(enchants); -- Loads data about each enchant, and saves it back on the passed in list.
 ns.populateEnchantExtraData = func(extra); -- Loads special enchant products (oils, wands) into the global map.
 ns.populateGlobalData = func(crafts); -- Takes (loaded) data about a profession and stores it in the Recipes and Search tables.

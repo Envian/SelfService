@@ -83,24 +83,24 @@ ns.isEmpty = function(table)
 	return true
 end
 
--- Returns Success (boolean), commandStack(List<String>), finalType(String - result of type() of the last access)
-ns.processCommand = function(commandObject, commandString)
-	if type(commandString) ~= "string" or #commandString == 0 then return false, nil, nil end;
+-- Returns targetObject, remainingString, commandStack
+ns.pullFromCommandTable = function(commandObject, commandString)
+	if type(commandString) ~= "string" or #commandString == 0 then return commandObject, commandString, {} end;
 
 	local command = nil;
+	local remainder = nil;
 	local commandStack = {};
-	while type(commandObject) == "table" do
-		command, commandString = commandString:match("^%s*(%S+)%s*(.*)$");
-		if not command then break end;
 
+	while type(commandObject) == "table" do
+		command, remainder = commandString:match("^%s*(%S+)%s*(.*)$");
+		if not command then
+			return commandObject, commandString, commandStack;
+		end
+
+		commandString = remainder;
 		commandObject = commandObject[command];
 		commandStack[#commandStack + 1] = command;
 	end
 
-	if type(commandObject) == "function" then
-		commandObject(commandString);
-		return true, comandStack, "function";
-	else
-		return false, commandStack, type(commandObject);
-	end
+	return commandObject, commandString, commandStack;
 end
