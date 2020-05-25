@@ -82,3 +82,25 @@ ns.isEmpty = function(table)
 	end
 	return true
 end
+
+-- Returns targetObject, remainingString, commandStack. 
+ns.pullFromCommandTable = function(commandObject, commandString)
+	if type(commandString) ~= "string" or #commandString == 0 then return commandObject, commandString, {} end;
+
+	local command = nil;
+	local remainder = nil;
+	local commandStack = {};
+
+	while type(commandObject) == "table" do
+		command, remainder = commandString:match("^%s*(%S+)%s*(.*)$");
+		if not command then
+			return commandObject, commandString, commandStack;
+		end
+
+		commandString = remainder;
+		commandObject = commandObject[command:lower()];
+		commandStack[#commandStack + 1] = command:lower();
+	end
+
+	return commandObject, commandString, commandStack;
+end

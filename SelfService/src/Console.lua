@@ -4,35 +4,78 @@ SLASH_SELFSERVICE1 = "/selfservice";
 SLASH_SELFSERVICE2 = "/service";
 SLASH_SELFSERVICE3 = "/ss";
 
-local SLASH_COMMANDS = {
+local slashCommands = {
 	enable = ns.enableAddon,
 	disable = ns.disableAddon,
-	reset = function(args)
-		local resetWhat, who = args:match("^(%S+)%s?(.*)$");
-		if not resetWhat or not who then return end;
-
-		local customer = ns.getCustomer(who);
-		if resetWhat:lower() == "order" then
-			if ns.CurrentOrder and ns.CurrentOrder == customer.CurrentOrder then
-				ns.CurrentOrder = nil;
-				ns.infof(ns.LOG_RESET, "ns.CurrentOrder");
+	help = function(helpTopic)
+		helpList = ns.pullFromCommandTable(ns.HELP_TEXT, helpTopic);
+		if type(helpList) == "nil" then
+			ns.printf(ns.CMD_HELP_UNKNOWN, helpTopic);
+		elseif type(helpList) == "string" then
+			ns.print(helpList);
+		else
+			for _, line in ipairs(helpList) do ns.print(line) end;
+		end
+	end,
+	reset = {
+		order = function(who)
+			if not who or #who == 0 then
+				ns.print(ns.CMD_RESET_BAD_NAME);
+				return;
 			end
 
-			customer.CurrentOrder = nil;
-			ns.infof(ns.LOG_RESET, customer.Name);
+			local customer = ns.Customers[ns.normalizeName(who)];
+			if customer then
+				if not customer.CurrentOrder then
+					ns.print(ns.CMD_RESET_NO_ORDER);
+					return;
+				end
+				customer.CurrentOrder = nil;
+				if ns.CurrentOrder and ns.CurrentOrder.CustomerName == customer.Name then
+					ns.CurrentOrder = nil;
+				end
+				ns.printf(ns.CMD_RESET_ORDER, customer.Name);
+			else
+				ns.printf(ns.CMD_RESET_ORDER_BAD_NAME, who);
+			end
+		end,
+		currentorder = function()
+			if ns.CurrentOrder then
+				local customerName = ns.CurrentOrder.CustomerName
+				ns.Customers[customerName].CurrentOrder = nil;
+				ns.CurrentOrder = nil;
+				ns.printf(ns.CMD_RESET_CURRENT_ORDER, customerName);
+			else
+				ns.print(ns.CMD_RESET_NO_ORDER);
+			end
 		end
-	end
+	}
 }
 
 SlashCmdList["SELFSERVICE"] = function(message, editbox)
-	if not message or #message == 0 then return end;
+	local target, arguments, stack = ns.pullFromCommandTable(slashCommands, message);
 
-	local command, args = message:match("^(%S+)%s?(.*)$");
-	local cmdFunction = SLASH_COMMANDS[command:lower()];
+	if target == slashCommands then
+		slashCommands.help();
+		return;
+	end
 
-	if cmdFunction then
-		cmdFunction(args);
+	if not target then
+		ns.printf(ns.CMD_UNKNOWN_COMMAND, strjoin(" ", unpack(stack)));
 	else
-		ns.errorf(ns.LOG_UNKNOWN_COMMAND, command);
+		if type(target) == "function" then
+			target(arguments);
+		elseif type(target) == "nil" then
+			-- Nil is the type when an unknown command or subcommand is sent
+			if #stack == 1 then
+				ns.printf(ns.CMD_UNKNOWN_COMMAND, stack[1]);
+			else
+				local unknownSubcmd = table.remove(stack, #stack);
+				ns.printf(ns.CMD_UNKNOWN_SUBCOMMAND, unknownSubcmd, strjoin(" ", unpack(stack)));
+			end
+		elseif type(target) == "table" then
+			-- table means that there are more commands needed.
+			ns.printf(ns.CMD_MORE_COMMANDS_NEEDED, strjoin(" ", unpack(stack)));
+		end
 	end
 end

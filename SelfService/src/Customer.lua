@@ -14,6 +14,12 @@ ns.getCustomer = function(name)
 	return newCustomer;
 end
 
+ns.normalizeName = function(name)
+	name = name:match("^%s*([^%s-]*)");
+	if not name then return nil end;
+	return name:gsub("^([\128-\255]?.)", string.upper).."-"..GetRealmName();
+end
+
 -- Customer Definition
 ns.CustomerClass = {};
 ns.CustomerClass.__index = ns.CustomerClass;

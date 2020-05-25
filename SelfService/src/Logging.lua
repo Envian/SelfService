@@ -38,3 +38,6 @@ ns.setLogLevel = function(level)
 end
 
 ns.setLogLevel(SelfServiceData.LogLevel);
+
+ns.print = log;
+ns.printf = logf;

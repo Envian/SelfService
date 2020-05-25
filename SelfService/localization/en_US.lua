@@ -26,7 +26,6 @@ ns.LOG_TRADE_SERVING_OTHER = "Canceled trade with %s: Currently serving %s.";
 ns.LOG_TRADE_ACCEPTED = "Accepted trade with %s.";
 
 -- Level 4 Info
-ns.LOG_RESET = "Order for %s has been reset.";
 ns.LOG_LOADED = "Data for %s has been loaded.";
 ns.LOG_NEW_CUSTOMER = "Serving a new customer: %s";
 ns.LOG_RETURNING_CUSTOMER = "Serving a returning customer: %s";
@@ -38,10 +37,37 @@ ns.LOG_DISABLED = "Has been disabled.";
 -- Level 2 Error
 ns.LOG_CONFLICT = "Recipe conflict found. %s and %s share the same Id, and will not work as expected.";
 ns.LOG_CONFLICT_HIDING = "The recipe %s will not be available.";
-ns.LOG_UNKNOWN_COMMAND = "Unknown command: %s";
 
 -- Level 1 Fatal
 
+-- Console Command Messages
+ns.CMD_UNKNOWN_COMMAND = "Unknown command: %s";
+ns.CMD_UNKNOWN_SUBCOMMAND = "%s is not a valid subcommand for %s.";
+ns.CMD_MORE_COMMANDS_NEEDED = "%s requires more subcommands to run.";
+ns.CMD_RESET_BAD_NAME = "Reset requires a customer name."
+ns.CMD_RESET_ORDER = "Order for %s has been reset.";
+ns.CMD_RESET_CURRENT_ORDER = "Current order for %s has been reset.";
+ns.CMD_RESET_ORDER_BAD_NAME = "Unable to reset order for %s, Customer not found.";
+ns.CMD_RESET_NO_ORDER = "No order to reset.";
+ns.CMD_HELP_UNKNOWN = "No help found for %s.";
+
+-- Console command help text
+-- This is a map/array hybrid. The map part is used to get the command's help text. the list is printed as help text.
+ns.HELP_TEXT = {
+	"This is the help text for the entire project. Try /ss help command",
+	"it can be multilined too!",
+	help = {"This is the help text for help. you're so fucked."},
+	enable = {"Enables the SelfService bot."},
+	disable = {
+		"Hard disables the SelfService bot.",
+		" Warning: This may cause trades in progress to be stuck."
+	},
+	reset = {
+		"Resets some aspect of the mod.",
+		order = {"Resets the order for the passed in player."},
+		currentorder = {"Resets the current order"}
+	}
+}
 
 -- Whispers
 ns.L.enUS = {
