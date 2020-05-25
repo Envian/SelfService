@@ -1,5 +1,9 @@
 local _, ns = ...;
 
+-- Customer Definition
+local CustomerClass = {};
+CustomerClass.__index = CustomerClass;
+
 ns.getCustomer = function(name)
 	if not string.find(name, "-") then
 		name = name.."-"..GetRealmName();
@@ -8,7 +12,7 @@ ns.getCustomer = function(name)
 	local existing = ns.Customers[name];
 	if existing then return existing end;
 
-	local newCustomer = ns.CustomerClass:new(SelfServiceData.Customers[name], name);
+	local newCustomer = CustomerClass:new(SelfServiceData.Customers[name], name);
 	SelfServiceData.Customers[name] = newCustomer;
 	ns.Customers[name] = newCustomer;
 	return newCustomer;
@@ -20,11 +24,8 @@ ns.normalizeName = function(name)
 	return name:gsub("^([\128-\255]?.)", string.upper).."-"..GetRealmName();
 end
 
--- Customer Definition
-ns.CustomerClass = {};
-ns.CustomerClass.__index = ns.CustomerClass;
 
-function ns.CustomerClass:new(data, name)
+function CustomerClass:new(data, name)
 	data = data or {
 		Name = name,
 		LastWhisper = 0,
@@ -33,11 +34,11 @@ function ns.CustomerClass:new(data, name)
 		CurrentOrder = nil
 	}
 	data.CurrentOrder = data.CurrentOrder and ns.OrderClass:new(data.CurrentOrder, name);
-	setmetatable(data, ns.CustomerClass);
+	setmetatable(data, CustomerClass);
 	return data;
 end
 
-function ns.CustomerClass:handleCommand(command, message)
+function CustomerClass:handleCommand(command, message)
 	-- Do we send a greeting?
 	if self.LastWhisper == 0 then
 		ns.infof(ns.LOG_NEW_CUSTOMER, self.Name);
@@ -62,11 +63,11 @@ function ns.CustomerClass:handleCommand(command, message)
 	self.MessagesAvailable = 0;
 end
 
-function ns.CustomerClass:getOrder()
+function CustomerClass:getOrder()
 	return self.CurrentOrder;
 end
 
-function ns.CustomerClass:addToOrder(recipes)
+function CustomerClass:addToOrder(recipes)
 	local order = self:getOrder();
 
 	-- Temporary
@@ -89,26 +90,26 @@ function ns.CustomerClass:addToOrder(recipes)
 	end
 end
 
-function ns.CustomerClass:reply(message)
+function CustomerClass:reply(message)
 	if self.MessagesAvailable > 0 then
 		self.MessagesAvailable = self.MessagesAvailable - 1;
 		SendChatMessage(ns.REPLY_PREFIX .. message, "WHISPER", nil, self.Name);
 	end
 end
 
-function ns.CustomerClass:replyf(message, ...)
+function CustomerClass:replyf(message, ...)
 	self:reply(message:format(...));
 end
 
-function ns.CustomerClass:whisper(message)
+function CustomerClass:whisper(message)
 	SendChatMessage(ns.REPLY_PREFIX .. message, "WHISPER", nil, self.Name);
 end
 
-function ns.CustomerClass:whisperf(message, ...)
+function CustomerClass:whisperf(message, ...)
 	self:whisper(message:format(...));
 end
 
-function ns.CustomerClass:replyJoin(message, list, delim)
+function CustomerClass:replyJoin(message, list, delim)
 	delim = delim or "";
 	message = message or "";
 

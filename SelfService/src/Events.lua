@@ -3,15 +3,13 @@ local _, ns = ...;
 local COMMAND_REGEX = "^!%s*%a%a";
 local SEARCH_REGEX = "^%?%s*([|%a%d]+)";
 
-ns.Events = {
-	EventFrame = CreateFrame("Frame"),
-	filterInbound = function(_, event, message, sender)
-		return ns.Enabled and (message:match(COMMAND_REGEX) or message:match(SEARCH_REGEX));
-	end,
-	filterOutbound = function(_, event, message, sender)
-		return ns.Enabled and message:sub(1, #ns.REPLY_PREFIX) == ns.REPLY_PREFIX;
-	end
-}
+local eventFrame = CreateFrame("Frame");
+local filterInbound = function(_, event, message, sender)
+	return ns.Enabled and (message:match(COMMAND_REGEX) or message:match(SEARCH_REGEX));
+end
+local filterOutbound = function(_, event, message, sender)
+	return ns.Enabled and message:sub(1, #ns.REPLY_PREFIX) == ns.REPLY_PREFIX;
+end
 
 local function ActionButton_OnEnter(self)
   GameTooltip_SetDefaultAnchor(GameTooltip, UIParent);
@@ -25,12 +23,12 @@ end
 
 ns.enableAddon = function()
 	if not ns.Enabled then
-		for event, _ in pairs(ns.Events.EventHandlers) do
-			ns.Events.EventFrame:RegisterEvent(event);
+		for event, _ in pairs(eventHandlers) do
+			eventFrame:RegisterEvent(event);
 		end
 		-- Hides outgoing bot whispers, and incoming commands.
-		-- ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER", ns.Events.filterInbound);
-		-- ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER_INFORM", ns.Events.filterOutbound);
+		-- ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER", eilterInbound);
+		-- ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER_INFORM", eilterOutbound);
 
 		if not SelfService_SecureButton then
 			local btn = CreateFrame("Button", "SelfService_SecureButton", UIParent, "SecureActionButtonTemplate");
@@ -57,11 +55,11 @@ end
 
 ns.disableAddon = function()
 	if ns.Enabled then
-		for event, _ in pairs(ns.Events.EventHandlers) do
-			ns.Events.EventFrame:UnregisterEvent(event);
+		for event, _ in pairs(eventHandlers) do
+			eventFrame:UnregisterEvent(event);
 		end
-		--ChatFrame_RemoveMessageEventFilter("CHAT_MSG_WHISPER", ns.Events.filterInbound);
-		--ChatFrame_RemoveMessageEventFilter("CHAT_MSG_WHISPER_INFORM", ns.Events.filterOutbound);
+		--ChatFrame_RemoveMessageEventFilter("CHAT_MSG_WHISPER", filterInbound);
+		--ChatFrame_RemoveMessageEventFilter("CHAT_MSG_WHISPER_INFORM", filterOutbound);
 		SelfService_SecureButton:Hide();
 
 		ns.Enabled = false;
@@ -71,7 +69,7 @@ ns.disableAddon = function()
 	end
 end
 
-ns.Events.EventHandlers = {
+local eventHandlers = {
 	CHAT_MSG_WHISPER = function(message, sender)
 		-- Convert messages including "?term" to "!search term"
 		message = message:gsub(SEARCH_REGEX, "!search %1");
@@ -108,8 +106,8 @@ ns.Events.EventHandlers = {
 	-- end
 };
 
-ns.Events.EventFrame:SetScript("OnEvent", function(_, event, ...)
-	ns.Events.EventHandlers[event](...);
+eventFrame:SetScript("OnEvent", function(_, event, ...)
+	eventHandlers[event](...);
 end);
 
 -- Loading events are always captured.
@@ -134,7 +132,7 @@ loadingFrame:SetScript("OnEvent", function(_, event, ...)
 				ns.Recipes[itemId] = recipe;
 			end
 			ns.Loaded.Enchanting = true;
-			ns.infof(ns.LOG_LOADED, "Enchanting");
+			ns.warningf(ns.LOG_LOADED, "Enchanting");
 		end
 	end
 end);

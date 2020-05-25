@@ -4,7 +4,7 @@ local _, ns = ...;
 local func = function() end;
 
 -- Classes
-ns.CustomerClass = nil; -- Customer.lua
+-- CustomerClass - Customer.lua
 ns.OrderClass = nil; -- Order.lua
 ns.RecipeClass = nil; -- Recipe.lua
 ns.OrderStates = nil; -- OrderStates.lua
