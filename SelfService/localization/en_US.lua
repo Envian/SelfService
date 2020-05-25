@@ -31,8 +31,10 @@ ns.LOG_NEW_CUSTOMER = "Serving a new customer: %s";
 ns.LOG_RETURNING_CUSTOMER = "Serving a returning customer: %s";
 
 -- Level 3 Warning
-ns.LOG_ENABLED = "Has been enabled.";
-ns.LOG_DISABLED = "Has been disabled.";
+ns.LOG_ENABLED = "has been enabled.";
+ns.LOG_DISABLED = "has been disabled.";
+ns.ALREADY_ENABLED = "is already enabled.";
+ns.ALREADY_DISABLED = "is already disabled.";
 
 -- Level 2 Error
 ns.LOG_CONFLICT = "Recipe conflict found. %s and %s share the same Id, and will not work as expected.";

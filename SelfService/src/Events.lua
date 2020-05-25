@@ -13,6 +13,16 @@ ns.Events = {
 	end
 }
 
+local function ActionButton_OnEnter(self)
+  GameTooltip_SetDefaultAnchor(GameTooltip, UIParent);
+  GameTooltip:AddLine(self:GetText());
+  GameTooltip:Show();
+end
+
+local function ActionButton_OnLeave(self)
+  GameTooltip:Hide();
+end
+
 ns.enableAddon = function()
 	if not ns.Enabled then
 		for event, _ in pairs(ns.Events.EventHandlers) do
@@ -26,6 +36,9 @@ ns.enableAddon = function()
 			local btn = CreateFrame("Button", "SelfService_SecureButton", UIParent, "SecureActionButtonTemplate");
 			btn:SetSize(42, 42);
 			btn:SetPoint("CENTER");
+			btn:SetText("No Action");
+			btn:SetScript("OnEnter", ActionButton_OnEnter);
+			btn:SetScript("OnLeave", ActionButton_OnLeave);
 
 			local t = btn:CreateTexture(nil,"BACKGROUND")
 			t:SetTexture("Interface\\Glues\\CharacterCreate\\UI-CharacterCreate-Factions.blp")
@@ -37,6 +50,8 @@ ns.enableAddon = function()
 
 		ns.Enabled = true;
 		ns.warning(ns.LOG_ENABLED);
+	else
+		ns.warning(ns.ALREADY_ENABLED);
 	end
 end
 
@@ -51,6 +66,8 @@ ns.disableAddon = function()
 
 		ns.Enabled = false;
 		ns.warning(ns.LOG_DISABLED);
+	else
+		ns.warning(ns.ALREADY_DISABLED);
 	end
 end
 
@@ -74,24 +91,15 @@ ns.Events.EventHandlers = {
 		elseif code == 227 then ns.Trading.tradeCompleted()
 		end
 	end,
-	CURRENT_SPELL_CAST_CHANGED = function()
+	CURRENT_SPELL_CAST_CHANGED = function(cancelledCast)
 		if ns.CurrentTrade.Customer and ns.CurrentTrade.Customer.CurrentOrder then
-			ns.CurrentTrade.Customer.CurrentOrder:handleEvent("CURSOR_CHANGE");
-		end
-	end,
-	CURSOR_UPDATE = function()
-		if ns.CurrentTrade.Customer and ns.CurrentTrade.Customer.CurrentOrder then
-			ns.CurrentTrade.Customer.CurrentOrder:handleEvent("CURSOR_CHANGE");
-		end
-	end,
-	UNIT_SPELLCAST_FAILED_QUIET = function(_, _, spellId)
-		if ns.CurrentTrade.Customer and ns.CurrentTrade.Customer.CurrentOrder then
-			ns.CurrentTrade.Customer.CurrentOrder:handleEvent("ENCHANT_FAILED", spellId, "cancelled");
+			ns.CurrentTrade.Customer.CurrentOrder:handleEvent("SPELLCAST_CHANGED", cancelledCast);
 		end
 	end,
 	UNIT_SPELLCAST_FAILED = function(_, _, spellId)
 		if ns.CurrentTrade.Customer and ns.CurrentTrade.Customer.CurrentOrder then
-			ns.CurrentTrade.Customer.CurrentOrder:handleEvent("ENCHANT_FAILED", spellId, "failed");
+			ns.debug("UNIT_SPELLCAST_FAILED Event Caught: "..spellId);
+			ns.CurrentTrade.Customer.CurrentOrder:handleEvent("SPELLCAST_FAILED", spellId);
 		end
 	end,
 	UNIT_SPELLCAST_SUCCEEDED = function(_, _, spellId)

@@ -66,6 +66,7 @@ function ns.OrderClass:isTradeAcceptable()
 
 	for id, count in pairs(self.RequiredMats) do
 		if tradeMats[id] ~= count then
+			ns.debugf(ns.LOG_ORDER_ITEM_QUANTITY_MISMATCH, id, count);
 			receivedExactMats = false;
 		end
 	end
@@ -77,6 +78,7 @@ function ns.OrderClass:isTradeAcceptable()
 		end
 	end
 
+	ns.debugf(ns.LOG_ORDER_TRADE_ACCEPTABLE);
 	return receivedExactMats;
 end
 

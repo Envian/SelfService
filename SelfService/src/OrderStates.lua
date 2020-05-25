@@ -170,7 +170,7 @@ ns.OrderStates = {
 		ENTER_STATE = function(customer)
 			ns.ActionQueue.castEnchant(customer.CurrentOrder.Recipes[1].Name);
 		end,
-		CURSOR_CHANGE = function(customer, spellId)
+		SPELLCAST_CHANGED = function(customer, cancelledCast)
 			if IsCurrentSpell(customer.CurrentOrder.Recipes[1].Id) then
 				ns.ActionQueue.clearButton();
 				return ns.OrderStates.APPLY_ENCHANT;
@@ -197,7 +197,7 @@ ns.OrderStates = {
 			ns.ActionQueue.applyEnchant();
 		end,
 		TRADE_ITEM_CHANGED = function(customer, enteredItems)
-			if isEmpty(enteredItems[7]) then
+			if ns.isEmpty(enteredItems[7]) then
 				return ns.OrderStates.WAIT_FOR_ENCHANTABLE;
 			else
 				local givenEnchant = select(6, GetTradeTargetItemInfo(7));
@@ -209,19 +209,15 @@ ns.OrderStates = {
 				end
 			end
 		end,
-		ENCHANT_FAILED = function(customer, spellId, failureMethod)
+		SPELLCAST_FAILED = function(customer, spellId)
 			if spellId == customer.CurrentOrder.Recipes[1].Id then
-				if failureMethod == "failed" then
-					ns.warning("The requested enchant cannot be applied to the requested item.");
-					customer:whisper("The enchant you requested cannot be applied to that item.");
-					ns.ActionQueue.clearButton();
-					return ns.OrderStates.WAIT_FOR_ENCHANTABLE;
-				elseif failureMethod == "cancelled" then
-					ns.ActionQueue.clearButton();
-					return ns.OrderStates.CAST_ENCHANT;
-				else
-					ns.fatal("Unknown enchant failure method!");
-				end
+				ns.warning("The requested enchant cannot be applied to the requested item.");
+				customer:whisper("The enchant you requested cannot be applied to that item.");
+				ns.ActionQueue.clearButton();
+				return ns.OrderStates.WAIT_FOR_ENCHANTABLE;
+			else
+				ns.debug("Some other spell failed, but we need to reload the enchant now.");
+				return ns.OrderStates.CAST_ENCHANT;
 			end
 		end,
 		REPLACE_ENCHANT = function(customer, currentEnchant, newEnchant)
