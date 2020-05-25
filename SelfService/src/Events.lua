@@ -98,7 +98,6 @@ ns.Events.EventHandlers = {
 	end,
 	UNIT_SPELLCAST_FAILED = function(_, _, spellId)
 		if ns.CurrentTrade.Customer and ns.CurrentTrade.Customer.CurrentOrder then
-			ns.debug("UNIT_SPELLCAST_FAILED Event Caught: "..spellId);
 			ns.CurrentTrade.Customer.CurrentOrder:handleEvent("SPELLCAST_FAILED", spellId);
 		end
 	end,
@@ -112,98 +111,6 @@ ns.Events.EventHandlers = {
 ns.Events.EventFrame:SetScript("OnEvent", function(_, event, ...)
 	ns.Events.EventHandlers[event](...);
 end);
-	-- else
-	-- 	print("Another event fired. Checking currentOrder...");
-	--
-	-- 	if(ns.CurrentOrder) then
-	-- 		print("CurrentOrder is active. Call process()");
-	-- 		ns.CurrentOrder:process(event, ...);
-	-- 	else
-	-- 		print("CurrentOrder is inactive. Do nothing.");
-	-- 	end
-	-- end
-	-- elseif event == "TRADE_SHOW" then
-	-- 	print("Trade Initiated");
-	-- 	local customer = ns.getCustomer(TradeFrameRecipientNameText:GetText());
-	--
-	-- 	if customer then
-	-- 		local order = customer:getOrder();
-	--
-	-- 		if order then
-	-- 			print("Customer order is active, continue trade.");
-	-- 			if order.Status == ns.OrderClass.STATUSES.ORDERED then
-	-- 				print("Customer has ordered, waiting on mats.");
-	-- 			elseif order.Status == ns.OrderClass.STATUSES.GATHERED then
-	-- 				print("Customer has delivered mats, start enchanting");
-	-- 			else
-	-- 				print("This order is in an insofar unhandled state.");
-	-- 			end
-	-- 		else
-	-- 			CancelTrade();
-	-- 			customer:reply(ns.L.enUS.BUY_FIRST);
-	-- 		end
-	-- 	else
-	-- 		CancelTrade();
-	-- 	end
-	--
-	-- elseif event == "TRADE_TARGET_ITEM_CHANGED" then
-	-- 	local slotChanged = ...;
-	-- 	local _, _, quantity = GetTradeTargetItemInfo(slotChanged);
-	-- 	local itemLink = GetTradeTargetItemLink(slotChanged);
-	-- 	ns.CurrentTrade[slotChanged] = itemName ~= "" and { id = ns.getItemIdFromLink(itemLink), quantity = quantity } or nil;
-	--
-	-- elseif event == "TRADE_MONEY_CHANGED" then
-	-- 	-- Money frame getText will be required to determine value
-	-- 	print("Customer has changed tip value.");
-	--
-	-- elseif event == "TRADE_ACCEPT_UPDATE" then
-	-- 	local playerAccepted, customerAccepted = ...;
-	--
-	-- 	print("Trade accept button pressed: ");
-	-- 	print("  - Player Accepted: "..playerAccepted);
-	-- 	print("  - Customer Accepted: "..customerAccepted);
-	--
-	-- 	if playerAccepted == 0 and customerAccepted == 1 then
-	-- 		if ns.CurrentOrder:isTradeAcceptable() then
-	-- 			--AcceptTrade(); -- Blizzard UI Protected Function
-	-- 			print("TRADE ACCEPTABLE, ACCEPT TRADE!");
-	-- 		else
-	-- 			CancelTrade();
-	-- 		end
-	-- 	end
-	--
-	-- 	-- Minimize number of trades. Require customer to optimize trading of mats, compare to expected optimization
-	-- 	-- Gathering: 1 trade, 1 enchant. Are exact mats present?
-	-- 	-- Enchant: is slot 7 enchanted properly and does tip match price?
-	-- 	-- If we accept the trade, register the TRADE_CLOSED event and listen for bag update/chat loot events to cross check traded items
-	--
-	-- --UI_INFO_MESSAGE
-	-- -- 227 "Trade complete."
-	-- -- 226 "Trade cancelled."
-	-- elseif event == "UI_INFO_MESSAGE" then
-	-- 	local error, message = ...;
-	-- 		-- Fired when the window closes, not guarantee of successful trade
-	-- 		-- May need to check a flag to see if trade was accepted or cancelled
-	-- 	if message == "Trade complete." then
-	-- 		print("Trade complete.");
-	-- 		if ns.CurrentOrder then
-	-- 			ns.CurrentOrder:closeTrade();
-	-- 		end
-	-- 	elseif message == "Trade cancelled." then
-	-- 		print("Trade cancelled.");
-	-- 		if ns.CurrentOrder then
-	-- 			print("Keep global CurrentOrder alive.");
-	-- 		end
-	-- 	else
-	-- 		print("Something else happened.");
-	-- 	end
-	-- 		-- Listen for CHAT_MSG_LOOT events and look for expected mats
-	-- 			-- ^ This method could cause issues
-	-- 		-- Unregister all trade events
-	-- 		-- Scan bags to ensure transfer of actual materials
-	-- 		-- May be easier to record bag contents in pretrade and subtract that from bag contents posttrade
-	-- end
--- end);
 
 -- Loading events are always captured.
 local loadingFrame = CreateFrame("Frame");

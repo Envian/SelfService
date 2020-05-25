@@ -33,12 +33,15 @@ ns.LOG_RETURNING_CUSTOMER = "Serving a returning customer: %s";
 -- Level 3 Warning
 ns.LOG_ENABLED = "has been enabled.";
 ns.LOG_DISABLED = "has been disabled.";
-ns.ALREADY_ENABLED = "is already enabled.";
-ns.ALREADY_DISABLED = "is already disabled.";
+ns.LOG_ALREADY_ENABLED = "is already enabled.";
+ns.LOG_ALREADY_DISABLED = "is already disabled.";
+ns.LOG_INVALID_ENCHANTABLE = "%s cannot be applied to the requested item.";
 
 -- Level 2 Error
 ns.LOG_CONFLICT = "Recipe conflict found. %s and %s share the same Id, and will not work as expected.";
 ns.LOG_CONFLICT_HIDING = "The recipe %s will not be available.";
+ns.LOG_RECONCILE_UNRECEIVED_MATS = "ns.OrderClass:reconcile tried to remove materials we did not receive.";
+ns.LOG_RECONCILE_NEGATIVE_MATS = "ns.OrderClass:reconcile resulted in a negative ReceivedMats balance.";
 
 -- Level 1 Fatal
 
@@ -84,5 +87,15 @@ ns.L.enUS = {
 	ORDER_LIMIT = "I only support ordering 1 item at a time. Try again",
 	ORDER_IN_PROGRESS = "I only support ordering 1 item at a time. Finish your order before requesting another",
 	BUY_FIRST = "Use command !buy before opening trade.",
-	BUSY = "I am serving another player right now. Please try again later."
+	BUSY = "I am serving another player right now. Please try again later.",
+	INVALID_ITEM = "%s cannot be applied to that item.",
+	REPLACE_ENCHANT = "I am replacing %s with %s on your item.",
+	TRADE_CANCELLED = "The trade was cancelled. Open a trade window when you are ready to continue.",
+	MONEY_REQUIRED = "I need %s more to complete your order.",
+	TRANSACTION_COMPLETE = "Your transaction is complete. Come back again now, ya hear?",
+	ADD_EXACT_MATERIALS = "Place the exact materials for your order in the trade window.",
+	EXACT_MATERIALS_REQUIRED = "I need to receive exact materials for your order.",
+	CRAFTING_ORDER = "Please wait while I craft your order",
+	ORDER_READY = "Your order is ready.",
+	ADD_ENCHANTABLE_ITEM = "Place the item you want enchanted in the \"Will Not Be Traded\" slot.";
 }

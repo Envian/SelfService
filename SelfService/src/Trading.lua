@@ -36,28 +36,11 @@ ns.Trading = {
 		if not ns.CurrentTrade.Customer or not ns.CurrentTrade.Customer.CurrentOrder then return end;
 
 		local itemName, _, quantity = GetTradeTargetItemInfo(slot);
-		local slotPreviouslyEmpty = ns.isEmpty(ns.CurrentTrade.Items[slot]);
 
 		ns.CurrentTrade.Items[slot].Id = itemName and ns.getItemIdFromLink(GetTradeTargetItemLink(slot), "item") or nil;
 		ns.CurrentTrade.Items[slot].Quantity = itemName and quantity or nil;
 
 		ns.CurrentTrade.Customer.CurrentOrder:handleEvent("TRADE_ITEM_CHANGED", ns.CurrentTrade.Items);
-
-		-- if slotPreviouslyEmpty then
-		-- 	if ns.isEmpty(ns.CurrentTrade.Items[slot]) then
-		-- 		ns.debug("TIC: Trade item added, but item is not cached.");
-		-- 	else
-		-- 		ns.debug("TIC: Trade item added.");
-		-- 		ns.CurrentTrade.Customer.CurrentOrder:handleEvent("TRADE_ITEM_CHANGED", ns.CurrentTrade.Items);
-		-- 	end
-		-- else
-		-- 	if ns.isEmpty(ns.CurrentTrade.Items[slot]) then
-		-- 		ns.debug("TIC: Trade item removed from slot, or item swapped and not cached.");
-		-- 	else
-		-- 		ns.debug("TIC: Trade item swapped in slot.");
-		-- 		ns.CurrentTrade.Customer.CurrentOrder:handleEvent("TRADE_ITEM_CHANGED", ns.CurrentTrade.Items);
-		-- 	end
-		-- end
 	end,
 	tradeItemUpdated = function()
 		if not ns.CurrentTrade.Customer or not ns.CurrentTrade.Customer.CurrentOrder then return end;
