@@ -76,6 +76,20 @@ ns.printType = function(value)
 	end
 end
 
+ns.moneyToString = function(value)
+	if type(value) ~= "number" then ns.fatal("Invalid operand to moneyToString: "..tostring(value)) end;
+
+	local copper = value % 100;
+	local silver = math.floor(value/100) % 100;
+	local gold   = math.floor(value/10000);
+
+	local cashString = copper > 0 and tostring(copper).."c";
+	cashString = (silver > 0 and tostring(silver).."s ")..cashString;
+	cashString = (gold > 0 and tostring(gold).."g ")..cashString;
+
+	return cashString;
+end
+
 ns.isEmpty = function(table)
 	for _, _ in pairs(table) do
 		return false

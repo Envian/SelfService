@@ -65,9 +65,10 @@ ns.Events.EventHandlers = {
 	end,
 	TRADE_SHOW = function() ns.Trading.tradeOpened() end,
 	TRADE_TARGET_ITEM_CHANGED = function(slot) ns.Trading.tradeItemChanged(slot) end,
+	TRADE_UPDATE = function() ns.Trading.tradeItemUpdated() end,
 	TRADE_MONEY_CHANGED = function() ns.Trading.tradeGoldChanged() end,
 	TRADE_ACCEPT_UPDATE = function(playerAccepted, CustomerAccepted) ns.Trading.tradeAccepted(playerAccepted, CustomerAccepted) end,
-	TRADE_REPLACE_ENCHANT = function() ns.Trading.overrideEnchant() end,
+	TRADE_REPLACE_ENCHANT = function(currentEnchant, newEnchant) ns.Trading.overrideEnchant(currentEnchant, newEnchant) end,
 	UI_INFO_MESSAGE = function(code)
 		if     code == 226 then ns.Trading.tradeCancelled()
 		elseif code == 227 then ns.Trading.tradeCompleted()
@@ -83,14 +84,14 @@ ns.Events.EventHandlers = {
 			ns.CurrentTrade.Customer.CurrentOrder:handleEvent("CURSOR_CHANGE");
 		end
 	end,
-	-- UNIT_SPELLCAST_FAILED_QUIET = function(_, _, spellId)
-	-- 	if ns.CurrentTrade.Customer and ns.CurrentTrade.Customer.CurrentOrder then
-	-- 		ns.CurrentTrade.Customer.CurrentOrder:handleEvent("ENCHANT_FAILED", spellId);
-	-- 	end
-	-- end,
+	UNIT_SPELLCAST_FAILED_QUIET = function(_, _, spellId)
+		if ns.CurrentTrade.Customer and ns.CurrentTrade.Customer.CurrentOrder then
+			ns.CurrentTrade.Customer.CurrentOrder:handleEvent("ENCHANT_FAILED", spellId, "cancelled");
+		end
+	end,
 	UNIT_SPELLCAST_FAILED = function(_, _, spellId)
 		if ns.CurrentTrade.Customer and ns.CurrentTrade.Customer.CurrentOrder then
-			ns.CurrentTrade.Customer.CurrentOrder:handleEvent("ENCHANT_FAILED", spellId);
+			ns.CurrentTrade.Customer.CurrentOrder:handleEvent("ENCHANT_FAILED", spellId, "failed");
 		end
 	end,
 	UNIT_SPELLCAST_SUCCEEDED = function(_, _, spellId)

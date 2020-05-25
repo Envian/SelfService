@@ -71,8 +71,8 @@ ns.HELP_TEXT = {
 
 -- Whispers
 ns.L.enUS = {
-	FIRST_TIME_CUSTOMER = "First time customer message",
-	RETURNING_CUSTOMER = "Returning customer message",
+	FIRST_TIME_CUSTOMER = "Thank you for using SelfService. When you are ready, use !buy <item link> to place your order. I currently only support ordering one item at a time.",
+	RETURNING_CUSTOMER = "Welcome back to SelfService. When you are ready, use !buy <item link> to place your order. I currently only support ordering one item at a time.",
 	UNKNOWN_COMMAND = "Unknown command. Use !help to see a list of commands.",
 	NO_RESULTS = "No results found. Maybe I don't have the recipe? Try searching by slot (wrist), stat (int), and/or value (7 int).",
 	HELP = "haha get wrecked nerd. you're on your own.",

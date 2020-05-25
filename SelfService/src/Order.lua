@@ -13,7 +13,8 @@ function ns.OrderClass:new(data, customerName)
 		RequiredMats = nil,
 		RequiredMoney = 0,
 		ReceivedMats = {},
-		ReceivedMoney = 0
+		ReceivedMoney = 0,
+		TradeAttempted = false
 	}
 	data.State = ns.OrderStates[data.State.Name];
 	setmetatable(data, ns.OrderClass);
@@ -99,6 +100,7 @@ function ns.OrderClass:reconcile(recipe)
 			end
 		end
 	end
+	-- TODO: Reconcile Gold?
 end
 
 function ns.OrderClass:closeTrade()

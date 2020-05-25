@@ -1339,11 +1339,11 @@ ns.Data.Enchanting = {
 	},
 	--Greater Mystic Wand
 	[14810] = {
-		Search = {"greater", "Mystic", "wand"}
+		Search = {"greater", "mystic", "wand"}
 	},
 	--Lesser Mystic Wand
 	[14809] = {
-		Search = {"lesser", "Mystic", "wand"}
+		Search = {"lesser", "mystic", "wand"}
 	},
 	--Greater Magic Wand
 	[14807] = {
