@@ -133,9 +133,7 @@ ns.OrderStates = {
 			-- local itemLink = GetTradeTargetItemLink(slotChanged);
 			-- ns.CurrentTrade[slotChanged] = itemName ~= nil and { id = ns.getItemIdFromLink(itemLink), quantity = quantity } or nil;
 		end,
-		TRADE_CANCELLED = function(customer)
-			tradeCancelledAfterOrderReadyForDelivery(customer);
-		end
+		TRADE_CANCELLED = tradeCancelledAfterOrderReadyForDelivery(customer;
 	}),
 
 	WAIT_FOR_ENCHANTABLE = baseOrderState:new({
@@ -147,9 +145,7 @@ ns.OrderStates = {
 				return ns.OrderStates.CAST_ENCHANT;
 			end
 		end,
-		TRADE_CANCELLED = function(customer)
-			tradeCancelledAfterOrderReadyForDelivery(customer);
-		end
+		TRADE_CANCELLED = tradeCancelledAfterOrderReadyForDelivery(customer;
 	}),
 
 	CAST_ENCHANT = baseOrderState:new({
@@ -172,9 +168,7 @@ ns.OrderStates = {
 				return ns.OrderStates.WAIT_FOR_ENCHANTABLE;
 			end
 		end,
-		TRADE_CANCELLED = function(customer)
-			tradeCancelledAfterOrderReadyForDelivery(customer);
-		end
+		TRADE_CANCELLED = tradeCancelledAfterOrderReadyForDelivery(customer;
 	}),
 
 	APPLY_ENCHANT = baseOrderState:new({
@@ -211,9 +205,7 @@ ns.OrderStates = {
 			ReplaceTradeEnchant();
 			customer:whisperf(ns.L.enUS.REPLACE_ENCHANT, currentEnchant, newEnchant);
 		end,
-		TRADE_CANCELLED = function(customer)
-			tradeCancelledAfterOrderReadyForDelivery(customer);
-		end,
+		TRADE_CANCELLED = tradeCancelledAfterOrderReadyForDelivery(customer),
 	}),
 
 	AWAIT_PAYMENT = baseOrderState:new({
@@ -244,9 +236,7 @@ ns.OrderStates = {
 				return ns.OrderStates.WAIT_FOR_ENCHANTABLE;
 			end
 		end,
-		TRADE_CANCELLED = function(customer)
-			tradeCancelledAfterOrderReadyForDelivery(customer);
-		end
+		TRADE_CANCELLED = tradeCancelledAfterOrderReadyForDelivery(customer;
 	}),
 
 	ACCEPT_DELIVERY = baseOrderState:new({
@@ -256,10 +246,8 @@ ns.OrderStates = {
 			ns.ActionQueue.acceptTrade();
 		end,
 
-		TRADE_CANCELLED = function(customer)
-			tradeCancelledAfterOrderReadyForDelivery(customer);
-		end,
-		TRADE_ITEM_CHANGED = function(customer, enteredItems)
+		TRADE_CANCELLED = tradeCancelledAfterOrderReadyForDelivery(customer);,
+		TRADE_ITEM_CHANGED = function(customer, entereItems)
 			if ns.isEmpty(enteredItems[7]) then
 				ns.ActionQueue.clearButton();
 				return ns.OrderStates.WAIT_FOR_ENCHANTABLE;
