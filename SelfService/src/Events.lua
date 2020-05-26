@@ -27,8 +27,8 @@ ns.enableAddon = function()
 			eventFrame:RegisterEvent(event);
 		end
 		-- Hides outgoing bot whispers, and incoming commands.
-		-- ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER", eilterInbound);
-		-- ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER_INFORM", eilterOutbound);
+		-- ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER", filterInbound);
+		-- ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER_INFORM", filterOutbound);
 
 		if not SelfService_SecureButton then
 			local btn = CreateFrame("Button", "SelfService_SecureButton", UIParent, "SecureActionButtonTemplate");
@@ -132,7 +132,7 @@ loadingFrame:SetScript("OnEvent", function(_, event, ...)
 				ns.Recipes[itemId] = recipe;
 			end
 			ns.Loaded.Enchanting = true;
-			ns.warningf(ns.LOG_LOADED, "Enchanting");
+			ns.infof(ns.LOG_LOADED, "Enchanting");
 		end
 	end
 end);
