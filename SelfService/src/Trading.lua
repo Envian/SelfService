@@ -42,6 +42,18 @@ ns.Trading = {
 
 		ns.CurrentTrade.Customer.CurrentOrder:handleEvent("TRADE_ITEM_CHANGED", ns.CurrentTrade.Items);
 	end,
+	tradeItemUpdated = function()
+		if not ns.CurrentTrade.Customer or not ns.CurrentTrade.Customer.CurrentOrder then return end;
+
+		for i=1,7 do
+			local itemName, _, quantity = GetTradeTargetItemInfo(i);
+
+			ns.CurrentTrade.Items[i].Id = itemName and ns.getItemIdFromLink(GetTradeTargetItemLink(i), "item") or nil;
+			ns.CurrentTrade.Items[i].Quantity = itemName and quantity or nil;
+		end
+
+		ns.CurrentTrade.Customer.CurrentOrder:handleEvent("TRADE_ITEM_CHANGED", ns.CurrentTrade.Items);
+	end,
 	tradeGoldChanged = function()
 		if not ns.CurrentTrade.Customer or not ns.CurrentTrade.Customer.CurrentOrder then return end;
 
@@ -52,14 +64,14 @@ ns.Trading = {
 		if not ns.CurrentTrade.Customer or not ns.CurrentTrade.Customer.CurrentOrder then return end;
 		ns.CurrentTrade.Customer.CurrentOrder:handleEvent("TRADE_ACCEPTED", playerAccepted, CustomerAccepted);
 	end,
-	overrideEnchant = function()
+	overrideEnchant = function(currentEnchant, newEnchant)
 		if not ns.CurrentTrade.Customer or not ns.CurrentTrade.Customer.CurrentOrder then return end;
-		ns.CurrentTrade.Customer.CurrentOrder:handleEvent("REPLACE_ENCHANT");
+		ns.CurrentTrade.Customer.CurrentOrder:handleEvent("REPLACE_ENCHANT", currentEnchant, newEnchant);
 	end,
-	tradeCanceled = function()
+	tradeCancelled = function()
 		if not ns.CurrentTrade.Customer or not ns.CurrentTrade.Customer.CurrentOrder then return end;
 
-		ns.CurrentTrade.Customer.CurrentOrder:handleEvent("TRADE_CANCELED");
+		ns.CurrentTrade.Customer.CurrentOrder:handleEvent("TRADE_CANCELLED");
 		ns.CurrentTrade.Customer = nil;
 	end,
 	tradeCompleted = function()

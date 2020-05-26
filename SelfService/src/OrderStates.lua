@@ -1,6 +1,11 @@
 local _, ns = ...;
 
-local noAction = function() end;
+local noAction = function() end
+local tradeCancelledAfterOrderReadyForDelivery = function(customer)
+	customer:whisper(ns.L.enUS.TRADE_CANCELLED);
+	ns.ActionQueue.clearButton();
+	return ns.OrderStates.READY_FOR_DELIVERY;
+end
 -- Base state - All events which are not defiend fall back here, and return self.
 -- Note: these are not actual blizzard events.
 local baseOrderState = {
@@ -10,10 +15,11 @@ local baseOrderState = {
 	TRADE_MONEY_CHANGED = noAction,
 	TRADE_ACCEPTED = noAction,
 	REPLACE_ENCHANT = noAction,
-	TRADE_CANCELED = noAction,
+	TRADE_CANCELLED = noAction,
 	TRADE_COMPLETED = noAction,
-	CURSOR_CHANGE = noAction,
-	ENCHANT_FAILED = noAction,
+	SPELLCAST_CHANGED = noAction,
+	--ENCHANT_SUCCEEDED = noAction,
+	SPELLCAST_FAILED = noAction
 }
 baseOrderState.__index = baseOrderState;
 
@@ -27,7 +33,8 @@ ns.OrderStates = {
 		Name = "ORDER_PLACED",
 
 		TRADE_SHOW = function(customer)
-			print(ns.LOG_PREFIX.."Trade Initiated.");
+			customer:whisper(ns.L.enUS.ADD_EXACT_MATERIALS);
+			ns.ActionQueue.clearButton();
 			return ns.OrderStates.WAIT_FOR_MATS;
 		end
 	}),
@@ -36,24 +43,19 @@ ns.OrderStates = {
 		Name = "WAIT_FOR_MATS",
 
 		TRADE_ITEM_CHANGED = function(customer, enteredItems)
-			if ns.CurrentOrder:isTradeAcceptable() then
+			if customer.CurrentOrder:isTradeAcceptable() then
+				ns.ActionQueue.clearButton();
 				return ns.OrderStates.ACCEPT_MATS;
 			end
-
-			return nil;
 		end,
 		TRADE_ACCEPTED = function(customer, playerAccepted, customerAccepted)
-			print("Trade accept button pressed: ");
-			print("  - Player Accepted: "..playerAccepted);
-			print("  - Customer Accepted: "..customerAccepted);
-
 			if playerAccepted == 0 and customerAccepted == 1 then
-				print("Trade not acceptable.");
-				return ns.OrderStates.ORDER_PLACED;
+				customer:whisper(ns.L.enUS.EXACT_MATERIALS_REQUIRED);
 			end
 		end,
-		TRADE_CANCELED = function(customer)
-			print("Trade cancelled.");
+		TRADE_CANCELLED = function(customer)
+			customer:whisper(ns.L.enUS.TRADE_CANCELLED);
+			ns.ActionQueue.clearButton();
 			return ns.OrderStates.ORDER_PLACED;
 		end
 	}),
@@ -62,21 +64,21 @@ ns.OrderStates = {
 		Name = "ACCEPT_MATS",
 
 		ENTER_STATE = function(customer)
-			ns.ActionQueue.clearButton();
-			return nil;
+			ns.ActionQueue.acceptTrade();
 		end,
 		TRADE_ITEM_CHANGED = function(customer)
-			print("Traded items changed during trade accept phase. Abort to WAIT_FOR_MATS");
-			ns.ActionQueue.clearButton();
-			return ns.OrderStates.WAIT_FOR_MATS;
+			if not customer.CurrentOrder:isTradeAcceptable() then
+				ns.ActionQueue.clearButton();
+				return ns.OrderStates.WAIT_FOR_MATS;
+			end
 		end,
-		TRADE_CANCELED = function(customer)
-			print("Trade cancelled.");
+		TRADE_CANCELLED = function(customer)
+			customer:whisper(ns.L.enUS.TRADE_CANCELLED);
 			ns.ActionQueue.clearButton();
 			return ns.OrderStates.ORDER_PLACED;
 		end,
 		TRADE_COMPLETED = function(customer)
-			print("Trade complete.");
+			customer:whisper(ns.L.enUS.CRAFTING_ORDER);
 			ns.ActionQueue.clearButton();
 			return ns.OrderStates.CRAFT_ORDER;
 		end
@@ -93,6 +95,8 @@ ns.OrderStates = {
 
 		ENTER_STATE = function(customer)
 			if customer.CurrentOrder.Recipes[1].Type == "Enchanting" then
+				customer:whisper(ns.L.enUS.ORDER_READY);
+				ns.ActionQueue.clearButton();
 				return ns.OrderStates.READY_FOR_DELIVERY;
 			end
 		end
@@ -101,10 +105,21 @@ ns.OrderStates = {
 	READY_FOR_DELIVERY = baseOrderState:new({
 		Name = "READY_FOR_DELIVERY",
 
+		ENTER_STATE = function(customer)
+			if not customer.CurrentOrder.TradeAttempted then
+				local i = string.find(customer.Name, "-");
+				InitiateTrade(string.sub(customer.Name, 1, i-1));
+				customer.CurrentOrder.TradeAttempted = true;
+			end
+		end,
 		TRADE_SHOW = function(customer)
+			-- TODO: update for non exact materials
 			if customer.CurrentOrder.Recipes[1].Type == "Enchanting" then
+				customer:whisper(ns.L.enUS.ADD_ENCHANTABLE_ITEM);
+				ns.ActionQueue.clearButton();
 				return ns.OrderStates.WAIT_FOR_ENCHANTABLE;
 			else
+				ns.ActionQueue.clearButton();
 				return ns.OrderStates.DELIVER_ORDER;
 			end
 		end
@@ -117,13 +132,8 @@ ns.OrderStates = {
 			-- local itemName, _, quantity = GetTradeTargetItemInfo(slotChanged);
 			-- local itemLink = GetTradeTargetItemLink(slotChanged);
 			-- ns.CurrentTrade[slotChanged] = itemName ~= nil and { id = ns.getItemIdFromLink(itemLink), quantity = quantity } or nil;
-
-			return nil;
 		end,
-		TRADE_CANCELED = function(customer)
-			print("Trade cancelled.");
-			return ns.OrderStates.READY_FOR_DELIVERY;
-		end
+		TRADE_CANCELLED = tradeCancelledAfterOrderReadyForDelivery,
 	}),
 
 	WAIT_FOR_ENCHANTABLE = baseOrderState:new({
@@ -131,26 +141,11 @@ ns.OrderStates = {
 
 		TRADE_ITEM_CHANGED = function(customer, enteredItems)
 			if enteredItems[7].Id then
-				-- local itemName, _, quantity = GetTradeTargetItemInfo(slotChanged);
-				-- local itemLink = GetTradeTargetItemLink(slotChanged);
-				-- ns.CurrentTrade[slotChanged] = itemName ~= nil and { id = ns.getItemIdFromLink(itemLink), quantity = quantity } or nil;
-
-				-- local itemSlot = {};
-				--
-				-- local item = Item:CreateFromItemID(getItemIdFromLink(itemLink));
-				-- item:ContinueOnItemLoad(function()
-				-- 	itemSlot = select(9, GetItemInfo(itemLink));
-				-- end
-				-- error code 374
-				-- UNIT_SPELLCAST_FAILED arg1:"player" arg3: spell id
+				ns.ActionQueue.clearButton();
 				return ns.OrderStates.CAST_ENCHANT;
-			else
-				return nil;
 			end
 		end,
-		TRADE_CANCELED = function(customer)
-			return ns.OrderStates.READY_FOR_DELIVERY;
-		end
+		TRADE_CANCELLED = tradeCancelledAfterOrderReadyForDelivery,
 	}),
 
 	CAST_ENCHANT = baseOrderState:new({
@@ -159,7 +154,7 @@ ns.OrderStates = {
 		ENTER_STATE = function(customer)
 			ns.ActionQueue.castEnchant(customer.CurrentOrder.Recipes[1].Name);
 		end,
-		CURSOR_CHANGE = function(customer, spellId)
+		SPELLCAST_CHANGED = function(customer, cancelledCast)
 			if IsCurrentSpell(customer.CurrentOrder.Recipes[1].Id) then
 				ns.ActionQueue.clearButton();
 				return ns.OrderStates.APPLY_ENCHANT;
@@ -167,10 +162,13 @@ ns.OrderStates = {
 				ns.ActionQueue.castEnchant(customer.CurrentOrder.Recipes[1].Name);
 			end
 		end,
-		TRADE_CANCELED = function(customer)
-			ns.ActionQueue.clearButton();
-			return ns.OrderStates.READY_FOR_DELIVERY;
-		end
+		TRADE_ITEM_CHANGED = function(customer, enteredItems)
+			if ns.isEmpty(enteredItems[7]) then
+				ns.ActionQueue.clearButton();
+				return ns.OrderStates.WAIT_FOR_ENCHANTABLE;
+			end
+		end,
+		TRADE_CANCELLED = tradeCancelledAfterOrderReadyForDelivery,
 	}),
 
 	APPLY_ENCHANT = baseOrderState:new({
@@ -179,59 +177,66 @@ ns.OrderStates = {
 		ENTER_STATE = function(customer)
 			ns.ActionQueue.applyEnchant();
 		end,
-		TRADE_ITEM_CHANGED = function(customer)
-			local _, _, _, _, _, givenEnchant = GetTradeTargetItemInfo(7);
-			print("Listed Enchant: " .. (givenEnchant or "NONE"));
-			if givenEnchant == customer.CurrentOrder.Recipes[1].Name then
+		TRADE_ITEM_CHANGED = function(customer, enteredItems)
+			if ns.isEmpty(enteredItems[7]) then
 				ns.ActionQueue.clearButton();
-				return ns.OrderStates.AWAIT_PAYMENT;
+				return ns.OrderStates.WAIT_FOR_ENCHANTABLE;
+			else
+				local givenEnchant = select(6, GetTradeTargetItemInfo(7));
+
+				if givenEnchant == customer.CurrentOrder.Recipes[1].Name then
+					ns.ActionQueue.clearButton();
+					return ns.OrderStates.AWAIT_PAYMENT;
+				end
 			end
 		end,
-		ENCHANT_FAILED = function(customer, spellId)
+		SPELLCAST_FAILED = function(customer, spellId)
 			if spellId == customer.CurrentOrder.Recipes[1].Id then
-				print("Spellcast Failed, do something.");
-					ns.ActionQueue.clearButton();
+				ns.warningf(ns.LOG_INVALID_ENCHANTABLE, customer.CurrentOrder.Recipes[1].Link);
+				customer:whisperf(ns.L.enUS.INVALID_ITEM, customer.CurrentOrder.Recipes[1].Link);
+				ns.ActionQueue.clearButton();
+				return ns.OrderStates.WAIT_FOR_ENCHANTABLE;
+			else
+				ns.ActionQueue.clearButton();
 				return ns.OrderStates.CAST_ENCHANT;
 			end
 		end,
-		REPLACE_ENCHANT = function(customer, newEnchant, currentEnchant)
+		REPLACE_ENCHANT = function(customer, currentEnchant, newEnchant)
 			ReplaceTradeEnchant();
-			--ns.ActionQueue.overrideEnchant();
+			customer:whisperf(ns.L.enUS.REPLACE_ENCHANT, currentEnchant, newEnchant);
 		end,
-		TRADE_CANCELED = function(customer)
-			ns.ActionQueue.clearButton();
-			return ns.OrderStates.READY_FOR_DELIVERY;
-		end,
+		TRADE_CANCELLED = tradeCancelledAfterOrderReadyForDelivery,
 	}),
-
-
-	-- OVERRIDE_ENCHANT = baseOrderState:new({
-	-- 	Name = "OVERRIDE_ENCHANT",
-	-- 	ENTER_STATE = function()
-	-- 		ReplaceEnchant();
-	-- 	end,
-	-- 	TRADE_ITEM_CHANGED = function()
-	-- 		-- TODO: did they remove the item they are enchanting? Or did they modify something else
-	-- 		return ns.OrderStates.AWAIT_PAYMENT;
-	-- 	end,
-	-- 	TRADE_CANCELED = function(customer)
-	-- 		return ns.OrderStates.READY_FOR_DELIVERY;
-	-- 	end,
-	-- }),
 
 	AWAIT_PAYMENT = baseOrderState:new({
 		Name = "AWAIT_PAYMENT",
 
 		ENTER_STATE = function(customer)
-			-- TODO: check if money is needed to complete trade.
-			return ns.OrderStates.ACCEPT_DELIVERY;
+			local balance = customer.CurrentOrder.RequiredMoney - customer.CurrentOrder.ReceivedMoney;
+
+			if balance > 0 then
+				customer:whisperf(ns.L.enUS.MONEY_REQUIRED, ns.moneyToString(balance));
+			else
+				ns.ActionQueue.clearButton();
+				return ns.OrderStates.ACCEPT_DELIVERY;
+			end
 		end,
 		TRADE_MONEY_CHANGED = function(customer)
-			-- TODO: check if money is needed to complete trade.
+			local targetMoney = tonumber(GetTargetTradeMoney());
+			local balance = customer.CurrentOrder.RequiredMoney - customer.CurrentOrder.ReceivedMoney - targetMoney;
+
+			if balance <= 0 then
+				ns.ActionQueue.clearButton();
+				return ns.OrderStates.ACCEPT_DELIVERY
+			end
 		end,
-		TRADE_CANCELED = function(customer)
-			return ns.OrderStates["READY_FOR_DELIVERY"];
-		end
+		TRADE_ITEM_CHANGED = function(customer, enteredItems)
+			if ns.isEmpty(enteredItems[7]) then
+				ns.ActionQueue.clearButton();
+				return ns.OrderStates.WAIT_FOR_ENCHANTABLE;
+			end
+		end,
+		TRADE_CANCELLED = tradeCancelledAfterOrderReadyForDelivery,
 	}),
 
 	ACCEPT_DELIVERY = baseOrderState:new({
@@ -241,15 +246,28 @@ ns.OrderStates = {
 			ns.ActionQueue.acceptTrade();
 		end,
 
-		TRADE_CANCELED = function(customer)
-			ns.ActionQueue.clearButton();
-			return ns.OrderStates.READY_FOR_DELIVERY;
+		TRADE_CANCELLED = tradeCancelledAfterOrderReadyForDelivery,
+		TRADE_ITEM_CHANGED = function(customer, enteredItems)
+			if ns.isEmpty(enteredItems[7]) then
+				ns.ActionQueue.clearButton();
+				return ns.OrderStates.WAIT_FOR_ENCHANTABLE;
+			end
 		end,
-
+		-- ENCHANT_SUCCEEDED = function(customer, spellId) -- This is just an extra error checking tool. May not be needed.
+		-- 	if spellId == customer.CurrentOrder.Recipes[1].Id then
+		-- 		ns.ActionQueue.clearButton();
+		-- 	end
+		-- end,
 		TRADE_COMPLETED = function(customer)
-			-- TODO: if we have more things to do, return to READY_FOR_DELIVERY
-			ns.ActionQueue.clearButton();
-			return ns.OrderStates.TRANSACTION_COMPLETE;
+			customer.CurrentOrder:reconcile(customer.CurrentOrder.Recipes[1]);
+
+			if ns.isEmpty(customer.CurrentOrder.ReceivedMats) then
+				ns.ActionQueue.clearButton();
+				return ns.OrderStates.TRANSACTION_COMPLETE;
+			else
+				ns.ActionQueue.clearButton();
+				return ns.OrderStates.READY_FOR_DELIVERY;
+			end
 		end,
 	}),
 
@@ -257,7 +275,9 @@ ns.OrderStates = {
 		Name = "TRANSACTION_COMPLETE",
 
 		ENTER_STATE = function(customer)
+			customer:whisper(ns.L.enUS.TRANSACTION_COMPLETE);
 			customer.CurrentOrder = nil;
+			ns.CurrentOrder = nil;
 		end
 	})
 }
