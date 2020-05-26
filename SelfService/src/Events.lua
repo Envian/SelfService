@@ -51,7 +51,7 @@ ns.enableAddon = function()
 		ns.Enabled = true;
 		ns.warning(ns.LOG_ENABLED);
 	else
-		ns.warning(ns.ALREADY_ENABLED);
+		ns.warning(ns.LOG_ALREADY_ENABLED);
 	end
 end
 
@@ -67,7 +67,7 @@ ns.disableAddon = function()
 		ns.Enabled = false;
 		ns.warning(ns.LOG_DISABLED);
 	else
-		ns.warning(ns.ALREADY_DISABLED);
+		ns.warning(ns.LOG_ALREADY_DISABLED);
 	end
 end
 

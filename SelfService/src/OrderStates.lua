@@ -1,11 +1,11 @@
 local _, ns = ...;
 
-local noAction = function() end;
+local noAction = function() end
 local tradeCancelledAfterOrderReadyForDelivery = function(customer)
 	customer:whisper(ns.L.enUS.TRADE_CANCELLED);
 	ns.ActionQueue.clearButton();
-	return ns.OrderStates.READY_FOR_DELIVERY);
-end;
+	return ns.OrderStates.READY_FOR_DELIVERY;
+end
 -- Base state - All events which are not defiend fall back here, and return self.
 -- Note: these are not actual blizzard events.
 local baseOrderState = {
@@ -133,7 +133,7 @@ ns.OrderStates = {
 			-- local itemLink = GetTradeTargetItemLink(slotChanged);
 			-- ns.CurrentTrade[slotChanged] = itemName ~= nil and { id = ns.getItemIdFromLink(itemLink), quantity = quantity } or nil;
 		end,
-		TRADE_CANCELLED = tradeCancelledAfterOrderReadyForDelivery(customer;
+		TRADE_CANCELLED = tradeCancelledAfterOrderReadyForDelivery,
 	}),
 
 	WAIT_FOR_ENCHANTABLE = baseOrderState:new({
@@ -145,7 +145,7 @@ ns.OrderStates = {
 				return ns.OrderStates.CAST_ENCHANT;
 			end
 		end,
-		TRADE_CANCELLED = tradeCancelledAfterOrderReadyForDelivery(customer;
+		TRADE_CANCELLED = tradeCancelledAfterOrderReadyForDelivery,
 	}),
 
 	CAST_ENCHANT = baseOrderState:new({
@@ -168,7 +168,7 @@ ns.OrderStates = {
 				return ns.OrderStates.WAIT_FOR_ENCHANTABLE;
 			end
 		end,
-		TRADE_CANCELLED = tradeCancelledAfterOrderReadyForDelivery(customer;
+		TRADE_CANCELLED = tradeCancelledAfterOrderReadyForDelivery,
 	}),
 
 	APPLY_ENCHANT = baseOrderState:new({
@@ -192,7 +192,7 @@ ns.OrderStates = {
 		end,
 		SPELLCAST_FAILED = function(customer, spellId)
 			if spellId == customer.CurrentOrder.Recipes[1].Id then
-				ns.warningf(ns.LOG_INVALID_ENCHANTABLE);
+				ns.warningf(ns.LOG_INVALID_ENCHANTABLE, customer.CurrentOrder.Recipes[1].Link);
 				customer:whisperf(ns.L.enUS.INVALID_ITEM, customer.CurrentOrder.Recipes[1].Link);
 				ns.ActionQueue.clearButton();
 				return ns.OrderStates.WAIT_FOR_ENCHANTABLE;
@@ -205,7 +205,7 @@ ns.OrderStates = {
 			ReplaceTradeEnchant();
 			customer:whisperf(ns.L.enUS.REPLACE_ENCHANT, currentEnchant, newEnchant);
 		end,
-		TRADE_CANCELLED = tradeCancelledAfterOrderReadyForDelivery(customer),
+		TRADE_CANCELLED = tradeCancelledAfterOrderReadyForDelivery,
 	}),
 
 	AWAIT_PAYMENT = baseOrderState:new({
@@ -236,7 +236,7 @@ ns.OrderStates = {
 				return ns.OrderStates.WAIT_FOR_ENCHANTABLE;
 			end
 		end,
-		TRADE_CANCELLED = tradeCancelledAfterOrderReadyForDelivery(customer;
+		TRADE_CANCELLED = tradeCancelledAfterOrderReadyForDelivery,
 	}),
 
 	ACCEPT_DELIVERY = baseOrderState:new({
@@ -246,8 +246,8 @@ ns.OrderStates = {
 			ns.ActionQueue.acceptTrade();
 		end,
 
-		TRADE_CANCELLED = tradeCancelledAfterOrderReadyForDelivery(customer);,
-		TRADE_ITEM_CHANGED = function(customer, entereItems)
+		TRADE_CANCELLED = tradeCancelledAfterOrderReadyForDelivery,
+		TRADE_ITEM_CHANGED = function(customer, enteredItems)
 			if ns.isEmpty(enteredItems[7]) then
 				ns.ActionQueue.clearButton();
 				return ns.OrderStates.WAIT_FOR_ENCHANTABLE;
