@@ -12,14 +12,51 @@ local filterOutbound = function(_, event, message, sender)
 end
 
 local function ActionButton_OnEnter(self)
-  GameTooltip_SetDefaultAnchor(GameTooltip, UIParent);
-  GameTooltip:AddLine(self:GetText());
-  GameTooltip:Show();
+	GameTooltip_SetDefaultAnchor(GameTooltip, UIParent);
+	GameTooltip:AddLine(self:GetText());
+	GameTooltip:Show();
 end
 
 local function ActionButton_OnLeave(self)
-  GameTooltip:Hide();
+	GameTooltip:Hide();
 end
+
+local eventHandlers = {
+	CHAT_MSG_WHISPER = function(message, sender)
+		-- Convert messages including "?term" to "!search term"
+		message = message:gsub(SEARCH_REGEX, "!search %1");
+		if message:match(COMMAND_REGEX) then
+			local command, term = message:match("^%!(%S+)%s?(.*)$");
+			ns.getCustomer(sender):handleCommand(command, term);
+		end
+	end,
+	TRADE_SHOW = function() ns.Trading.tradeOpened() end,
+	TRADE_TARGET_ITEM_CHANGED = function(slot) ns.Trading.tradeItemChanged(slot) end,
+	TRADE_UPDATE = function() ns.Trading.tradeItemUpdated() end,
+	TRADE_MONEY_CHANGED = function() ns.Trading.tradeGoldChanged() end,
+	TRADE_ACCEPT_UPDATE = function(playerAccepted, CustomerAccepted) ns.Trading.tradeAccepted(playerAccepted, CustomerAccepted) end,
+	TRADE_REPLACE_ENCHANT = function(currentEnchant, newEnchant) ns.Trading.overrideEnchant(currentEnchant, newEnchant) end,
+	UI_INFO_MESSAGE = function(code)
+		if     code == 226 then ns.Trading.tradeCancelled()
+		elseif code == 227 then ns.Trading.tradeCompleted()
+		end
+	end,
+	CURRENT_SPELL_CAST_CHANGED = function(cancelledCast)
+		if ns.CurrentTrade.Customer and ns.CurrentTrade.Customer.CurrentOrder then
+			ns.CurrentTrade.Customer.CurrentOrder:handleEvent("SPELLCAST_CHANGED", cancelledCast);
+		end
+	end,
+	UNIT_SPELLCAST_FAILED = function(_, _, spellId)
+		if ns.CurrentTrade.Customer and ns.CurrentTrade.Customer.CurrentOrder then
+			ns.CurrentTrade.Customer.CurrentOrder:handleEvent("SPELLCAST_FAILED", spellId);
+		end
+	end,
+	-- UNIT_SPELLCAST_SUCCEEDED = function(_, _, spellId)
+	-- 	if ns.CurrentTrade.Customer and ns.CurrentTrade.Customer.CurrentOrder then
+	-- 		ns.CurrentTrade.Customer.CurrentOrder:handleEvent("ENCHANT_SUCCEEDED", spellId);
+	-- 	end
+	-- end
+};
 
 ns.enableAddon = function()
 	if not ns.Enabled then
@@ -68,43 +105,6 @@ ns.disableAddon = function()
 		ns.warning(ns.LOG_ALREADY_DISABLED);
 	end
 end
-
-local eventHandlers = {
-	CHAT_MSG_WHISPER = function(message, sender)
-		-- Convert messages including "?term" to "!search term"
-		message = message:gsub(SEARCH_REGEX, "!search %1");
-		if message:match(COMMAND_REGEX) then
-			local command, term = message:match("^%!(%S+)%s?(.*)$");
-			ns.getCustomer(sender):handleCommand(command, term);
-		end
-	end,
-	TRADE_SHOW = function() ns.Trading.tradeOpened() end,
-	TRADE_TARGET_ITEM_CHANGED = function(slot) ns.Trading.tradeItemChanged(slot) end,
-	TRADE_UPDATE = function() ns.Trading.tradeItemUpdated() end,
-	TRADE_MONEY_CHANGED = function() ns.Trading.tradeGoldChanged() end,
-	TRADE_ACCEPT_UPDATE = function(playerAccepted, CustomerAccepted) ns.Trading.tradeAccepted(playerAccepted, CustomerAccepted) end,
-	TRADE_REPLACE_ENCHANT = function(currentEnchant, newEnchant) ns.Trading.overrideEnchant(currentEnchant, newEnchant) end,
-	UI_INFO_MESSAGE = function(code)
-		if     code == 226 then ns.Trading.tradeCancelled()
-		elseif code == 227 then ns.Trading.tradeCompleted()
-		end
-	end,
-	CURRENT_SPELL_CAST_CHANGED = function(cancelledCast)
-		if ns.CurrentTrade.Customer and ns.CurrentTrade.Customer.CurrentOrder then
-			ns.CurrentTrade.Customer.CurrentOrder:handleEvent("SPELLCAST_CHANGED", cancelledCast);
-		end
-	end,
-	UNIT_SPELLCAST_FAILED = function(_, _, spellId)
-		if ns.CurrentTrade.Customer and ns.CurrentTrade.Customer.CurrentOrder then
-			ns.CurrentTrade.Customer.CurrentOrder:handleEvent("SPELLCAST_FAILED", spellId);
-		end
-	end,
-	-- UNIT_SPELLCAST_SUCCEEDED = function(_, _, spellId)
-	-- 	if ns.CurrentTrade.Customer and ns.CurrentTrade.Customer.CurrentOrder then
-	-- 		ns.CurrentTrade.Customer.CurrentOrder:handleEvent("ENCHANT_SUCCEEDED", spellId);
-	-- 	end
-	-- end
-};
 
 eventFrame:SetScript("OnEvent", function(_, event, ...)
 	eventHandlers[event](...);
