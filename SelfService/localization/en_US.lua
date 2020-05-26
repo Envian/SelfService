@@ -97,5 +97,5 @@ ns.L.enUS = {
 	EXACT_MATERIALS_REQUIRED = "I need to receive exact materials for your order.",
 	CRAFTING_ORDER = "Please wait while I craft your order",
 	ORDER_READY = "Your order is ready.",
-	ADD_ENCHANTABLE_ITEM = "Place the item you want enchanted in the \"Will Not Be Traded\" slot.";
+	ADD_ENCHANTABLE_ITEM = "Place the item you want enchanted in the \"Will Not Be Traded\" slot.",
 }

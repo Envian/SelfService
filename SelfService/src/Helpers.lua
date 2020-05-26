@@ -83,9 +83,9 @@ ns.moneyToString = function(value)
 	local silver = math.floor(value/100) % 100;
 	local gold   = math.floor(value/10000);
 
-	local cashString = copper > 0 and tostring(copper).."c" or "";;
-	cashString = (silver > 0 and tostring(silver).."s ")..cashString or "";
-	cashString = (gold > 0 and tostring(gold).."g ")..cashString or "";
+	local cashString = copper > 0 and tostring(copper).."c" or "";
+	cashString = (silver > 0 and tostring(silver).."s ") or ""..cashString;
+	cashString = (gold > 0 and tostring(gold).."s ") or ""..cashString;
 
 	return cashString;
 end

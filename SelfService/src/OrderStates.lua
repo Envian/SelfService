@@ -1,6 +1,11 @@
 local _, ns = ...;
 
 local noAction = function() end;
+local tradeCancelledAfterOrderReadyForDelivery = function(customer)
+	customer:whisper(ns.L.enUS.TRADE_CANCELLED);
+	ns.ActionQueue.clearButton();
+	return ns.OrderStates.READY_FOR_DELIVERY);
+end;
 -- Base state - All events which are not defiend fall back here, and return self.
 -- Note: these are not actual blizzard events.
 local baseOrderState = {
@@ -129,9 +134,7 @@ ns.OrderStates = {
 			-- ns.CurrentTrade[slotChanged] = itemName ~= nil and { id = ns.getItemIdFromLink(itemLink), quantity = quantity } or nil;
 		end,
 		TRADE_CANCELLED = function(customer)
-			customer:whisper(ns.L.enUS.TRADE_CANCELLED);
-			ns.ActionQueue.clearButton();
-			return ns.OrderStates.READY_FOR_DELIVERY;
+			tradeCancelledAfterOrderReadyForDelivery(customer);
 		end
 	}),
 
@@ -145,9 +148,7 @@ ns.OrderStates = {
 			end
 		end,
 		TRADE_CANCELLED = function(customer)
-			customer:whisper(ns.L.enUS.TRADE_CANCELLED);
-			ns.ActionQueue.clearButton();
-			return ns.OrderStates.READY_FOR_DELIVERY;
+			tradeCancelledAfterOrderReadyForDelivery(customer);
 		end
 	}),
 
@@ -172,9 +173,7 @@ ns.OrderStates = {
 			end
 		end,
 		TRADE_CANCELLED = function(customer)
-			customer:whisper(ns.L.enUS.TRADE_CANCELLED);
-			ns.ActionQueue.clearButton();
-			return ns.OrderStates.READY_FOR_DELIVERY;
+			tradeCancelledAfterOrderReadyForDelivery(customer);
 		end
 	}),
 
@@ -199,7 +198,7 @@ ns.OrderStates = {
 		end,
 		SPELLCAST_FAILED = function(customer, spellId)
 			if spellId == customer.CurrentOrder.Recipes[1].Id then
-				ns.warningf(ns.INVALID_ENCHANTABLE);
+				ns.warningf(ns.LOG_INVALID_ENCHANTABLE);
 				customer:whisperf(ns.L.enUS.INVALID_ITEM, customer.CurrentOrder.Recipes[1].Link);
 				ns.ActionQueue.clearButton();
 				return ns.OrderStates.WAIT_FOR_ENCHANTABLE;
@@ -213,9 +212,7 @@ ns.OrderStates = {
 			customer:whisperf(ns.L.enUS.REPLACE_ENCHANT, currentEnchant, newEnchant);
 		end,
 		TRADE_CANCELLED = function(customer)
-			customer:whisper(ns.L.enUS.TRADE_CANCELLED);
-			ns.ActionQueue.clearButton();
-			return ns.OrderStates.READY_FOR_DELIVERY;
+			tradeCancelledAfterOrderReadyForDelivery(customer);
 		end,
 	}),
 
@@ -248,9 +245,7 @@ ns.OrderStates = {
 			end
 		end,
 		TRADE_CANCELLED = function(customer)
-			customer:whisper(ns.L.enUS.TRADE_CANCELLED);
-			ns.ActionQueue.clearButton();
-			return ns.OrderStates.READY_FOR_DELIVERY;
+			tradeCancelledAfterOrderReadyForDelivery(customer);
 		end
 	}),
 
@@ -262,9 +257,7 @@ ns.OrderStates = {
 		end,
 
 		TRADE_CANCELLED = function(customer)
-			customer:whisper(ns.L.enUS.TRADE_CANCELLED);
-			ns.ActionQueue.clearButton();
-			return ns.OrderStates.READY_FOR_DELIVERY;
+			tradeCancelledAfterOrderReadyForDelivery(customer);
 		end,
 		TRADE_ITEM_CHANGED = function(customer, enteredItems)
 			if ns.isEmpty(enteredItems[7]) then

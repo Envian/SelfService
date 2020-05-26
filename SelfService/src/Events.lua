@@ -101,11 +101,11 @@ ns.Events.EventHandlers = {
 			ns.CurrentTrade.Customer.CurrentOrder:handleEvent("SPELLCAST_FAILED", spellId);
 		end
 	end,
-	UNIT_SPELLCAST_SUCCEEDED = function(_, _, spellId)
-		if ns.CurrentTrade.Customer and ns.CurrentTrade.Customer.CurrentOrder then
-			ns.CurrentTrade.Customer.CurrentOrder:handleEvent("ENCHANT_SUCCEEDED", spellId);
-		end
-	end
+	-- UNIT_SPELLCAST_SUCCEEDED = function(_, _, spellId)
+	-- 	if ns.CurrentTrade.Customer and ns.CurrentTrade.Customer.CurrentOrder then
+	-- 		ns.CurrentTrade.Customer.CurrentOrder:handleEvent("ENCHANT_SUCCEEDED", spellId);
+	-- 	end
+	-- end
 };
 
 ns.Events.EventFrame:SetScript("OnEvent", function(_, event, ...)
