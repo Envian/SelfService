@@ -94,7 +94,7 @@ ns.OrderStates = {
 		-- When all CraftFocus items are in inventory, update OrderState to READY_FOR_DELIVERY
 
 		ENTER_STATE = function(customer)
-			if customer.CurrentOrder.Recipes[1].Type == "Enchanting" then
+			if customer.CurrentOrder.Recipes[customer.CurrentOrder.OrderIndex].Type == "Enchanting" then
 				customer:whisper(ns.L.enUS.ORDER_READY);
 				ns.ActionQueue.clearTradeAction();
 				return ns.OrderStates.READY_FOR_DELIVERY;
@@ -114,13 +114,28 @@ ns.OrderStates = {
 		end,
 		TRADE_SHOW = function(customer)
 			-- TODO: update for non exact materials
-			if customer.CurrentOrder.Recipes[1].Type == "Enchanting" then
-				customer:whisper(ns.L.enUS.ADD_ENCHANTABLE_ITEM);
-				ns.ActionQueue.clearTradeAction();
-				return ns.OrderStates.WAIT_FOR_ENCHANTABLE;
+			if customer.CurrentOrder.Recipes[customer.CurrentOrder.OrderIndex] then
+				if customer.CurrentOrder.Recipes[customer.CurrentOrder.OrderIndex].Type == "Enchanting" then
+					customer:whisper(ns.L.enUS.ADD_ENCHANTABLE_ITEM);
+					ns.ActionQueue.clearTradeAction();
+					return ns.OrderStates.WAIT_FOR_ENCHANTABLE;
+				else
+					ns.ActionQueue.clearTradeAction();
+					return ns.OrderStates.DELIVER_ORDER;
+				end
 			else
-				ns.ActionQueue.clearTradeAction();
-				return ns.OrderStates.DELIVER_ORDER;
+				local returnables = {};
+				ns.debug("No more recipes to craft. Remaining received items:");
+				for id, count in pairs(customer.CurrentOrder.ReceivedMats) do
+					table.insert(returnables, ns.breakStack(id, count));
+				end
+
+				for _, returnable in ipairs(returnables) do
+					ns.debug("  - Return ["..returnable.itemId.."] from Bag"..returnable.container..", Slot"..returnable.containerSlot);
+					UseContainerItem(returnable.container, returnable.containerSlot);
+				end
+
+				return ns.OrderStates.TRANSACTION_COMPLETE;
 			end
 		end
 	}),
@@ -152,14 +167,14 @@ ns.OrderStates = {
 		Name = "CAST_ENCHANT",
 
 		ENTER_STATE = function(customer)
-			ns.ActionQueue.castEnchant(customer.CurrentOrder.Recipes[1].Name);
+			ns.ActionQueue.castEnchant(customer.CurrentOrder.Recipes[customer.CurrentOrder.OrderIndex].Name);
 		end,
 		SPELLCAST_CHANGED = function(customer, cancelledCast)
-			if IsCurrentSpell(customer.CurrentOrder.Recipes[1].Id) then
+			if IsCurrentSpell(customer.CurrentOrder.Recipes[customer.CurrentOrder.OrderIndex].Id) then
 				ns.ActionQueue.clearTradeAction();
 				return ns.OrderStates.APPLY_ENCHANT;
 			else
-				ns.ActionQueue.castEnchant(customer.CurrentOrder.Recipes[1].Name);
+				ns.ActionQueue.castEnchant(customer.CurrentOrder.Recipes[customer.CurrentOrder.OrderIndex].Name);
 			end
 		end,
 		TRADE_ITEM_CHANGED = function(customer, enteredItems)
@@ -184,16 +199,17 @@ ns.OrderStates = {
 			else
 				local givenEnchant = select(6, GetTradeTargetItemInfo(7));
 
-				if givenEnchant == customer.CurrentOrder.Recipes[1].Name then
+				if givenEnchant == customer.CurrentOrder.Recipes[customer.CurrentOrder.OrderIndex].Name then
 					ns.ActionQueue.clearTradeAction();
 					return ns.OrderStates.AWAIT_PAYMENT;
 				end
 			end
 		end,
 		SPELLCAST_FAILED = function(customer, spellId)
-			if spellId == customer.CurrentOrder.Recipes[1].Id then
-				ns.warningf(ns.LOG_INVALID_ENCHANTABLE, customer.CurrentOrder.Recipes[1].Link);
-				customer:whisperf(ns.L.enUS.INVALID_ITEM, customer.CurrentOrder.Recipes[1].Link);
+
+			if spellId == customer.CurrentOrder.Recipes[customer.CurrentOrder.OrderIndex].Id then
+				ns.warningf(ns.LOG_INVALID_ENCHANTABLE, customer.CurrentOrder.Recipes[customer.CurrentOrder.OrderIndex].Link);
+				customer:whisperf(ns.L.enUS.INVALID_ITEM, customer.CurrentOrder.Recipes[customer.CurrentOrder.OrderIndex].Link);
 				ns.ActionQueue.clearTradeAction();
 				return ns.OrderStates.WAIT_FOR_ENCHANTABLE;
 			else
@@ -254,18 +270,20 @@ ns.OrderStates = {
 			end
 		end,
 		-- ENCHANT_SUCCEEDED = function(customer, spellId) -- This is just an extra error checking tool. May not be needed.
-		-- 	if spellId == customer.CurrentOrder.Recipes[1].Id then
+		-- 	if spellId == customer.CurrentOrder.Recipes[customer.CurrentOrder.OrderIndex].Id then
 		-- 		ns.ActionQueue.clearTradeAction();
 		-- 	end
 		-- end,
 		TRADE_COMPLETED = function(customer)
-			customer.CurrentOrder:reconcile(customer.CurrentOrder.Recipes[1]);
+			customer.CurrentOrder:reconcile(customer.CurrentOrder.Recipes[customer.CurrentOrder.OrderIndex]);
 
 			if ns.isEmpty(customer.CurrentOrder.ReceivedMats) then
 				ns.ActionQueue.clearTradeAction();
 				return ns.OrderStates.TRANSACTION_COMPLETE;
 			else
+
 				ns.ActionQueue.clearTradeAction();
+				customer.CurrentOrder.TradeAttempted = false;
 				return ns.OrderStates.READY_FOR_DELIVERY;
 			end
 		end,

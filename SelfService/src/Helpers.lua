@@ -97,6 +97,31 @@ ns.isEmpty = function(table)
 	return true
 end
 
+ns.searchBags = function(itemId)
+	local matches = {}
+
+	for i=0,11 do
+		for j=1,GetContainerNumSlots(i) do
+			if GetContainerItemID(i, j) == itemId then
+				local count = select(2, GetContainerItemInfo(i, j));
+				table.insert(matches, {itemId = itemId, container = i, containerSlot = j, count = count});
+			end
+		end
+	end
+
+	return matches;
+end
+
+ns.breakStack = function(itemId, count)
+	local match = ns.searchBags(itemId)[1];
+
+	if match.count == count then
+		return match;
+	else
+		ns.error("Break stack failed to find an appropriate stack size.");
+	end
+end
+
 -- Returns targetObject, remainingString, commandStack.
 ns.pullFromCommandTable = function(commandObject, commandString)
 	if type(commandString) ~= "string" or #commandString == 0 then return commandObject, commandString, {} end;

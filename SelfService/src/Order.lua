@@ -14,7 +14,8 @@ function ns.OrderClass:new(data, customerName)
 		RequiredMoney = 0,
 		ReceivedMats = {},
 		ReceivedMoney = 0,
-		TradeAttempted = false
+		TradeAttempted = false,
+		OrderIndex = 1
 	}
 	data.State = ns.OrderStates[data.State.Name];
 	setmetatable(data, ns.OrderClass);
@@ -62,25 +63,28 @@ end
 
 function ns.OrderClass:isTradeAcceptable()
 	local tradeMats = ns.Trading.totalTrade();
-	local receivedExactMats = true;
+	local receivedSufficientMats = true;
 
 	for id, count in pairs(self.RequiredMats) do
-		if tradeMats[id] ~= count then
-			ns.debugf(ns.LOG_ORDER_ITEM_QUANTITY_MISMATCH, id, count);
-			receivedExactMats = false;
+		if tradeMats[id] < count then
+			ns.debugf(ns.LOG_ORDER_INSUFFICIENT_ITEMS, id, count);
+			receivedSufficientMats = false;
 		end
 	end
 
+	-- Still do not want to accept any trade containing items unrelated to the order
 	for id, count in pairs(tradeMats) do
 		if not self.RequiredMats[id] then
 			ns.debugf(ns.LOG_ORDER_UNDESIRED_ITEM, id, count);
-			receivedExactMats = false;
+			receivedSufficientMats = false;
 		end
 	end
 
 	ns.debugf(ns.LOG_ORDER_TRADE_ACCEPTABLE);
-	return receivedExactMats;
+	return receivedSufficientMats;
 end
+
+calculateDifference(recipe)
 
 function ns.OrderClass:reconcile(recipe)
 	if not recipe then
@@ -101,6 +105,9 @@ function ns.OrderClass:reconcile(recipe)
 			end
 		end
 	end
+
+	self.OrderIndex = self.OrderIndex + 1;
+
 	-- TODO: Reconcile Gold?
 end
 
