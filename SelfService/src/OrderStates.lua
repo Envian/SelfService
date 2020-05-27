@@ -127,9 +127,8 @@ ns.OrderStates = {
 				--return received materials
 				-- Temporary debugging/info loop
 				ns.debug("No more recipes to craft. Remaining received items:");
-				for id, count in customer.CurrentOrder.ReceivedMats do
-					local _, itemLink = GetItemInfo(id);
-					ns.debug("  - "..itemLink.."x"..count);
+				for id, count in pairs(customer.CurrentOrder.ReceivedMats) do
+					ns.debug("  - ["..id.."]x"..count);
 				end
 
 				return ns.OrderStates.TRANSACTION_COMPLETE;
