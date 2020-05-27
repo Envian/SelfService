@@ -14,6 +14,12 @@ ns.getCustomer = function(name)
 	return newCustomer;
 end
 
+ns.normalizeName = function(name)
+	name = name:match("^%s*([^%s-]*)");
+	if not name then return nil end;
+	return name:gsub("^([\128-\255]?.)", string.upper).."-"..GetRealmName();
+end
+
 -- Customer Definition
 ns.CustomerClass = {};
 ns.CustomerClass.__index = ns.CustomerClass;
@@ -75,7 +81,7 @@ function ns.CustomerClass:addToOrder(recipes)
 			order:addToOrder({ recipe });
 			self.CurrentOrder = order;
 			ns.CurrentOrder = self.CurrentOrder;
-			self:replyJoin(ns.L.enUS.ORDER_READY:format(recipe.Name),
+			self:replyJoin(ns.L.enUS.ORDER_PLACED:format(recipe.Name),
 				ns:imap(recipe.Mats, function(mat) return mat.Link end));
 		else
 			self:reply(ns.L.enUS.RECIPES_UNAVAILABLE);
@@ -92,6 +98,14 @@ end
 
 function ns.CustomerClass:replyf(message, ...)
 	self:reply(message:format(...));
+end
+
+function ns.CustomerClass:whisper(message)
+	SendChatMessage(ns.REPLY_PREFIX .. message, "WHISPER", nil, self.Name);
+end
+
+function ns.CustomerClass:whisperf(message, ...)
+	self:whisper(message:format(...));
 end
 
 function ns.CustomerClass:replyJoin(message, list, delim)

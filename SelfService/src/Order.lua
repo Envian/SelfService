@@ -14,6 +14,7 @@ function ns.OrderClass:new(data, customerName)
 		RequiredMoney = 0,
 		ReceivedMats = {},
 		ReceivedMoney = 0,
+		TradeAttempted = false
 	}
 	data.State = ns.OrderStates[data.State.Name];
 	setmetatable(data, ns.OrderClass);
@@ -60,26 +61,47 @@ function ns.OrderClass:addTradedItems(items, money)
 end
 
 function ns.OrderClass:isTradeAcceptable()
-	-- TODO: Generalize to support additional statuses
 	local tradeMats = ns.Trading.totalTrade();
-	ns.dumpTable(tradeMats);
+	local receivedExactMats = true;
 
 	for id, count in pairs(self.RequiredMats) do
-		if tradeMats[id] and count ~= tradeMats[id] then
-			ns.debugf(ns.LOG_ORDER_ITEM_QUANTITY_MISMATCH, id, count, id, tradeMats[id]);
-			return false;
+		if tradeMats[id] ~= count then
+			ns.debugf(ns.LOG_ORDER_ITEM_QUANTITY_MISMATCH, id, count);
+			receivedExactMats = false;
 		end
 	end
 
 	for id, count in pairs(tradeMats) do
 		if not self.RequiredMats[id] then
 			ns.debugf(ns.LOG_ORDER_UNDESIRED_ITEM, id, count);
-			return false;
+			receivedExactMats = false;
 		end
 	end
 
-	ns.debug(ns.LOG_ORDER_TRADE_ACCEPTABLE);
-	return true;
+	ns.debugf(ns.LOG_ORDER_TRADE_ACCEPTABLE);
+	return receivedExactMats;
+end
+
+function ns.OrderClass:reconcile(recipe)
+	if not recipe then
+		error("ns.OrderClass:reconcile called with nil parameter.", 2);
+		return;
+	end
+
+	for _, mat in ipairs(recipe.Mats) do
+		if not self.ReceivedMats[mat.Id] then
+			ns.error(ns.LOG_RECONCILE_UNRECEIVED_MATS);
+		else
+			self.ReceivedMats[mat.Id] = self.ReceivedMats[mat.Id] - mat.Count;
+
+			if self.ReceivedMats[mat.Id] < 0 then
+				ns.error(ns.LOG_RECONCILE_NEGATIVE_MATS);
+			elseif self.ReceivedMats[mat.Id] == 0 then
+				self.ReceivedMats[mat.Id] = nil;
+			end
+		end
+	end
+	-- TODO: Reconcile Gold?
 end
 
 function ns.OrderClass:closeTrade()

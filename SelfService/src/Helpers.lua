@@ -76,9 +76,45 @@ ns.printType = function(value)
 	end
 end
 
+ns.moneyToString = function(value)
+	if type(value) ~= "number" then error("Invalid operand to moneyToString: "..tostring(value), 2) end;
+
+	local copper = value % 100;
+	local silver = math.floor(value/100) % 100;
+	local gold   = math.floor(value/10000);
+
+	local cashString = copper > 0 and tostring(copper).."c" or "";
+	cashString = (silver > 0 and tostring(silver).."s ") or ""..cashString;
+	cashString = (gold > 0 and tostring(gold).."s ") or ""..cashString;
+
+	return cashString;
+end
+
 ns.isEmpty = function(table)
 	for _, _ in pairs(table) do
 		return false
 	end
 	return true
+end
+
+-- Returns targetObject, remainingString, commandStack.
+ns.pullFromCommandTable = function(commandObject, commandString)
+	if type(commandString) ~= "string" or #commandString == 0 then return commandObject, commandString, {} end;
+
+	local command = nil;
+	local remainder = nil;
+	local commandStack = {};
+
+	while type(commandObject) == "table" do
+		command, remainder = commandString:match("^%s*(%S+)%s*(.*)$");
+		if not command then
+			return commandObject, commandString, commandStack;
+		end
+
+		commandString = remainder;
+		commandObject = commandObject[command:lower()];
+		commandStack[#commandStack + 1] = command:lower();
+	end
+
+	return commandObject, commandString, commandStack;
 end
