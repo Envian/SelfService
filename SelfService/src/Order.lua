@@ -52,10 +52,11 @@ end
 
 function ns.OrderClass:isTradeAcceptable(tradeMats) -- table{K, V}, key=itemID, V=+/- number
 	local receivedSufficientMats = true;
+	tradeMats = ns.Trading.totalTrade();
 
 	for id, count in pairs(self.ItemBalance) do
-		if self.ItemBalance - tradeMats[id] > 0 then
-			ns.debugf(ns.LOG_ORDER_INSUFFICIENT_ITEMS, id, count);
+		if count - (tradeMats[id] or 0) > 0 then
+			ns.debugf(ns.LOG_ORDER_INSUFFICIENT_ITEMS, id, tradeMats[id], id, count);
 			receivedSufficientMats = false;
 		end
 	end
@@ -81,7 +82,7 @@ function ns.OrderClass:debit(matList, count)
 end
 
 function ns.OrderClass:_modifyBalance(matList, factor, count)
-	if type(mats) ~= "table" then
+	if type(matList) ~= "table" then
 		error("Balance can only be modified with a list of mats.", 3);
 	end
 	count = count or #matList;

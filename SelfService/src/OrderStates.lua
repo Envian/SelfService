@@ -43,7 +43,7 @@ ns.OrderStates = {
 		Name = "WAIT_FOR_MATS",
 
 		TRADE_ITEM_CHANGED = function(customer, enteredItems)
-			if customer.CurrentOrder:isTradeAcceptable() then
+			if customer.CurrentOrder:isTradeAcceptable(enteredItems) then
 				ns.ActionQueue.clearTradeAction();
 				return ns.OrderStates.ACCEPT_MATS;
 			end
@@ -126,9 +126,11 @@ ns.OrderStates = {
 	DELIVER_ORDER = baseOrderState:new({
 		Name = "DELIVER_ORDER",
 		ENTER_STATE = function(customer)
-			for id, count in pairs(customer.CurrentOrder.ItemBlanace) do
+			local returnables = {};
+
+			for id, count in pairs(customer.CurrentOrder.ItemBalance) do
 				if count < 0 then
-					UseContainerItem(ns.breakStack(id, -count));
+					table.insert(returnables, ns.breakStack(id, -count));
 				end
 			end
 
@@ -137,6 +139,11 @@ ns.OrderStates = {
 				UseContainerItem(returnable.container, returnable.containerSlot);
 			end
 
+			if customer.CurrentOrder.Recipes[customer.CurrentOrder.OrderIndex] then
+				return ns.OrderStates.WAIT_FOR_ENCHANTABLE;
+			else
+				return ns.OrderStates.AWAIT_PAYMENT;
+			end
 		end,
 
 		TRADE_ITEM_CHANGED = function(customer, enteredItems)
@@ -224,9 +231,7 @@ ns.OrderStates = {
 		Name = "AWAIT_PAYMENT",
 
 		ENTER_STATE = function(customer)
-			local balance = customer.CurrentOrder.RequiredMoney - customer.CurrentOrder.ReceivedMoney;
-
-			if balance > 0 then
+			if customer.CurrentOrder.MoneyBalance > 0 then
 				customer:whisperf(ns.L.enUS.MONEY_REQUIRED, ns.moneyToString(balance));
 			else
 				ns.ActionQueue.clearTradeAction();
@@ -235,9 +240,8 @@ ns.OrderStates = {
 		end,
 		TRADE_MONEY_CHANGED = function(customer)
 			local targetMoney = tonumber(GetTargetTradeMoney());
-			local balance = customer.CurrentOrder.RequiredMoney - customer.CurrentOrder.ReceivedMoney - targetMoney;
 
-			if balance <= 0 then
+			if customer.CurrentOrder.MoneyBalance - targetMoney < 0 then
 				ns.ActionQueue.clearTradeAction();
 				return ns.OrderStates.ACCEPT_DELIVERY
 			end
