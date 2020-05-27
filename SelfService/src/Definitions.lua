@@ -32,7 +32,8 @@ ns.getItemIdFromLink = func(link, type); -- Gets the first itemId from the given
 ns.getLinkedItemIds = func(text, type); -- Gets all linked item Ids. Type can be "item", "enchant", or nil for both.
 ns.delink = func(text); -- Removes all links from a string, but leaves the text (including brackets)
 ns.enableAddon = func(); -- Enables bot event handling.
-ns.disableAddon = func() -- Disables bot event handling.
+ns.disableAddon = func(); -- Disables bot event handling.
+ns.searchBags = func(itemId); -- Returns a table containing bag, slot, and stack count for the given item
 
 -- Logging
 ns.setLogLevel = func(level); -- Sets the log level to a specified value.

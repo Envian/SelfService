@@ -30,4 +30,10 @@ ns.ActionQueue = {
 		SelfService_SecureButton:SetText("Open Trade");
 		ns.debugf(ns.LOG_SECURE_BUTTON_TRADE_ACTION, ns.LOG_SECURE_BUTTON_TYPES.OPEN_TRADE);
 	end,
+	-- useContainerItem = function(bagId, slotId)
+	-- 	SelfService_SecureButton:SetAttribute("type", "script");
+	-- 	SelfService_SecureButton:SetAttribute("_script", function() UseContainerItem(bagId, slotId) end);
+	-- 	SelfService_SecureButton:SetText("Add Returnable");
+	-- 	ns.debug("Adding Returnable Item");
+	-- end,
 };

@@ -124,11 +124,15 @@ ns.OrderStates = {
 					return ns.OrderStates.DELIVER_ORDER;
 				end
 			else
-				--return received materials
-				-- Temporary debugging/info loop
+				local returnables = {};
 				ns.debug("No more recipes to craft. Remaining received items:");
 				for id, count in pairs(customer.CurrentOrder.ReceivedMats) do
-					ns.debug("  - ["..id.."]x"..count);
+					table.insert(returnables, ns.breakStack(id, count));
+				end
+
+				for _, returnable in ipairs(returnables) do
+					ns.debug("  - Return ["..returnable.itemId.."] from Bag"..returnable.container..", Slot"..returnable.containerSlot);
+					UseContainerItem(returnable.container, returnable.containerSlot);
 				end
 
 				return ns.OrderStates.TRANSACTION_COMPLETE;
