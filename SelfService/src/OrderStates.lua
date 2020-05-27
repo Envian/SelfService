@@ -275,13 +275,12 @@ ns.OrderStates = {
 		-- 	end
 		-- end,
 		TRADE_COMPLETED = function(customer)
-			customer.CurrentOrder:reconcile(customer.CurrentOrder.Recipes[customer.CurrentOrder.OrderIndex]);
+			customer.CurrentOrder.OrderIndex = customer.CurrentOrder.OrderIndex + 1;
 
-			if ns.isEmpty(customer.CurrentOrder.ReceivedMats) then
+			if not customer.CurrentOrder.Recipes[customer.CurrentOrder.OrderIndex] and ns.isEmpty(customer.CurrentOrder.ItemBalance) then
 				ns.ActionQueue.clearTradeAction();
 				return ns.OrderStates.TRANSACTION_COMPLETE;
 			else
-
 				ns.ActionQueue.clearTradeAction();
 				customer.CurrentOrder.TradeAttempted = false;
 				return ns.OrderStates.READY_FOR_DELIVERY;
