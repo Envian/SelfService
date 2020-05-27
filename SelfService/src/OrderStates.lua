@@ -271,13 +271,12 @@ ns.OrderStates = {
 		-- 	end
 		-- end,
 		TRADE_COMPLETED = function(customer)
-			customer.CurrentOrder:reconcile(customer.CurrentOrder.Recipes[customer.CurrentOrder.OrderIndex]);
+			customer.CurrentOrder.OrderIndex = customer.CurrentOrder.OrderIndex + 1;
 
-			if ns.isEmpty(customer.CurrentOrder.ItemBalance) then
+			if not customer.CurrentOrder.Recipes[customer.CurrentOrder.OrderIndex] and ns.isEmpty(customer.CurrentOrder.ItemBalance) then
 				ns.ActionQueue.clearTradeAction();
 				return ns.OrderStates.TRANSACTION_COMPLETE;
 			else
-
 				ns.ActionQueue.clearTradeAction();
 				customer.CurrentOrder.TradeAttempted = false;
 				return ns.OrderStates.READY_FOR_DELIVERY;
@@ -300,7 +299,7 @@ ns.OrderStates = {
 			Name = "SKIP_TO_AWAIT_PAYMENT",
 			ENTER_STATE = function(customer)
 				ns.print(ns.DEBUG_SKIPPED_ENCHANT);
-				customer.CurrentOrder:addTradedItems(customer.CurrentOrder.Recipes[1].Mats, 0);
+				customer.CurrentOrder:credit(customer.CurrentOrder.Recipes[customer.CurrentOrder.OrderIndex].Mats);
 				customer:whisper(ns.L.enUS.DEBUG_SKIPPED_ENCHANT);
 				return ns.OrderStates.AWAIT_PAYMENT;
 			end

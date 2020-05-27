@@ -52,7 +52,7 @@ ns.Trading = {
 		local itemName, _, quantity = GetTradePlayerItemInfo(slot);
 
 		ns.CurrentTrade.PlayerItems[slot].Id = itemName and ns.getItemIdFromLink(GetTradePlayerItemLink(slot), "item") or nil;
-		ns.CurrentTrade.PlayerItems[slot].Count = itemName and -quantity or nil;
+		ns.CurrentTrade.PlayerItems[slot].Count = itemName and quantity or nil;
 	end,
 	tradeItemUpdated = function()
 		if not ns.CurrentTrade.Customer or not ns.CurrentTrade.Customer.CurrentOrder then return end;
@@ -92,6 +92,9 @@ ns.Trading = {
 		-------------------------------------------------------------------------------------------------------
 		-- Reconcile trade items from both ns.CurrentTrade.PlayerItems and ns.CurrentTrade.TargetItems here. --
 		-------------------------------------------------------------------------------------------------------
+		ns.CurrentTrade.Customer.CurrentOrder:debit(ns.CurrentTrade.PlayerItems, 6);
+		ns.CurrentTrade.Customer.CurrentOrder:credit(ns.CurrentTrade.TargetItems, 6);
+
 
 		ns.CurrentTrade.Customer.CurrentOrder:handleEvent("TRADE_COMPLETED");
 		ns.CurrentTrade.Customer = nil;

@@ -35,13 +35,10 @@ function ns.OrderClass:handleEvent(event, ...)
 end
 
 function ns.OrderClass:addToOrder(recipes)
-	for _, recipe in ipairs(recipes) do
-		for _, mat in ipairs(recipe.Mats) do
-			self.ItemBalance[mat.Id] = (self.ItemBalance[mat.Id] or 0) + mat.Count;
-		end
-	end
-
 	self.Recipes = recipes;
+	for _, recipe in ipairs(recipes) do
+		self:debit(recipe.Mats);
+	end
 end
 
 -- function ns.OrderClass:addTradedItems(items, money)
@@ -75,30 +72,33 @@ function ns.OrderClass:isTradeAcceptable(tradeMats) -- table{K, V}, key=itemID, 
 	return receivedSufficientMats;
 end
 
-function ns.OrderClass:reconcile(tradeMats)
-	if not tradeMats then
-		error("ns.OrderClass:reconcile called with nil parameter.", 2);
-		return;
+function ns.OrderClass:credit(matList, count)
+	self:_modifyBalance(matList, -1, count);
+end
+
+function ns.OrderClass:debit(matList, count)
+	self:_modifyBalance(matList, 1, count);
+end
+
+function ns.OrderClass:_modifyBalance(matList, factor, count)
+	if type(mats) ~= "table" then
+		error("Balance can only be modified with a list of mats.", 3);
+	end
+	count = count or #matList;
+	if type(count) ~= "number" or count < 0 or count > #matList then
+		error("Invalid count passed to credit/debit.", 3);
 	end
 
-	for id, count in pairs(tradeMats) do
-		if not self.ItemBalance[id] then
-			ns.error(ns.LOG_RECONCILE_UNRECEIVED_MATS);
-		else
-			self.ItemBalance[id] = self.ItemBalance[id] - count;
 
-			if self.ItemBalance[id] ~= 0 then
-				ns.debug("Item Balance not zero after reconcile:: ID: "..id.."; Balance: "..self.ItemBalance[id]);
-				--ns.error(ns.LOG_RECONCILE_NEGATIVE_MATS);
-			elseif self.ItemBalance[id] == 0 then
+	for n = 1,count do
+		id, count = matList[n].Id, matList[n].Count;
+		if id then
+			self.ItemBalance[id] = (self.ItemBalance[id] or 0) + (count * factor);
+			if self.ItemBalance[id] == 0 then
 				self.ItemBalance[id] = nil;
 			end
 		end
 	end
-
-	self.OrderIndex = self.OrderIndex + 1;
-
-	-- TODO: Reconcile Gold?
 end
 
 function ns.OrderClass:closeTrade()
