@@ -49,12 +49,20 @@ ns.LOG_RECONCILE_NEGATIVE_MATS = "ns.OrderClass:reconcile resulted in a negative
 ns.CMD_UNKNOWN_COMMAND = "Unknown command: %s";
 ns.CMD_UNKNOWN_SUBCOMMAND = "%s is not a valid subcommand for %s.";
 ns.CMD_MORE_COMMANDS_NEEDED = "%s requires more subcommands to run.";
+ns.CMD_HELP_UNKNOWN = "No help found for %s.";
+
+ns.CMD_CONFIRM_WARNING = "Use /ss confirm to continue.";
+ns.CMD_CONFIRM_NOTHING = "Nothing needed confirmation.";
+
 ns.CMD_RESET_BAD_NAME = "Reset requires a customer name."
 ns.CMD_RESET_ORDER = "Order for %s has been reset.";
 ns.CMD_RESET_CURRENT_ORDER = "Current order for %s has been reset.";
 ns.CMD_RESET_ORDER_BAD_NAME = "Unable to reset order for %s, Customer not found.";
 ns.CMD_RESET_NO_ORDER = "No order to reset.";
-ns.CMD_HELP_UNKNOWN = "No help found for %s.";
+
+ns.CMD_WIPE_ALL_WARNING = "WARNING: This will wipe all settings and reload the UI.";
+ns.CMD_WIPE_CUSTOMERS_WARNING = "WARNING: This will wipe all customer data and current orders.";
+ns.CMD_WIPE_CUSTOMERS = "All customers and orders have been reset.";
 
 -- Console command help text
 -- This is a map/array hybrid. The map part is used to get the command's help text. the list is printed as help text.
