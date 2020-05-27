@@ -117,31 +117,27 @@ ns.OrderStates = {
 			if customer.CurrentOrder.Recipes[customer.CurrentOrder.OrderIndex] then
 				if customer.CurrentOrder.Recipes[customer.CurrentOrder.OrderIndex].Type == "Enchanting" then
 					customer:whisper(ns.L.enUS.ADD_ENCHANTABLE_ITEM);
-					ns.ActionQueue.clearTradeAction();
-					return ns.OrderStates.WAIT_FOR_ENCHANTABLE;
-				else
-					ns.ActionQueue.clearTradeAction();
-					return ns.OrderStates.DELIVER_ORDER;
 				end
-			else
-				local returnables = {};
-				ns.debug("No more recipes to craft. Remaining received items:");
-				for id, count in pairs(customer.CurrentOrder.ReceivedMats) do
-					table.insert(returnables, ns.breakStack(id, count));
-				end
-
-				for _, returnable in ipairs(returnables) do
-					ns.debug("  - Return ["..returnable.itemId.."] from Bag"..returnable.container..", Slot"..returnable.containerSlot);
-					UseContainerItem(returnable.container, returnable.containerSlot);
-				end
-
-				return ns.OrderStates.TRANSACTION_COMPLETE;
 			end
+			return ns.OrderStates.DELIVER_ORDER;
 		end
 	}),
 
 	DELIVER_ORDER = baseOrderState:new({
 		Name = "DELIVER_ORDER",
+		ENTER_STATE = function(customer)
+			for id, count in pairs(customer.CurrentOrder.ItemBlanace) do
+				if count < 0 then
+					UseContainerItem(ns.breakStack(id, -count));
+				end
+			end
+
+			for _, returnable in ipairs(returnables) do
+				ns.debug("  - Return ["..returnable.itemId.."] from Bag"..returnable.container..", Slot"..returnable.containerSlot);
+				UseContainerItem(returnable.container, returnable.containerSlot);
+			end
+
+		end,
 
 		TRADE_ITEM_CHANGED = function(customer, enteredItems)
 			-- local itemName, _, quantity = GetTradeTargetItemInfo(slotChanged);
@@ -277,7 +273,7 @@ ns.OrderStates = {
 		TRADE_COMPLETED = function(customer)
 			customer.CurrentOrder:reconcile(customer.CurrentOrder.Recipes[customer.CurrentOrder.OrderIndex]);
 
-			if ns.isEmpty(customer.CurrentOrder.ReceivedMats) then
+			if ns.isEmpty(customer.CurrentOrder.ItemBalance) then
 				ns.ActionQueue.clearTradeAction();
 				return ns.OrderStates.TRANSACTION_COMPLETE;
 			else
