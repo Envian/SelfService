@@ -4,6 +4,15 @@ local _, ns = ...;
 ns.RecipeClass = {};
 ns.RecipeClass.__index = ns.RecipeClass;
 
+local enchantRecipeClass = {};
+enchantRecipeClass.__index = enchantRecipeClass;
+setmetatable(enchantRecipeClass, ns.RecipeClass);
+
+local craftRecipeClass = {};
+craftRecipeClass.__index = craftRecipeClass;
+setmetatable(craftRecipeClass, ns.RecipeClass);
+
+
 function ns.RecipeClass:newEnchant(id, recipe)
 	if not recipe or not recipe.Search then error("Recipes require a template with Search criteria") end
 
@@ -14,7 +23,7 @@ function ns.RecipeClass:newEnchant(id, recipe)
 	recipe.CraftFocus = nil;
 	recipe.Mats = {};
 
-	setmetatable(recipe, ns.EnchantRecipeClass);
+	setmetatable(recipe, enchantRecipeClass);
 	return recipe;
 end
 
@@ -34,12 +43,7 @@ function ns.RecipeClass:register()
 	end
 end
 
-
-ns.EnchantRecipeClass = {};
-ns.EnchantRecipeClass.__index = ns.EnchantRecipeClass;
-setmetatable(ns.EnchantRecipeClass, ns.RecipeClass);
-
-function ns.EnchantRecipeClass:loadFromIndex(index)
+function enchantRecipeClass:loadFromIndex(index)
 	local name, _ = GetCraftInfo(index);
 
 	self.Name = name;
@@ -62,8 +66,3 @@ function ns.EnchantRecipeClass:loadFromIndex(index)
 
 	self:register();
 end
-
-
-ns.CraftedRecipeClass = {};
-ns.CraftedRecipeClass.__index = ns.CraftedRecipeClass;
-setmetatable(ns.CraftedRecipeClass, ns.RecipeClass);
