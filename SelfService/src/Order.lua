@@ -55,8 +55,8 @@ end
 function ns.OrderClass:addTradedItems(items, money)
 	self.ReceivedMoney = self.ReceivedMoney + money;
 	for n = 1,6 do
-		if items[n].Id then
-			self.ReceivedMats[items[n].Id] = (self.ReceivedMats[items[n].Id] or 0) + items[n].Quantity;
+		if items[n] and items[n].Id then
+			self.ReceivedMats[items[n].Id] = (self.ReceivedMats[items[n].Id] or 0) + items[n].Count;
 		end
 	end
 end

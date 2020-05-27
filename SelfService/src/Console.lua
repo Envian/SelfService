@@ -4,6 +4,31 @@ SLASH_SELFSERVICE1 = "/selfservice";
 SLASH_SELFSERVICE2 = "/service";
 SLASH_SELFSERVICE3 = "/ss";
 
+-- Callbacks for wipe commands. Goes through with the wipe
+local doWipeAll = function()
+	SelfServiceData = nil;
+	ReloadUI();
+end
+
+local doWipeCustomers = function()
+	SelfServiceData.Customers = {};
+	ns.Customers = {};
+	ns.CurrentOrder = nil;
+
+	ns.print(ns.CMD_WIPE_CUSTOMERS);
+end
+
+-- Stores the current action that needs confirmation.
+local confirmCallback = nil;
+
+local confirmFromUser = function(message, callback)
+	if type(message) ~= "string" then error("Invalid message passed into confirmFromUser.", 2) end;
+	if type(callback) ~= "function" then error("Invalid callback passed into confirmFromUser.", 2) end;
+
+	ns.print(message..ns.CMD_CONFIRM_WARNING);
+	confirmCallback = callback;
+end
+
 local slashCommands = {
 	enable = ns.enableAddon,
 	disable = ns.disableAddon,
@@ -17,6 +42,14 @@ local slashCommands = {
 			for _, line in ipairs(helpList) do ns.print(line) end;
 		end
 	end,
+	confirm = function()
+		if confirmCallback then
+			confirmCallback();
+			confirmCallback = nil;
+		else
+			ns.print(ns.CMD_CONFIRM_NOTHING);
+		end
+	end,
 	reset = {
 		order = function(who)
 			if not who or #who == 0 then
@@ -24,8 +57,11 @@ local slashCommands = {
 				return;
 			end
 
-			local customer = ns.Customers[ns.normalizeName(who)];
-			if customer then
+			local customerName = ns.normalizeName(who);
+			-- Customers are always added to SelfServiceData on creation.
+			if SelfServiceData.Customers[customerName] then
+				local customer = ns.getCustomer(customerName);
+
 				if not customer.CurrentOrder then
 					ns.print(ns.CMD_RESET_NO_ORDER);
 					return;
@@ -48,8 +84,23 @@ local slashCommands = {
 			else
 				ns.print(ns.CMD_RESET_NO_ORDER);
 			end
+		end,
+	},
+	wipe = {
+		all = function()
+			confirmFromUser(ns.CMD_WIPE_ALL_WARNING, doWipeAll);
+		end,
+		customers = function()
+			confirmFromUser(ns.CMD_WIPE_CUSTOMERS_WARNING, doWipeCustomers);
+		end,
+	},
+	debug = {
+		mockenchants = function()
+			ns.print(ns.DEBUG_SKIP_ENCHANT_STATE);
+			ns.print(ns.DEBUG_MODE_RELOAD_MESSAGE);
+			ns.OrderStates.CAST_ENCHANT = ns.OrderStates.DEBUG_STATES.SKIP_TO_AWAIT_PAYMENT;
 		end
-	}
+	},
 }
 
 SlashCmdList["SELFSERVICE"] = function(message, editbox)
