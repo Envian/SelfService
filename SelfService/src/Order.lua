@@ -37,7 +37,7 @@ end
 function ns.OrderClass:addToOrder(recipes)
 	self.Recipes = recipes;
 	for _, recipe in ipairs(recipes) do
-		self:reconcile(recipe.Mats, false);
+		self:debit(recipe.Mats);
 	end
 end
 
@@ -72,14 +72,28 @@ function ns.OrderClass:isTradeAcceptable(tradeMats) -- table{K, V}, key=itemID, 
 	return receivedSufficientMats;
 end
 
-function ns.OrderClass:reconcile(mats, remove)
+function ns.OrderClass:credit(matList, count)
+	self:_modifyBalance(matList, -1, count);
+end
+
+function ns.OrderClass:debit(matList, count)
+	self:_modifyBalance(matList, 1, count);
+end
+
+function ns.OrderClass:_modifyBalance(matList, factor, count)
 	if type(mats) ~= "table" then
-		error("Reconcile requires a list of materials to reconcile.", 2);
+		error("Balance can only be modified with a list of mats.", 3);
+	end
+	count = count or #matList;
+	if type(count) ~= "number" or count < 0 or count > #matList then
+		error("Invalid count passed to credit/debit.", 3);
 	end
 
-	for n = 1,6 do
-		if mats[n] and mats[n].Id then
-			self.ItemBalance[id] = (self.ItemBalance[id] or 0) + (remove and count * -1 or count);
+
+	for n = 1,count do
+		id, count = matList[n].Id, matList[n].Count;
+		if id then
+			self.ItemBalance[id] = (self.ItemBalance[id] or 0) + (count * factor);
 			if self.ItemBalance[id] == 0 then
 				self.ItemBalance[id] = nil;
 			end

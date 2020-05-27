@@ -303,7 +303,7 @@ ns.OrderStates = {
 			Name = "SKIP_TO_AWAIT_PAYMENT",
 			ENTER_STATE = function(customer)
 				ns.print(ns.DEBUG_SKIPPED_ENCHANT);
-				customer.CurrentOrder:reconcile(customer.CurrentOrder.Recipes[customer.CurrentOrder.OrderIndex].Mats, true);
+				customer.CurrentOrder:credit(customer.CurrentOrder.Recipes[customer.CurrentOrder.OrderIndex].Mats);
 				customer:whisper(ns.L.enUS.DEBUG_SKIPPED_ENCHANT);
 				return ns.OrderStates.AWAIT_PAYMENT;
 			end

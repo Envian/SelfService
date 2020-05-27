@@ -96,8 +96,8 @@ ns.Trading = {
 		-------------------------------------------------------------------------------------------------------
 		-- Reconcile trade items from both ns.CurrentTrade.PlayerItems and ns.CurrentTrade.TargetItems here. --
 		-------------------------------------------------------------------------------------------------------
-		ns.CurrentTrade.Customer.CurrentOrder:reconcile(ns.CurrentTrade.PlayerItems, false);
-		ns.CurrentTrade.Customer.CurrentOrder:reconcile(ns.CurrentTrade.TargetItems, true);
+		ns.CurrentTrade.Customer.CurrentOrder:debit(ns.CurrentTrade.PlayerItems, 6);
+		ns.CurrentTrade.Customer.CurrentOrder:credit(ns.CurrentTrade.TargetItems, 6);
 
 
 		ns.CurrentTrade.Customer.CurrentOrder:handleEvent("TRADE_COMPLETED");
