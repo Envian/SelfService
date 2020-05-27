@@ -84,8 +84,6 @@ function ns.OrderClass:isTradeAcceptable()
 	return receivedSufficientMats;
 end
 
-calculateDifference(recipe)
-
 function ns.OrderClass:reconcile(recipe)
 	if not recipe then
 		error("ns.OrderClass:reconcile called with nil parameter.", 2);
