@@ -35,13 +35,10 @@ function ns.OrderClass:handleEvent(event, ...)
 end
 
 function ns.OrderClass:addToOrder(recipes)
-	for _, recipe in ipairs(recipes) do
-		for _, mat in ipairs(recipe.Mats) do
-			self.ItemBalance[mat.Id] = (self.ItemBalance[mat.Id] or 0) + mat.Count;
-		end
-	end
-
 	self.Recipes = recipes;
+	for _, recipe in ipairs(recipes) do
+		self:reconcile(recipe.Mats, false);
+	end
 end
 
 -- function ns.OrderClass:addTradedItems(items, money)
@@ -75,30 +72,19 @@ function ns.OrderClass:isTradeAcceptable(tradeMats) -- table{K, V}, key=itemID, 
 	return receivedSufficientMats;
 end
 
-function ns.OrderClass:reconcile(tradeMats)
-	if not tradeMats then
-		error("ns.OrderClass:reconcile called with nil parameter.", 2);
-		return;
+function ns.OrderClass:reconcile(mats, remove)
+	if type(mats) ~= "table" then
+		error("Reconcile requires a list of materials to reconcile.", 2);
 	end
 
-	for id, count in pairs(tradeMats) do
-		if not self.ItemBalance[id] then
-			ns.error(ns.LOG_RECONCILE_UNRECEIVED_MATS);
-		else
-			self.ItemBalance[id] = self.ItemBalance[id] - count;
-
-			if self.ItemBalance[id] ~= 0 then
-				ns.debug("Item Balance not zero after reconcile:: ID: "..id.."; Balance: "..self.ItemBalance[id]);
-				--ns.error(ns.LOG_RECONCILE_NEGATIVE_MATS);
-			elseif self.ItemBalance[id] == 0 then
+	for n = 1,6 do
+		if mats[n] and mats[n].Id then
+			self.ItemBalance[id] = (self.ItemBalance[id] or 0) + (remove and count * -1 or count);
+			if self.ItemBalance[id] == 0 then
 				self.ItemBalance[id] = nil;
 			end
 		end
 	end
-
-	self.OrderIndex = self.OrderIndex + 1;
-
-	-- TODO: Reconcile Gold?
 end
 
 function ns.OrderClass:closeTrade()

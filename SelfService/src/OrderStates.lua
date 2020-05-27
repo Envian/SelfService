@@ -304,7 +304,9 @@ ns.OrderStates = {
 			Name = "SKIP_TO_AWAIT_PAYMENT",
 			ENTER_STATE = function(customer)
 				ns.print(ns.DEBUG_SKIPPED_ENCHANT);
-				customer.CurrentOrder:addTradedItems(customer.CurrentOrder.Recipes[1].Mats, 0);
+				for n = customer.CurrentOrder.OrderIndex,#customer.CurrentOrder.Recipes do
+					customer.CurrentOrder:reconcile(customer.CurrentOrder.Recipes[n].Mats, true);
+				end
 				customer:whisper(ns.L.enUS.DEBUG_SKIPPED_ENCHANT);
 				return ns.OrderStates.AWAIT_PAYMENT;
 			end
