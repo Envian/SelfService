@@ -10,10 +10,8 @@ function ns.OrderClass:new(data, customerName)
 		CustomerName = customerName,
 		State = ns.OrderStates["ORDER_PLACED"],
 		Recipes = nil,
-		RequiredMats = nil,
-		RequiredMoney = 0,
-		ReceivedMats = {},
-		ReceivedMoney = 0,
+		ItemBalance = {},
+		MoneyBalance = 0,
 		TradeAttempted = false,
 		OrderIndex = 1
 	}
@@ -37,36 +35,29 @@ function ns.OrderClass:handleEvent(event, ...)
 end
 
 function ns.OrderClass:addToOrder(recipes)
-	local requiredMats = {};
 	for _, recipe in ipairs(recipes) do
 		for _, mat in ipairs(recipe.Mats) do
-			requiredMats[mat.Id] = (requiredMats[mat.Id] or 0) + mat.Count;
+			self.ItemBalance[mat.Id] = (self.ItemBalance[mat.Id] or 0) + mat.Count;
 		end
 	end
 
 	self.Recipes = recipes;
-	self.RequiredMats = requiredMats;
-
-	for id, count in pairs(self.RequiredMats) do
-		local _, itemLink = GetItemInfo(id);
-	end
 end
 
-function ns.OrderClass:addTradedItems(items, money)
-	self.ReceivedMoney = self.ReceivedMoney + money;
-	for n = 1,6 do
-		if items[n] and items[n].Id then
-			self.ReceivedMats[items[n].Id] = (self.ReceivedMats[items[n].Id] or 0) + items[n].Count;
-		end
-	end
-end
+-- function ns.OrderClass:addTradedItems(items, money)
+-- 	self.ReceivedMoney = self.ReceivedMoney + money;
+-- 	for n = 1,6 do
+-- 		if items[n] and items[n].Id then
+-- 			self.ReceivedMats[items[n].Id] = (self.ReceivedMats[items[n].Id] or 0) + items[n].Count;
+-- 		end
+-- 	end
+-- end
 
-function ns.OrderClass:isTradeAcceptable()
-	local tradeMats = ns.Trading.totalTrade();
+function ns.OrderClass:isTradeAcceptable(tradeMats) -- table{K, V}, key=itemID, V=+/- number
 	local receivedSufficientMats = true;
 
-	for id, count in pairs(self.RequiredMats) do
-		if tradeMats[id] < count then
+	for id, count in pairs(self.ItemBalance) do
+		if self.ItemBalance - tradeMats[id] > 0 then
 			ns.debugf(ns.LOG_ORDER_INSUFFICIENT_ITEMS, id, count);
 			receivedSufficientMats = false;
 		end
@@ -74,7 +65,7 @@ function ns.OrderClass:isTradeAcceptable()
 
 	-- Still do not want to accept any trade containing items unrelated to the order
 	for id, count in pairs(tradeMats) do
-		if not self.RequiredMats[id] then
+		if not self.ItemBalance[id] then
 			ns.debugf(ns.LOG_ORDER_UNDESIRED_ITEM, id, count);
 			receivedSufficientMats = false;
 		end
@@ -84,24 +75,23 @@ function ns.OrderClass:isTradeAcceptable()
 	return receivedSufficientMats;
 end
 
-calculateDifference(recipe)
-
-function ns.OrderClass:reconcile(recipe)
-	if not recipe then
+function ns.OrderClass:reconcile(tradeMats)
+	if not tradeMats then
 		error("ns.OrderClass:reconcile called with nil parameter.", 2);
 		return;
 	end
 
-	for _, mat in ipairs(recipe.Mats) do
-		if not self.ReceivedMats[mat.Id] then
+	for id, count in pairs(tradeMats) do
+		if not self.ItemBalance[id] then
 			ns.error(ns.LOG_RECONCILE_UNRECEIVED_MATS);
 		else
-			self.ReceivedMats[mat.Id] = self.ReceivedMats[mat.Id] - mat.Count;
+			self.ItemBalance[id] = self.ItemBalance[id] - count;
 
-			if self.ReceivedMats[mat.Id] < 0 then
-				ns.error(ns.LOG_RECONCILE_NEGATIVE_MATS);
-			elseif self.ReceivedMats[mat.Id] == 0 then
-				self.ReceivedMats[mat.Id] = nil;
+			if self.ItemBalance[id] ~= 0 then
+				ns.debug("Item Balance not zero after reconcile:: ID: "..id.."; Balance: "..self.ItemBalance[id]);
+				--ns.error(ns.LOG_RECONCILE_NEGATIVE_MATS);
+			elseif self.ItemBalance[id] == 0 then
+				self.ItemBalance[id] = nil;
 			end
 		end
 	end

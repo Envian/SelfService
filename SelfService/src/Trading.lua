@@ -85,9 +85,15 @@ ns.Trading = {
 		local tradeMats = {};
 
 		for i=1, 6 do
-			local stack = ns.CurrentTrade.Items[i];
-			if stack.Id then
-				tradeMats[stack.Id] = (tradeMats[stack.Id] or 0) + stack.Count;
+			local playerStack = ns.CurrentTrade.PlayerItems[i];
+			local targetStack = ns.CurrentTrade.TargetItems[i];
+
+			if playerStack.Id then
+				tradeMats[playerStack.Id] = (tradeMats[playerStack.Id] or 0) - playerStack.Count;
+			end
+
+			if targetStack.Id then
+				tradeMats[targetStack.Id] = (tradeMats[targetStack.Id] or 0) + targetStack.Count;
 			end
 		end
 
