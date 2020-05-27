@@ -24,8 +24,11 @@ local slashCommands = {
 				return;
 			end
 
-			local customer = ns.Customers[ns.normalizeName(who)];
-			if customer then
+			local customerName = ns.normalizeName(who);
+			-- Customers are always added to SelfServiceData on creation.
+			if SelfServiceData.Customers[customerName] then
+				local customer = ns.getCustomer(customerName);
+
 				if not customer.CurrentOrder then
 					ns.print(ns.CMD_RESET_NO_ORDER);
 					return;
