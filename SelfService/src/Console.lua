@@ -93,7 +93,14 @@ local slashCommands = {
 		customers = function()
 			confirmFromUser(ns.CMD_WIPE_CUSTOMERS_WARNING, doWipeCustomers);
 		end,
-	}
+	},
+	debug = {
+		mockenchants = function()
+			ns.print(ns.DEBUG_SKIP_ENCHANT_STATE);
+			ns.print(ns.DEBUG_MODE_RELOAD_MESSAGE);
+			ns.OrderStates.CAST_ENCHANT = ns.OrderStates.DEBUG_STATES.SKIP_TO_AWAIT_PAYMENT;
+		end
+	},
 }
 
 SlashCmdList["SELFSERVICE"] = function(message, editbox)

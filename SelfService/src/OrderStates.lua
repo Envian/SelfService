@@ -279,5 +279,17 @@ ns.OrderStates = {
 			customer.CurrentOrder = nil;
 			ns.CurrentOrder = nil;
 		end
-	})
+	}),
+
+	DEBUG_STATES = {
+		SKIP_TO_AWAIT_PAYMENT = baseOrderState:new({
+			Name = "SKIP_TO_AWAIT_PAYMENT",
+			ENTER_STATE = function(customer)
+				ns.print(ns.DEBUG_SKIPPED_ENCHANT);
+				customer.CurrentOrder:addTradedItems(customer.CurrentOrder.Recipes[1].Mats, 0);
+				customer:whisper(ns.L.enUS.DEBUG_SKIPPED_ENCHANT);
+				return ns.OrderStates.AWAIT_PAYMENT;
+			end
+		}),
+	}
 }

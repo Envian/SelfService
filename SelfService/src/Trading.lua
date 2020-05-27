@@ -38,7 +38,7 @@ ns.Trading = {
 		local itemName, _, quantity = GetTradeTargetItemInfo(slot);
 
 		ns.CurrentTrade.Items[slot].Id = itemName and ns.getItemIdFromLink(GetTradeTargetItemLink(slot), "item") or nil;
-		ns.CurrentTrade.Items[slot].Quantity = itemName and quantity or nil;
+		ns.CurrentTrade.Items[slot].Count = itemName and quantity or nil;
 
 		ns.CurrentTrade.Customer.CurrentOrder:handleEvent("TRADE_ITEM_CHANGED", ns.CurrentTrade.Items);
 	end,
@@ -49,7 +49,7 @@ ns.Trading = {
 			local itemName, _, quantity = GetTradeTargetItemInfo(i);
 
 			ns.CurrentTrade.Items[i].Id = itemName and ns.getItemIdFromLink(GetTradeTargetItemLink(i), "item") or nil;
-			ns.CurrentTrade.Items[i].Quantity = itemName and quantity or nil;
+			ns.CurrentTrade.Items[i].Count = itemName and quantity or nil;
 		end
 
 		ns.CurrentTrade.Customer.CurrentOrder:handleEvent("TRADE_ITEM_CHANGED", ns.CurrentTrade.Items);
@@ -87,7 +87,7 @@ ns.Trading = {
 		for i=1, 6 do
 			local stack = ns.CurrentTrade.Items[i];
 			if stack.Id then
-				tradeMats[stack.Id] = (tradeMats[stack.Id] or 0) + stack.Quantity;
+				tradeMats[stack.Id] = (tradeMats[stack.Id] or 0) + stack.Count;
 			end
 		end
 

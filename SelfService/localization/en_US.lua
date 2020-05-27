@@ -64,6 +64,11 @@ ns.CMD_WIPE_ALL_WARNING = "WARNING: This will wipe all settings and reload the U
 ns.CMD_WIPE_CUSTOMERS_WARNING = "WARNING: This will wipe all customer data and current orders.";
 ns.CMD_WIPE_CUSTOMERS = "All customers and orders have been reset.";
 
+-- Debug mode messages
+ns.DEBUG_MODE_RELOAD_MESSAGE = "Debug mode cannot be disabled without reloading the UI.";
+ns.DEBUG_SKIP_ENCHANT_STATE = "Debug Mode Enabled - Enchants will no longer be cast.";
+ns.DEBUG_SKIPPED_ENCHANT = "Debug Mode Enabled - Customer's item has not been enchanted.";
+
 -- Console command help text
 -- This is a map/array hybrid. The map part is used to get the command's help text. the list is printed as help text.
 ns.HELP_TEXT = {
@@ -79,6 +84,15 @@ ns.HELP_TEXT = {
 		"Resets some aspect of the mod.",
 		order = {"Resets the order for the passed in player."},
 		currentorder = {"Resets the current order"}
+	},
+	wipe = {
+		"Wipes saved SelfService data, deleting it permanently.",
+		all = {"Wipes all data and reloads the UI."},
+		customers = {"Wipes all customer information and pending orders."}
+	},
+	debug = {
+		"Various debug commands for testing this addon.",
+		mockenchants = {"Skips enchanting an item but progresses the order as if it was done successfully."}
 	}
 }
 
@@ -106,4 +120,6 @@ ns.L.enUS = {
 	CRAFTING_ORDER = "Please wait while I craft your order",
 	ORDER_READY = "Your order is ready.",
 	ADD_ENCHANTABLE_ITEM = "Place the item you want enchanted in the \"Will Not Be Traded\" slot.",
+
+	DEBUG_SKIPPED_ENCHANT = "Debug mode enabled. Enchant has not been applied.",
 }
