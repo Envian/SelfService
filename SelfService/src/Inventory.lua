@@ -101,9 +101,7 @@ ns.combineItems = function(itemId)
 	local i, j = 1, #matches;
 
 	while i < j do
-		ns.debug("Stacking "..matches[i].container..", "..matches[i].containerSlot);
 		if matches[i].count == maxStack then
-			ns.debug("Stack is full.");
 			i = i + 1;
 		else
 			table.insert(moveQueue, {fromBag = matches[j].container, fromSlot = matches[j].container, toBag = matches[i].container, toSlot = matches[i].containerSlot});
@@ -112,10 +110,8 @@ ns.combineItems = function(itemId)
 				matches[j].count = matches[j].count - (maxStack - matches[i].count);
 				matches[i].count = maxStack;
 				i = i + 1;
-				ns.debug("Partial stack drop, do not remove matches[j] ("..matches[j].count.." remaining)");
 			else
 				matches[i].count = matches[i].count + matches[j].count;
-				ns.debug("Full stack was moved. Remove matches[j] ("..matches[i].count.." total)");
 				table.remove(matches, j);
 				j = j - 1;
 			end
