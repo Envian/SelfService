@@ -108,7 +108,7 @@ ns.OrderStates = {
 		ENTER_STATE = function(customer)
 			if not customer.CurrentOrder.TradeAttempted then
 				local i = string.find(customer.Name, "-");
-				InitiateTrade(string.sub(customer.Name, 1, i-1));
+				ns.ActionQueue.openTrade(customer.Name);
 				customer.CurrentOrder.TradeAttempted = true;
 			end
 		end,
