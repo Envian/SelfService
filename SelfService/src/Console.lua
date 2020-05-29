@@ -101,11 +101,15 @@ local slashCommands = {
 			ns.OrderStates.CAST_ENCHANT = ns.OrderStates.DEBUG_STATES.SKIP_TO_AWAIT_PAYMENT;
 		end
 	},
-	restack = {
-		item = function(itemId)
-			ns.combineItems(tonumber(itemId));
+	breakstack = function(params)
+		local args = {};
+
+		for i in string.gmatch(params, "%S+") do
+			table.insert(args, i);
 		end
-	},
+
+		ns.breakStack(tonumber(args[1]), tonumber(args[2]));
+	end,
 }
 
 SlashCmdList["SELFSERVICE"] = function(message, editbox)

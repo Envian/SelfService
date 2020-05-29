@@ -3,17 +3,23 @@ local _, ns = ...;
 local eventFrame = CreateFrame("Frame");
 
 local eventHandlers = {
-	BAG_UPDATE = function(container)
-	end,
 	ITEM_LOCKED = function(container, containerSlot)
+		ns.debug("Item at ("..container..", "..containerSlot..") Locked.");
 	end,
-	ITEM_LOCK_CHANGED = function(container, containerSlot)
+	ITEM_UNLOCKED = function(container, containerSlot)
+		ns.debug("Item at ("..container..", "..containerSlot..") Unlocked.");
 	end
 };
 
 local registerEvents = function()
 	for event, _ in pairs(eventHandlers) do
 		eventFrame:RegisterEvent(event);
+	end
+end
+
+local unRegisterEvents = function()
+	for event, _ in pairs(eventHandlers) do
+		eventFrame:UnregisterEvent(event);
 	end
 end
 
@@ -53,44 +59,7 @@ local searchBags = function(itemId)
 	return matches;
 end
 
-local breakStack = function(itemId, count)
-	ns.combineItems(itemId);
-
-	local matches = searchBags(itemId);
-	local total = GetItemCount(itemId);
-
-	if total < count then
-		ns.error("Inventory does not contain "..count.." of ["..itemId.."].");
-	elseif total == count then
-		return matches;
-	else
-		local results = {};
-
-		while count ~= 0 do
-			if matches[#matches].count <= count then
-				count = count - matches[#matches];
-				table.insert(results, table.remove(matches));
-			else
-				local freeSlot = ns.nextFreeBagSlot();
-				if ns.isEmpty(freeSlot) then
-					ns.error("Unable to break an appropriate stack size. Inventory is full.");
-					return;
-				end
-
-				SplitContainerItem(matches[#matches].container, matches[#matches].containerSlot, count);
-				if CursorHasItem() then
-					PickupContainerItem(freeSlot.container, freeSlot.containerSlot);
-					count = 0;
-					table.insert(results, freeSlot);
-				end
-			end
-		end
-
-		return results;
-	end
-end
-
-ns.combineItems = function(itemId)
+local combineItems = function(itemId)
 	--temporary call
 	registerEvents();
 	local moveQueue = {};
@@ -117,8 +86,50 @@ ns.combineItems = function(itemId)
 			end
 		end
 	end
-	ns.debug("Move Queue:");
-	ns.dumpTable(moveQueue);
-	ns.debug("Resultant Table:");
-	ns.dumpTable(matches);
+	unRegisterEvents();
+end
+
+ns.breakStack = function(itemId, count)
+	combineItems(itemId);
+
+	local matches = searchBags(itemId);
+	local total = GetItemCount(itemId);
+
+	ns.debug("Total: "..total.."; Desired: "..count);
+
+	if total < count then
+		ns.error("Inventory does not contain "..count.." of ["..itemId.."].");
+	elseif total == count then
+		ns.debug("Returning only stack.");
+		ns.dumpTable(matches);
+		return matches;
+	else
+		local results = {};
+
+		while count ~= 0 do
+			if matches[#matches].count <= count then
+				count = count - matches[#matches].count;
+				ns.debug("Adding a stack of "..count.." to the results.");
+				table.insert(results, table.remove(matches));
+			else
+				local freeSlot = nextFreeBagSlot();
+
+				if ns.isEmpty(freeSlot) then
+					ns.error("Unable to break an appropriate stack size. Inventory is full.");
+					return;
+				end
+
+				SplitContainerItem(matches[#matches].container, matches[#matches].containerSlot, count);
+				if CursorHasItem() then
+					PickupContainerItem(freeSlot.container, freeSlot.containerSlot);
+					result = {itemId = itemId, container = freeSlot.container, containerSlot = freeSlot.containerSlot, count = count};
+					count = 0;
+					table.insert(results, result);
+				end
+			end
+		end
+
+		ns.dumpTable(results);
+		return results;
+	end
 end
