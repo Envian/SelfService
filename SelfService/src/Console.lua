@@ -101,6 +101,11 @@ local slashCommands = {
 			ns.OrderStates.CAST_ENCHANT = ns.OrderStates.DEBUG_STATES.SKIP_TO_AWAIT_PAYMENT;
 		end
 	},
+	restack = {
+		item = function(itemId)
+			ns.combineItems(tonumber(itemId));
+		end
+	},
 }
 
 SlashCmdList["SELFSERVICE"] = function(message, editbox)

@@ -130,7 +130,10 @@ ns.OrderStates = {
 
 			for id, count in pairs(customer.CurrentOrder.ItemBalance) do
 				if count < 0 then
-					table.insert(returnables, ns.breakStack(id, -count));
+					for _, stack in ipairs(ns.breakStack(id, -count)) do
+						ns.debug("Return stack: ["..id.."]x"..-count);
+						table.insert(returnables, stack);
+					end
 				end
 			end
 
