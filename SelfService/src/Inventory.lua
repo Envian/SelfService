@@ -149,6 +149,11 @@ local isSafeToDoNextMove = function()
 end
 
 ns.findInInventory = function(itemId, count)
+	if not itemId or type(count) ~= "number" or count < 0 then
+		ns.error("Invalid parameters supplied to findInInventory()");
+		return;
+	end
+
 	lockedSlots = {};
 	desiredItem = itemId;
 	desiredAmt = count;
