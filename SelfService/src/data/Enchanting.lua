@@ -33,8 +33,8 @@ ns.Data.Enchanting = {
 		Search = {
 			"enchant",
 			"weapon", "weap",
-			"spell", "power", "spellpower", "damage", "dmg",
-			"30", "30dmg", "30dmg",
+			"spell", "power", "spellpower", "sp", "damage", "dmg",
+			"30", "30dmg", "30dmg", "30sp"
 		}
 	},
 	-- Enchant Weapon - Healing Power
@@ -721,6 +721,8 @@ ns.Data.Enchanting = {
 		Search = {
 			"enchant",
 			"boots", "boot", "feet", "foot",
+			"minor",
+			"speed"
 		}
 	},
 	-- Enchant Boots - Stamina
@@ -1147,7 +1149,7 @@ ns.Data.Enchanting = {
 		Search = {
 			"enchant",
 			"bracer", "bracers", "wrist", "wrists",
-			"deflection", "defense", "def",
+			"deflection", "defense", "def", "deflect",
 			"3", "3def",
 		}
 	},
@@ -1194,7 +1196,7 @@ ns.Data.Enchanting = {
 			"enchant",
 			"bracer", "bracers", "wrist", "wrists",
 			"lesser",
-			"deflection", "defense", "def",
+			"deflection", "defense", "def", "deflect",
 			"2", "2def",
 		}
 	},
@@ -1292,6 +1294,7 @@ ns.Data.Enchanting = {
 		Search = {
 			"enchant",
 			"bracer", "bracers", "wrist", "wrists",
+			"minor",
 			"deflect", "deflection", "defense", "def",
 			"1", "1def",
 		}
