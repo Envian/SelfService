@@ -104,7 +104,7 @@ ns.combineItems = function(itemId)
 		if matches[i].count == maxStack then
 			i = i + 1;
 		else
-			table.insert(moveQueue, {fromBag = matches[j].container, fromSlot = matches[j].container, toBag = matches[i].container, toSlot = matches[i].containerSlot});
+			table.insert(moveQueue, {fromBag = matches[j].container, fromSlot = matches[j].containerSlot, toBag = matches[i].container, toSlot = matches[i].containerSlot});
 
 			if matches[i].count + matches[j].count > maxStack then
 				matches[j].count = matches[j].count - (maxStack - matches[i].count);
