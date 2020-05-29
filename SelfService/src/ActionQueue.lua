@@ -27,7 +27,7 @@ ns.ActionQueue = {
 	openTrade = function(playerName)
 		SelfService_SecureButton:SetAttribute("type", "target");
 		SelfService_SecureButton:SetAttribute("unit", string.sub(playerName, 1, i-1));
-		SelfService_SecureButton:HookScript("OnClick", function()
+		SelfService_SecureButton:HookScript("OnClick", function(frame)
 			InitiateTrade("target");
 			ns.ActionQueue.clearTarget();
 		end);
@@ -37,6 +37,7 @@ ns.ActionQueue = {
 	clearTarget = function()
 		SelfService_SecureButton:SetAttribute("type", "target");
 		SelfService_SecureButton:SetAttribute("unit", nil);
+		SelfService_SecureButton:HookScript("OnClick", nil);
 		SelfService_SecureButton:SetText("Clear Target");
 	end,
 	-- useContainerItem = function(bagId, slotId)
