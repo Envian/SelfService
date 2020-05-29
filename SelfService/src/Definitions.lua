@@ -45,10 +45,8 @@ ns.pullFromCommandTable = func(commandTable, command); -- Parses the command str
 
 ns.enableAddon = func(); -- Enables bot event handling.
 ns.disableAddon = func(); -- Disables bot event handling.
-ns.nextFreeBagSlot = func(); -- Returns the next available bag slot
-ns.combineItems = func(itemId); -- Combines stacks of inventory items
-ns.searchBags = func(itemId); -- Returns a table containing bag, slot, and stack count for the given item
-ns.breakStack = func(itemId, count); -- Returns a table containing bag and slot information for the desired stack size
+
+ns.findInInventory = func(itemId, count);
 
 -- Logging
 ns.setLogLevel = func(level); -- Sets the log level to a specified value.

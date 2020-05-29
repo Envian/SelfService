@@ -101,14 +101,14 @@ local slashCommands = {
 			ns.OrderStates.CAST_ENCHANT = ns.OrderStates.DEBUG_STATES.SKIP_TO_AWAIT_PAYMENT;
 		end
 	},
-	breakstack = function(params)
-		local args = {};
+	find = function(args)
+		local list = {};
 
-		for i in string.gmatch(params, "%S+") do
-			table.insert(args, i);
+		for i in string.gmatch(args, "%S+") do
+			table.insert(list, tonumber(i));
 		end
 
-		ns.breakStack(tonumber(args[1]), tonumber(args[2]));
+		ns.findInInventory(list[1], list[2]);
 	end,
 }
 
