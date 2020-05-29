@@ -149,6 +149,7 @@ local isSafeToDoNextMove = function()
 end
 
 ns.findInInventory = function(itemId, count)
+	lockedSlots = {};
 	desiredItem = itemId;
 	desiredAmt = count;
 	makeItemActionQueue(itemId);
