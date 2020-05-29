@@ -23,5 +23,7 @@ src/Helpers.lua
 src/Trading.lua
 src/Events.lua
 
+src/Inventory.lua
+
 src/Console.lua
 src/CustomerCommands.lua

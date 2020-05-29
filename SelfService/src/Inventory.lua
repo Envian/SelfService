@@ -1,4 +1,27 @@
-ns.nextFreeBagSlot = function()
+local _, ns = ...;
+
+local eventFrame = CreateFrame("Frame");
+
+local eventHandlers = {
+	BAG_UPDATE = function(container)
+	end,
+	ITEM_LOCKED = function(container, containerSlot)
+	end,
+	ITEM_LOCK_CHANGED = function(container, containerSlot)
+	end
+};
+
+local registerEvents = function()
+	for event, _ in pairs(eventHandlers) do
+		eventFrame:RegisterEvent(event);
+	end
+end
+
+eventFrame:SetScript("OnEvent", function(_, event, ...)
+	eventHandlers[event](...);
+end);
+
+local nextFreeBagSlot = function()
 	for i=0,11 do
 		if GetContainerNumFreeSlots(i) == 0 then
 			break;
@@ -15,46 +38,7 @@ ns.nextFreeBagSlot = function()
 	ns.error("No free bag slots available.");
 end
 
-ns.combineItems = function(itemId)
-	local matches = ns.searchBags(itemId);
-	ns.dumpTable(matches);
-	local maxStack = select(8, GetItemInfo(itemId));
-
-	local n = 1;
-	local i, j = 1, #matches;
-
-	while n < 3 do
-		ns.debug("i = "..i.."; j = "..j);
-		ns.debug("Stacking "..matches[i].container..", "..matches[i].containerSlot);
-		if matches[i].count == maxStack then
-			ns.debug("Stack is full.");
-			i = i + 1;
-		else
-			ns.debug("Grabbing stack at "..matches[j].container..", "..matches[j].containerSlot);
-			PickupContainerItem(matches[j].container, matches[j].containerSlot);
-			if CursorHasItem() then
-				ns.debug("Got the stack.");
-				PickupContainerItem(matches[i].container, matches[i].containerSlot);
-				ns.debug("Dropped the stack.");
-
-				if matches[i].count + matches[j].count > maxStack then
-					matches[j].count = maxStack - matches[i].count;
-					matches[i].count = maxStack;
-					i = i + 1;
-					ns.debug("Partial stack drop, do not remove matches[j]");
-				else
-					ns.debug("Full stack was moved. Remove matches[j].");
-					matches[i].count = matches[i].count + matches[j].count;
-					table.remove(matches, j);
-					j = j - 1;
-				end
-			end
-		end
-		n = n + 1;
-	end
-end
-
-ns.searchBags = function(itemId)
+local searchBags = function(itemId)
 	local matches = {}
 
 	for i=0,11 do
@@ -69,11 +53,11 @@ ns.searchBags = function(itemId)
 	return matches;
 end
 
-ns.breakStack = function(itemId, count)
+local breakStack = function(itemId, count)
 	ns.combineItems(itemId);
 
-	local matches = ns.searchBags(itemId);
-	local total = 0;
+	local matches = searchBags(itemId);
+	local total = GetItemCount(itemId);
 
 	if total < count then
 		ns.error("Inventory does not contain "..count.." of ["..itemId.."].");
@@ -101,5 +85,46 @@ ns.breakStack = function(itemId, count)
 				end
 			end
 		end
+
+		return results;
 	end
+end
+
+ns.combineItems = function(itemId)
+	--temporary call
+	registerEvents();
+	local moveQueue = {};
+
+	local matches = searchBags(itemId);
+	local maxStack = select(8, GetItemInfo(itemId));
+
+	local i, j = 1, #matches;
+
+	while i < j do
+		ns.debug("i = "..i.."; j = "..j);
+		ns.debug("Stacking "..matches[i].container..", "..matches[i].containerSlot);
+		if matches[i].count == maxStack then
+			ns.debug("Stack is full.");
+			i = i + 1;
+		else
+			ns.debug("Grabbing stack at "..matches[j].container..", "..matches[j].containerSlot);
+			table.insert(moveQueue, {fromBag = matches[j].container, fromSlot = matches[j].container, toBag = matches[i].container, toSlot = matches[i].containerSlot});
+
+			if matches[i].count + matches[j].count > maxStack then
+				matches[j].count = maxStack - matches[i].count;
+				matches[i].count = maxStack;
+				i = i + 1;
+				ns.debug("Partial stack drop, do not remove matches[j]");
+			else
+				ns.debug("Full stack was moved. Remove matches[j].");
+				matches[i].count = matches[i].count + matches[j].count;
+				table.remove(matches, j);
+				j = j - 1;
+			end
+		end
+	end
+	ns.debug("Move Queue:");
+	ns.dumpTable(moveQueue);
+	ns.debug("Resultant Table:");
+	ns.dumpTable(matches);
 end
