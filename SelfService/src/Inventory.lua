@@ -4,8 +4,6 @@ local itemActionQueue = {};
 local stackResults = {};
 local brokenStacks = {};
 local lockedSlots = {};
-local desiredItem = 0;
-local desiredAmt = 0;
 local eventFrame = CreateFrame("Frame");
 
 local doNextMove = function()
@@ -53,48 +51,48 @@ local searchBags = function(itemId)
 	return matches;
 end
 
-local makeItemActionQueue = function(itemId)
+local makeItemActionQueue = function(returnables)
 	itemActionQueue = {};
 	stackResults = {};
 
-	local matches = searchBags(itemId);
-	local maxStack = select(8, GetItemInfo(itemId));
+	for _, returnable in ipairs(returnables) do
+		local matches = searchBags(returnable.itemId);
+		local maxStack = select(8, GetItemInfo(returnable.itemId));
 
-	local i, j = 1, #matches;
+		local i, j = 1, #matches;
 
-	while i < j do
-		if matches[i].count == maxStack then
-			i = i + 1;
-		else
-			table.insert(itemActionQueue, {action = "MOVE_STACK", fromBag = matches[j].container, fromSlot = matches[j].containerSlot, toBag = matches[i].container, toSlot = matches[i].containerSlot});
-
-			if matches[i].count + matches[j].count > maxStack then
-				matches[j].count = matches[j].count - (maxStack - matches[i].count);
-				matches[i].count = maxStack;
+		while i < j do
+			if matches[i].count == maxStack then
 				i = i + 1;
 			else
-				matches[i].count = matches[i].count + matches[j].count;
-				table.remove(matches, j);
-				j = j - 1;
+				table.insert(itemActionQueue, {action = "MOVE_STACK", fromBag = matches[j].container, fromSlot = matches[j].containerSlot, toBag = matches[i].container, toSlot = matches[i].containerSlot});
+
+				if matches[i].count + matches[j].count > maxStack then
+					matches[j].count = matches[j].count - (maxStack - matches[i].count);
+					matches[i].count = maxStack;
+					i = i + 1;
+				else
+					matches[i].count = matches[i].count + matches[j].count;
+					table.remove(matches, j);
+					j = j - 1;
+				end
 			end
 		end
-	end
 
-	stackResults = matches;
-	table.insert(itemActionQueue, {action = "BREAK_STACK"});
-	table.insert(itemActionQueue, {action = "RETURN_STACK"});
+		stackResults = matches;
+		table.insert(itemActionQueue, {action = "BREAK_STACK", itemId = returnable.itemId, count = returnable.count});
+	end
+	table.insert(itemActionQueue, {action = "RETURN_STACKS"});
 end
 
 local breakStack = function(itemId, count)
-	brokenStacks = {};
-
 	local matches = searchBags(itemId);
 	local total = GetItemCount(itemId);
 
 	if total < count then
 		ns.error("Inventory does not contain "..count.." of ["..itemId.."].");
 	elseif total == count then
-		brokenStacks = matches;
+		table.insert(brokenStacks, matches[1]);
 	else
 		while count ~= 0 do
 			if matches[#matches].count <= count then
@@ -121,7 +119,7 @@ local breakStack = function(itemId, count)
 end
 
 local isSafeToBreak = function()
-	if ns.isEmpty(itemActionQueue) or itemActionQueue[1].action ~= "BREAK_STACK" then
+	if ns.isEmpty(itemActionQueue) or itemActionQueue[1].action ~= "BREAK_STACK" or CursorHasItem() then
 		return false;
 	else
 		for _, match in ipairs(stackResults) do
@@ -137,7 +135,7 @@ local isSafeToBreak = function()
 end
 
 local isSafeToReturn = function()
-	if ns.isEmpty(itemActionQueue) or itemActionQueue[1].action ~= "RETURN_STACK" then
+	if ns.isEmpty(itemActionQueue) or itemActionQueue[1].action ~= "RETURN_STACKS" or CursorHasItem() then
 		return false;
 	else
 		for _, match in ipairs(brokenStacks) do
@@ -153,7 +151,7 @@ local isSafeToReturn = function()
 end
 
 local isSafeToDoNextMove = function()
-	if ns.isEmpty(itemActionQueue) or itemActionQueue[1].action ~= "MOVE_STACK" then
+	if ns.isEmpty(itemActionQueue) or itemActionQueue[1].action ~= "MOVE_STACK" or CursorHasItem() then
 		return false;
 	else
 		local nextMove = itemActionQueue[1];
@@ -163,28 +161,28 @@ local isSafeToDoNextMove = function()
 	end
 end
 
-ns.findInInventory = function(itemId, count)
-	if not itemId or type(count) ~= "number" or count < 0 then
-		ns.error("Invalid parameters supplied to findInInventory()");
+ns.findInInventory = function(returnables)
+	if not returnables then
+		ns.error("Nil parameter supplied to findInInventory()");
 		return;
 	end
 
 	lockedSlots = {};
-	desiredItem = itemId;
-	desiredAmt = count;
-	makeItemActionQueue(itemId);
+	brokenStacks = {};
+	makeItemActionQueue(returnables);
+
+	eventFrame:RegisterEvent("ITEM_UNLOCKED");
+	eventFrame:RegisterEvent("ITEM_LOCKED");
 
 	if itemActionQueue[1].action == "MOVE_STACK" then
-		eventFrame:RegisterEvent("ITEM_UNLOCKED");
-		eventFrame:RegisterEvent("ITEM_LOCKED");
-
-	-- Do first move.
 		if isSafeToDoNextMove() then
 			doNextMove();
 		end
 	elseif itemActionQueue[1].action == "BREAK_STACK" then
-		breakStack(itemId, count);
-		table.remove(itemActionQueue, 1);
+		if isSafeToBreak() then
+			breakStack(itemActionQueue[1].itemId, itemActionQueue[1].count);
+			table.remove(itemActionQueue, 1);
+		end
 	end
 end
 
@@ -200,7 +198,7 @@ local eventHandlers = {
 		if isSafeToDoNextMove() then
 			doNextMove();
 		elseif isSafeToBreak() then
-			breakStack(desiredItem, desiredAmt);
+			breakStack(itemActionQueue[1].itemId, itemActionQueue[1].count);
 			table.remove(itemActionQueue, 1);
 		elseif isSafeToReturn() then
 			eventFrame:UnregisterEvent("ITEM_UNLOCKED");

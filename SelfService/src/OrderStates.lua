@@ -127,13 +127,14 @@ ns.OrderStates = {
 	DELIVER_ORDER = baseOrderState:new({
 		Name = "DELIVER_ORDER",
 		ENTER_STATE = function(customer)
+			local returnables = {};
 			ns.debug("Preparing returnable mats");
 			for id, count in pairs(customer.CurrentOrder.ItemBalance) do
 				if count < 0 then
-					ns.findInInventory(id, -count);
+					table.insert(returnables, {itemId = id, count = -count});
 				end
-				break;
 			end
+			ns.findInInventory(returnables);
 		end,
 		CALLED_BACK = function(customer, returnables)
 			for _, returnable in ipairs(returnables) do
