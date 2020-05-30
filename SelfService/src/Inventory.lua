@@ -92,7 +92,7 @@ local breakStack = function(itemId, count)
 	if total < count then
 		ns.error("Inventory does not contain "..count.." of ["..itemId.."].");
 	elseif total == count then
-		table.insert(brokenStacks, matches[1]);
+		table.insert(brokenStacks, table.remove(matches));
 	else
 		while count ~= 0 do
 			if matches[#matches].count <= count then
@@ -170,7 +170,6 @@ ns.findInInventory = function(returnables)
 	lockedSlots = {};
 	brokenStacks = {};
 	makeItemActionQueue(returnables);
-
 	eventFrame:RegisterEvent("ITEM_UNLOCKED");
 	eventFrame:RegisterEvent("ITEM_LOCKED");
 
