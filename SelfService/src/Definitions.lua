@@ -42,6 +42,7 @@ ns.dumpTable = func(table, indent); -- Dumps a table to the console, for debuggi
 ns.printType = func(value); -- Converts a variable to a readable representation.
 ns.delink = func(text); -- Removes all links from a string, but leaves the text (including brackets)
 ns.pullFromCommandTable = func(commandTable, command); -- Parses the command string and returns the object requested by the command string.
+ns.searchRecipes = func(searchStringOrList); -- Takes in a search string, or a list of search terms, and returns all recipes that match.
 
 ns.enableAddon = func(); -- Enables bot event handling.
 ns.disableAddon = func(); -- Disables bot event handling.

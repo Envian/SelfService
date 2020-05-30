@@ -107,6 +107,7 @@ ns.L.enUS = {
 	RECIPES_UNAVAILABLE = "I do not have that recipe.",
 	ORDER_PLACED = "Once you have obtained the mats for %s, open trade. Your total is: ",
 	ORDER_LIMIT = "I only support ordering 1 item at a time. Try again",
+	ORDER_MULTIPLE_SEARCH_RESULTS = "I found %i recipes that match that description. Please be more specific.",
 	ORDER_IN_PROGRESS = "I only support ordering 1 item at a time. Finish your order before requesting another",
 	BUY_FIRST = "Use command !buy before opening trade.",
 	BUSY = "I am serving another player right now. Please try again later.",

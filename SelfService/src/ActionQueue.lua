@@ -24,11 +24,20 @@ ns.ActionQueue = {
 		SelfService_SecureButton:SetText("Apply Enchant");
 		ns.debugf(ns.LOG_SECURE_BUTTON_TRADE_ACTION, ns.LOG_SECURE_BUTTON_TYPES.APPLY_ENCHANT);
 	end,
-	openTrade = function(player)
-		SelfService_SecureButton:SetAttribute("type", "script");
-		SelfService_SecureButton:SetAttribute("_script", function() InitiateTrade(player) end);
-		SelfService_SecureButton:SetText("Open Trade");
-		ns.debugf(ns.LOG_SECURE_BUTTON_TRADE_ACTION, ns.LOG_SECURE_BUTTON_TYPES.OPEN_TRADE);
+	openTrade = function(playerName)
+		-- Trading and targeting does not work with players who are not in your group. There is no way to open trade with someone random.
+
+		-- SelfService_SecureButton:SetAttribute("unit", "player "..string.sub(playerName, 1, string.find(playerName, "-")-1));
+		-- SelfService_SecureButton:HookScript("OnClick", function(frame)
+		-- 	InitiateTrade("target");
+		-- 	-- -- Clears Target
+		-- 	-- SelfService_SecureButton:SetAttribute("type", "target");
+		-- 	-- SelfService_SecureButton:SetAttribute("unit", nil);
+		-- 	-- SelfService_SecureButton:HookScript("OnClick", function() end);
+		-- 	-- SelfService_SecureButton:SetText("Clear Target");
+		-- end);
+		-- SelfService_SecureButton:SetText("Open Trade");
+		-- ns.debugf(ns.LOG_SECURE_BUTTON_TRADE_ACTION, ns.LOG_SECURE_BUTTON_TYPES.OPEN_TRADE);
 	end,
 	-- useContainerItem = function(bagId, slotId)
 	-- 	SelfService_SecureButton:SetAttribute("type", "script");

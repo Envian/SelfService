@@ -1,6 +1,6 @@
 ## Interface: 11303
 ## Title: SelfService
-## Author: Envian
+## Author: Envian, Mcscurvy
 ## Version: 0.1
 ## SavedVariablesPerCharacter: SelfServiceData
 

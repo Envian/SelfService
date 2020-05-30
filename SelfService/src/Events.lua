@@ -26,7 +26,7 @@ local eventHandlers = {
 		-- Convert messages including "?term" to "!search term"
 		message = message:gsub(SEARCH_REGEX, "!search %1");
 		if message:match(COMMAND_REGEX) then
-			local command, term = message:match("^%!(%S+)%s?(.*)$");
+			local command, term = message:match("^%!%s*(%S+)%s?(.*)$");
 			ns.getCustomer(sender):handleCommand(command, term);
 		end
 	end,
