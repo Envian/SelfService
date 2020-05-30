@@ -19,7 +19,8 @@ local baseOrderState = {
 	TRADE_COMPLETED = noAction,
 	SPELLCAST_CHANGED = noAction,
 	--ENCHANT_SUCCEEDED = noAction,
-	SPELLCAST_FAILED = noAction
+	SPELLCAST_FAILED = noAction,
+	CALLED_BACK = noAction
 }
 baseOrderState.__index = baseOrderState;
 
@@ -126,17 +127,15 @@ ns.OrderStates = {
 	DELIVER_ORDER = baseOrderState:new({
 		Name = "DELIVER_ORDER",
 		ENTER_STATE = function(customer)
-			local returnables = {};
-
+			ns.debug("Preparing returnable mats");
 			for id, count in pairs(customer.CurrentOrder.ItemBalance) do
 				if count < 0 then
-					for _, stack in ipairs(ns.breakStack(id, -count)) do
-						ns.debug("Return stack: ["..id.."]x"..-count);
-						table.insert(returnables, stack);
-					end
+					ns.findInInventory(id, -count);
 				end
+				break;
 			end
-
+		end,
+		CALLED_BACK = function(customer, returnables)
 			for _, returnable in ipairs(returnables) do
 				ns.debug("  - Return ["..returnable.itemId.."] from Bag"..returnable.container..", Slot"..returnable.containerSlot);
 				UseContainerItem(returnable.container, returnable.containerSlot);
@@ -148,7 +147,6 @@ ns.OrderStates = {
 				return ns.OrderStates.AWAIT_PAYMENT;
 			end
 		end,
-
 		TRADE_ITEM_CHANGED = function(customer, enteredItems)
 			-- local itemName, _, quantity = GetTradeTargetItemInfo(slotChanged);
 			-- local itemLink = GetTradeTargetItemLink(slotChanged);

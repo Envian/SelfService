@@ -82,11 +82,10 @@ local makeItemActionQueue = function(itemId)
 
 	stackResults = matches;
 	table.insert(itemActionQueue, {action = "BREAK_STACK"});
+	table.insert(itemActionQueue, {action = "RETURN_STACK"});
 end
 
 local breakStack = function(itemId, count)
-	eventFrame:UnregisterEvent("ITEM_UNLOCKED");
-	eventFrame:UnregisterEvent("ITEM_LOCKED");
 	brokenStacks = {};
 
 	local matches = searchBags(itemId);
@@ -137,6 +136,22 @@ local isSafeToBreak = function()
 	return true;
 end
 
+local isSafeToReturn = function()
+	if ns.isEmpty(itemActionQueue) or itemActionQueue[1].action ~= "RETURN_STACK" then
+		return false;
+	else
+		for _, match in ipairs(brokenStacks) do
+			local key = match.container..match.containerSlot;
+
+			if lockedSlots[key] then
+				return false;
+			end
+		end
+	end
+
+	return true;
+end
+
 local isSafeToDoNextMove = function()
 	if ns.isEmpty(itemActionQueue) or itemActionQueue[1].action ~= "MOVE_STACK" then
 		return false;
@@ -168,8 +183,8 @@ ns.findInInventory = function(itemId, count)
 			doNextMove();
 		end
 	elseif itemActionQueue[1].action == "BREAK_STACK" then
-		table.remove(itemActionQueue, 1);
 		breakStack(itemId, count);
+		table.remove(itemActionQueue, 1);
 	end
 end
 
@@ -186,6 +201,11 @@ local eventHandlers = {
 			doNextMove();
 		elseif isSafeToBreak() then
 			breakStack(desiredItem, desiredAmt);
+			table.remove(itemActionQueue, 1);
+		elseif isSafeToReturn() then
+			eventFrame:UnregisterEvent("ITEM_UNLOCKED");
+			eventFrame:UnregisterEvent("ITEM_LOCKED");
+			ns.CurrentTrade.Customer.CurrentOrder:handleEvent("CALLED_BACK", brokenStacks);
 		end
 	end,
 };
