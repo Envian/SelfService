@@ -118,3 +118,29 @@ ns.pullFromCommandTable = function(commandObject, commandString)
 
 	return commandObject, commandString, commandStack;
 end
+
+ns.searchRecipes = function(searchString)
+	local results = {}
+	for term in searchString:gmatch("[^+%s]+") do
+		local matches = ns.Search[string.lower(term)];
+
+		-- Ignore terms that don't match anything
+		if matches then
+			if #results == 0 then
+				-- Clones the array (we'll modify it later.)
+				for n, result in ipairs(matches) do
+					results[n] = result;
+				end
+			else
+				-- If we have multiple terms, only show results that match all.
+				results = ns.ifilter(results, function(result)
+					for _, newEntry in ipairs(matches) do
+						if newEntry.Id == result.Id then return true end;
+					end
+					return false;
+				end);
+			end
+		end
+	end
+	return results;
+end
