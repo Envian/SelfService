@@ -29,16 +29,14 @@ ns.ActionQueue = {
 		SelfService_SecureButton:SetAttribute("unit", string.sub(playerName, 1, i-1));
 		SelfService_SecureButton:HookScript("OnClick", function(frame)
 			InitiateTrade("target");
-			ns.ActionQueue.clearTarget();
+			-- Clears Target
+			SelfService_SecureButton:SetAttribute("type", "target");
+			SelfService_SecureButton:SetAttribute("unit", nil);
+			SelfService_SecureButton:HookScript("OnClick", nil);
+			SelfService_SecureButton:SetText("Clear Target");
 		end);
 		SelfService_SecureButton:SetText("Open Trade");
 		ns.debugf(ns.LOG_SECURE_BUTTON_TRADE_ACTION, ns.LOG_SECURE_BUTTON_TYPES.OPEN_TRADE);
-	end,
-	clearTarget = function()
-		SelfService_SecureButton:SetAttribute("type", "target");
-		SelfService_SecureButton:SetAttribute("unit", nil);
-		SelfService_SecureButton:HookScript("OnClick", nil);
-		SelfService_SecureButton:SetText("Clear Target");
 	end,
 	-- useContainerItem = function(bagId, slotId)
 	-- 	SelfService_SecureButton:SetAttribute("type", "script");
