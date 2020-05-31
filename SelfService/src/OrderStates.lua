@@ -134,7 +134,10 @@ ns.OrderStates = {
 					table.insert(returnables, {itemId = id, count = -count});
 				end
 			end
-			ns.findInInventory(returnables);
+
+			if not ns.isEmpty(returnables) then
+				ns.findInInventory(returnables);
+			end
 		end,
 		CALLED_BACK = function(customer, returnables)
 			for _, returnable in ipairs(returnables) do
