@@ -101,15 +101,6 @@ local slashCommands = {
 			ns.OrderStates.CAST_ENCHANT = ns.OrderStates.DEBUG_STATES.SKIP_TO_AWAIT_PAYMENT;
 		end
 	},
-	find = function(args)
-		local list = {};
-
-		for i in string.gmatch(args, "%S+") do
-			table.insert(list, tonumber(i));
-		end
-
-		ns.findInInventory(list[1], list[2]);
-	end,
 }
 
 SlashCmdList["SELFSERVICE"] = function(message, editbox)
