@@ -131,6 +131,7 @@ local isSafeToBreak = function()
 		end
 	end
 
+	lockedSlots = {};
 	return true;
 end
 
@@ -147,6 +148,7 @@ local isSafeToReturn = function()
 		end
 	end
 
+	lockedSlots = {};
 	return true;
 end
 
@@ -157,8 +159,13 @@ local isSafeToDoNextMove = function()
 		local nextMove = itemActionQueue[1];
 		local toKey, fromKey = nextMove.toBag..nextMove.toSlot, nextMove.fromBag..nextMove.fromSlot;
 
-		return not lockedSlots[toKey] and not lockedSlots[fromKey];
+		if lockedSlots[toKey] or lockedSlots[fromKey] then
+			return false;
+		end
 	end
+
+	lockedSlots = {};
+	return true;
 end
 
 ns.findInInventory = function(returnables)
