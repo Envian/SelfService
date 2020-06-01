@@ -56,7 +56,7 @@ function ns.OrderClass:isTradeAcceptable(tradeMats) -- table{K, V}, key=itemID, 
 
 	for id, count in pairs(self.ItemBalance) do
 		if count - (tradeMats[id] or 0) > 0 then
-			ns.debugf(ns.LOG_ORDER_INSUFFICIENT_ITEMS, id, tradeMats[id], id, count);
+			ns.debugf(ns.LOG_ORDER_INSUFFICIENT_ITEMS, id, count, id, tradeMats[id]);
 			receivedSufficientMats = false;
 		end
 	end
