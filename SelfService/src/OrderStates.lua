@@ -137,6 +137,12 @@ ns.OrderStates = {
 
 			if not ns.isEmpty(returnables) then
 				ns.findInInventory(returnables);
+			else
+				if customer.CurrentOrder.Recipes[customer.CurrentOrder.OrderIndex].Type == "Enchanting" then
+					return ns.OrderStates.WAIT_FOR_ENCHANTABLE;
+				else
+					return ns.OrderStates.AWAIT_PAYMENT;
+				end
 			end
 		end,
 		CALLED_BACK = function(customer, returnables)
