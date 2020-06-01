@@ -3,7 +3,6 @@ local _, ns = ...;
 local itemActionQueue = {};
 local stackResults = {};
 local brokenStacks = {};
-local lockedSlots = {};
 local eventFrame = CreateFrame("Frame");
 
 local nextFreeSlot = function()
@@ -13,7 +12,7 @@ local nextFreeSlot = function()
 				if GetContainerItemID(i, j) == nil then
 					-- TODO: Remove in release, for debugging only
 					ns.debug("Free slot at "..i..", "..j);
-					return {container = i, containerSlot = j};
+					return {container = i, slot = j};
 				end
 			end
 		end
@@ -27,7 +26,7 @@ local searchBags = function(itemId)
 		for j=1,GetContainerNumSlots(i) do
 			if GetContainerItemID(i, j) == itemId then
 				local count = select(2, GetContainerItemInfo(i, j));
-				table.insert(matches, {itemId = itemId, container = i, containerSlot = j, count = count});
+				table.insert(matches, {itemId = itemId, container = i, slot = j, count = count});
 			end
 		end
 	end
@@ -49,7 +48,7 @@ local makeItemActionQueue = function(returnables)
 			if matches[i].count == maxStack then
 				i = i + 1;
 			else
-				table.insert(itemActionQueue, {action = "MOVE_STACK", fromBag = matches[j].container, fromSlot = matches[j].containerSlot, toBag = matches[i].container, toSlot = matches[i].containerSlot});
+				table.insert(itemActionQueue, {action = "MOVE_STACK", fromBag = matches[j].container, fromSlot = matches[j].slot, toBag = matches[i].container, toSlot = matches[i].slot});
 
 				if matches[i].count + matches[j].count > maxStack then
 					matches[j].count = matches[j].count - (maxStack - matches[i].count);
@@ -96,10 +95,10 @@ local breakStack = function(itemId, count)
 					return;
 				end
 
-				SplitContainerItem(matches[#matches].container, matches[#matches].containerSlot, count);
+				SplitContainerItem(matches[#matches].container, matches[#matches].slot, count);
 				if CursorHasItem() then
-					PickupContainerItem(freeSlot.container, freeSlot.containerSlot);
-					result = {itemId = itemId, container = freeSlot.container, containerSlot = freeSlot.containerSlot, count = count};
+					PickupContainerItem(freeSlot.container, freeSlot.slot);
+					result = {itemId = itemId, container = freeSlot.container, slot = freeSlot.slot, count = count};
 					count = 0;
 					table.insert(brokenStacks, result);
 				end
@@ -108,8 +107,8 @@ local breakStack = function(itemId, count)
 	end
 end
 
-local getKey = function(container, slot)
-	return container..":"..slot;
+local isLocked = function(container, slot)
+	return C_Item.IsLocked(ItemLocation:CreateFromBagAndSlot(container, slot));
 end
 
 local isSafe = function(action)
@@ -117,32 +116,25 @@ local isSafe = function(action)
 		return false;
 	else
 		if action.action == "MOVE_STACK" then
-			local toKey, fromKey = getKey(action.toBag, action.toSlot), getKey(action.fromBag, action.fromSlot);
-
-			if lockedSlots[toKey] or lockedSlots[fromKey] then
+			if isLocked(action.toBag, action.toSlot) or isLocked(action.fromBag, action.fromSlot) then
 				return false;
 			end
 		elseif action.action == "BREAK_STACK" then
 			for _, stack in ipairs(stackResults) do
-				local key = getKey(stack.container, stack.containerSlot);
-
-				if lockedSlots[key] then
+				if isLocked(stack.container, stack.slot) then
 					return false;
 				end
 			end
 		elseif action.action == "RETURN_STACKS" then
 			for _, stack in ipairs(brokenStacks) do
-				local key = getKey(stack.container, stack.containerSlot);
-
-				if lockedSlots[key] then
+				if isLocked(stack.container, stack.slot) then
 					return false;
 				end
 			end
 		end
 	end
 
-	-- Desired action is safe, return true and clear the lockedSlots table
-	lockedSlots = {};
+	-- Desired action is safe, return true
 	return true;
 end
 
@@ -153,7 +145,6 @@ local doAction = function(action)
 		return;
 	elseif action.action == "RETURN_STACKS" then
 		eventFrame:UnregisterEvent("ITEM_UNLOCKED");
-		eventFrame:UnregisterEvent("ITEM_LOCKED");
 		ns.CurrentTrade.Customer.CurrentOrder:handleEvent("CALLED_BACK", brokenStacks);
 	elseif action.count then
 		breakStack(action.itemId, action.count);
@@ -175,38 +166,20 @@ ns.findInInventory = function(returnables)
 		return;
 	end
 
-	lockedSlots = {};
 	brokenStacks = {};
 	makeItemActionQueue(returnables);
 	eventFrame:RegisterEvent("ITEM_UNLOCKED");
-	eventFrame:RegisterEvent("ITEM_LOCKED");
 
 	if isSafe(itemActionQueue[1]) then
 		doAction(table.remove(itemActionQueue, 1));
 	else
+		-- TODO: Remove message later. Just for the case where this function is called and an item is already on the cursor. Self fixes on next ITEM_UNLOCKED event
 		ns.debug("Unable to perform first action in list.");
 	end
-	-- if itemActionQueue[1].action == "MOVE_STACK" then
-	-- 	if isSafeToDoNextMove() then
-	-- 		doNextMove();
-	-- 	end
-	-- elseif itemActionQueue[1].action == "BREAK_STACK" then
-	-- 	if isSafeToBreak() then
-	-- 		breakStack(itemActionQueue[1].itemId, itemActionQueue[1].count);
-	-- 		table.remove(itemActionQueue, 1);
-	-- 	end
-	-- end
 end
 
 local eventHandlers = {
-	ITEM_LOCKED = function(container, containerSlot)
-		local key = getKey(container, containerSlot);
-		lockedSlots[key] = "locked";
-	end,
-	ITEM_UNLOCKED = function(container, containerSlot)
-		local key = getKey(container, containerSlot);
-		lockedSlots[key] = nil;
-
+	ITEM_UNLOCKED = function(container, slot)
 		if isSafe(itemActionQueue[1]) then
 			doAction(table.remove(itemActionQueue, 1));
 		end

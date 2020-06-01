@@ -128,7 +128,7 @@ ns.OrderStates = {
 		Name = "DELIVER_ORDER",
 		ENTER_STATE = function(customer)
 			local returnables = {};
-			ns.debug("Preparing returnable mats");
+			ns.debug(ns.LOG_ORDER_PREPARING_RETURNABLES);
 			for id, count in pairs(customer.CurrentOrder.ItemBalance) do
 				if count < 0 then
 					table.insert(returnables, {itemId = id, count = -count});
@@ -147,7 +147,7 @@ ns.OrderStates = {
 		end,
 		CALLED_BACK = function(customer, returnables)
 			for _, returnable in ipairs(returnables) do
-				ns.debug("  - Return ["..returnable.itemId.."] from Bag"..returnable.container..", Slot"..returnable.containerSlot);
+				ns.debugf(ns.LOG_RETURNABLES, returnable.itemId, returnable.container, returnable.containerSlot);
 				UseContainerItem(returnable.container, returnable.containerSlot);
 			end
 
