@@ -21,19 +21,16 @@ end
 
 local nextFreeBagSlot = function()
 	for i=0,11 do
-		if GetContainerNumFreeSlots(i) == 0 then
-			break;
-		else
+		if GetContainerNumFreeSlots(i) > 0 then
 			for j=1,GetContainerNumSlots(i) do
 				if GetContainerItemID(i, j) == nil then
+					-- TODO: Remove in release, for debugging only
 					ns.debug("Free slot at "..i..", "..j);
 					return {container = i, containerSlot = j};
 				end
 			end
 		end
 	end
-
-	ns.error("No free bag slots available.");
 end
 
 local searchBags = function(itemId)
@@ -90,9 +87,12 @@ local breakStack = function(itemId, count)
 	local total = GetItemCount(itemId);
 
 	if total < count then
+		-- TODO: Localize
 		ns.error("Inventory does not contain "..count.." of ["..itemId.."].");
 	elseif total == count then
-		table.insert(brokenStacks, table.remove(matches));
+		for i=1,#matches do
+			table.insert(brokenStacks, matches[i])
+		end
 	else
 		while count ~= 0 do
 			if matches[#matches].count <= count then
@@ -102,6 +102,7 @@ local breakStack = function(itemId, count)
 				local freeSlot = nextFreeBagSlot();
 
 				if ns.isEmpty(freeSlot) then
+					-- TODO: Localize
 					ns.error("Unable to break an appropriate stack size. Inventory is full.");
 					return;
 				end
@@ -118,12 +119,16 @@ local breakStack = function(itemId, count)
 	end
 end
 
+local getKey = function(container, slot)
+	return container..":"..slot;
+end
+
 local isSafeToBreak = function()
 	if ns.isEmpty(itemActionQueue) or itemActionQueue[1].action ~= "BREAK_STACK" or CursorHasItem() then
 		return false;
 	else
 		for _, match in ipairs(stackResults) do
-			local key = match.container..match.containerSlot;
+			local key = getKey(match.container, match.containerSlot);
 
 			if lockedSlots[key] then
 				return false;
@@ -140,7 +145,7 @@ local isSafeToReturn = function()
 		return false;
 	else
 		for _, match in ipairs(brokenStacks) do
-			local key = match.container..match.containerSlot;
+			local key = getKey(match.container, match.containerSlot);
 
 			if lockedSlots[key] then
 				return false;
@@ -157,7 +162,7 @@ local isSafeToDoNextMove = function()
 		return false;
 	else
 		local nextMove = itemActionQueue[1];
-		local toKey, fromKey = nextMove.toBag..nextMove.toSlot, nextMove.fromBag..nextMove.fromSlot;
+		local toKey, fromKey = getKey(nextMove.toBag, nextMove.toSlot), getKey(nextMove.fromBag, nextMove.fromSlot);
 
 		if lockedSlots[toKey] or lockedSlots[fromKey] then
 			return false;
@@ -194,11 +199,11 @@ end
 
 local eventHandlers = {
 	ITEM_LOCKED = function(container, containerSlot)
-		local key = container..containerSlot;
+		local key = getKey(container, containerSlot);
 		lockedSlots[key] = "locked";
 	end,
 	ITEM_UNLOCKED = function(container, containerSlot)
-		local key = container..containerSlot;
+		local key = getKey(container, containerSlot);
 		lockedSlots[key] = nil;
 
 		if isSafeToDoNextMove() then
