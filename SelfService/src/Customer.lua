@@ -21,7 +21,7 @@ end
 ns.normalizeName = function(name)
 	name = name:match("^%s*([^%s-]*)");
 	if not name then return nil end;
-	return name:gsub("^([\128-\255]?.)", string.upper).."-"..GetRealmName();
+	return name:lower():gsub("^([\128-\255]?.)", string.upper).."-"..GetRealmName();
 end
 
 

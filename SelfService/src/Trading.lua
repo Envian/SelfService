@@ -1,8 +1,10 @@
 local _, ns = ...;
 
 ns.CurrentTrade = {
-	Items = {{},{},{},{},{},{},{}},
-	Money = {},
+	TargetItems = {{},{},{},{},{},{},{}},
+	PlayerItems = {{},{},{},{},{},{},{}},
+	TargetMoney = 0,
+	PlayerMoney = 0,
 	Customer = nil,
 }
 
@@ -23,24 +25,34 @@ ns.Trading = {
 		else
 			-- New trade, reset parameters
 			for n = 1,7 do
-				wipe(ns.CurrentTrade.Items[n]);
+				wipe(ns.CurrentTrade.TargetItems[n]);
+				wipe(ns.CurrentTrade.PlayerItems[n]);
 			end
-			ns.CurrentTrade.Money = 0;
+			ns.CurrentTrade.TargetMoney = 0;
+			ns.CurrentTrade.PlayerMoney = 0;
 			ns.CurrentTrade.Customer = customer;
 
 			ns.CurrentTrade.Customer.CurrentOrder:handleEvent("TRADE_SHOW");
 			ns.debugf(ns.LOG_TRADE_ACCEPTED, customer.Name);
 		end
 	end,
-	tradeItemChanged = function(slot)
+	targetItemChanged = function(slot)
 		if not ns.CurrentTrade.Customer or not ns.CurrentTrade.Customer.CurrentOrder then return end;
 
 		local itemName, _, quantity = GetTradeTargetItemInfo(slot);
 
-		ns.CurrentTrade.Items[slot].Id = itemName and ns.getItemIdFromLink(GetTradeTargetItemLink(slot), "item") or nil;
-		ns.CurrentTrade.Items[slot].Quantity = itemName and quantity or nil;
+		ns.CurrentTrade.TargetItems[slot].Id = itemName and ns.getItemIdFromLink(GetTradeTargetItemLink(slot), "item") or nil;
+		ns.CurrentTrade.TargetItems[slot].Count = itemName and quantity or nil;
 
-		ns.CurrentTrade.Customer.CurrentOrder:handleEvent("TRADE_ITEM_CHANGED", ns.CurrentTrade.Items);
+		ns.CurrentTrade.Customer.CurrentOrder:handleEvent("TRADE_ITEM_CHANGED", ns.CurrentTrade.TargetItems);
+	end,
+	playerItemChanged = function(slot)
+		if not ns.CurrentTrade.Customer or not ns.CurrentTrade.Customer.CurrentOrder then return end;
+
+		local itemName, _, quantity = GetTradePlayerItemInfo(slot);
+
+		ns.CurrentTrade.PlayerItems[slot].Id = itemName and ns.getItemIdFromLink(GetTradePlayerItemLink(slot), "item") or nil;
+		ns.CurrentTrade.PlayerItems[slot].Count = itemName and quantity or nil;
 	end,
 	tradeItemUpdated = function()
 		if not ns.CurrentTrade.Customer or not ns.CurrentTrade.Customer.CurrentOrder then return end;
@@ -48,17 +60,17 @@ ns.Trading = {
 		for i=1,7 do
 			local itemName, _, quantity = GetTradeTargetItemInfo(i);
 
-			ns.CurrentTrade.Items[i].Id = itemName and ns.getItemIdFromLink(GetTradeTargetItemLink(i), "item") or nil;
-			ns.CurrentTrade.Items[i].Quantity = itemName and quantity or nil;
+			ns.CurrentTrade.TargetItems[i].Id = itemName and ns.getItemIdFromLink(GetTradeTargetItemLink(i), "item") or nil;
+			ns.CurrentTrade.TargetItems[i].Count = itemName and quantity or nil;
 		end
 
-		ns.CurrentTrade.Customer.CurrentOrder:handleEvent("TRADE_ITEM_CHANGED", ns.CurrentTrade.Items);
+		ns.CurrentTrade.Customer.CurrentOrder:handleEvent("TRADE_ITEM_CHANGED", ns.CurrentTrade.TargetItems);
 	end,
 	tradeGoldChanged = function()
 		if not ns.CurrentTrade.Customer or not ns.CurrentTrade.Customer.CurrentOrder then return end;
 
 		ns.CurrentTrade.Money = GetTargetTradeMoney();
-		ns.CurrentTrade.Customer.CurrentOrder:handleEvent("TRADE_MONEY_CHANGED", ns.CurrentTrade.Copper);
+		ns.CurrentTrade.Customer.CurrentOrder:handleEvent("TRADE_MONEY_CHANGED", ns.CurrentTrade.TargetMoney, ns.CurrentTrade.PlayerMoney);
 	end,
 	tradeAccepted = function(playerAccepted, CustomerAccepted)
 		if not ns.CurrentTrade.Customer or not ns.CurrentTrade.Customer.CurrentOrder then return end;
@@ -77,7 +89,13 @@ ns.Trading = {
 	tradeCompleted = function()
 		if not ns.CurrentTrade.Customer or not ns.CurrentTrade.Customer.CurrentOrder then return end;
 
-		ns.CurrentTrade.Customer.CurrentOrder:addTradedItems(ns.CurrentTrade.Items, ns.CurrentTrade.Money);
+		-------------------------------------------------------------------------------------------------------
+		-- Reconcile trade items from both ns.CurrentTrade.PlayerItems and ns.CurrentTrade.TargetItems here. --
+		-------------------------------------------------------------------------------------------------------
+		ns.CurrentTrade.Customer.CurrentOrder:debit(ns.CurrentTrade.PlayerItems, 6);
+		ns.CurrentTrade.Customer.CurrentOrder:credit(ns.CurrentTrade.TargetItems, 6);
+
+
 		ns.CurrentTrade.Customer.CurrentOrder:handleEvent("TRADE_COMPLETED");
 		ns.CurrentTrade.Customer = nil;
 	end,
@@ -85,9 +103,15 @@ ns.Trading = {
 		local tradeMats = {};
 
 		for i=1, 6 do
-			local stack = ns.CurrentTrade.Items[i];
-			if stack.Id then
-				tradeMats[stack.Id] = (tradeMats[stack.Id] or 0) + stack.Quantity;
+			local playerStack = ns.CurrentTrade.PlayerItems[i];
+			local targetStack = ns.CurrentTrade.TargetItems[i];
+
+			if playerStack.Id then
+				tradeMats[playerStack.Id] = (tradeMats[playerStack.Id] or 0) - playerStack.Count;
+			end
+
+			if targetStack.Id then
+				tradeMats[targetStack.Id] = (tradeMats[targetStack.Id] or 0) + targetStack.Count;
 			end
 		end
 

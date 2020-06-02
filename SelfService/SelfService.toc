@@ -1,6 +1,6 @@
 ## Interface: 11303
 ## Title: SelfService
-## Author: Envian
+## Author: Envian, Mcscurvy
 ## Version: 0.1
 ## SavedVariablesPerCharacter: SelfServiceData
 
@@ -22,6 +22,8 @@ src/ActionQueue.lua
 src/Helpers.lua
 src/Trading.lua
 src/Events.lua
+
+src/Inventory.lua
 
 src/Console.lua
 src/CustomerCommands.lua

@@ -19,27 +19,7 @@ ns.CustomerCommands = {
 		end
 
 		-- Search by terms
-		local results = {};
-		for term in message:gmatch("[^+%s]+") do
-			local matches = ns.Search[string.lower(term)];
-
-			-- Ignore terms that don't match anything
-			if matches then
-				if #results == 0 then
-					for n, result in ipairs(matches) do
-						results[n] = result;
-					end
-				else
-					-- If we have multiple terms, only show results that match all.
-					results = ns.ifilter(results, function(result)
-						for _, newEntry in ipairs(matches) do
-							if newEntry.Id == result.Id then return true end;
-						end
-						return false;
-					end);
-				end
-			end
-		end
+		local results = ns.searchRecipes(message);
 
 		if #results > 0 then
 			customer:replyJoin("", ns.imap(results, function(result) return result.Link end), " ");
@@ -55,6 +35,15 @@ ns.CustomerCommands = {
 		end
 
 		local orders = ns.getLinkedItemIds(message);
+		if #orders == 0 then
+			local result = ns.searchRecipes(message);
+			if #result == 1 then
+				orders = { result[1].Id };
+			else
+				customer:replyf(ns.L.enUS.ORDER_MULTIPLE_SEARCH_RESULTS, #result);
+				return;
+			end
+		end
 		customer:addToOrder(orders);
 		ns.infof(ns.LOG_ORDER_PLACED, customer.Name, #orders);
 	end,

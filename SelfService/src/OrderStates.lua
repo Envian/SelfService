@@ -19,7 +19,8 @@ local baseOrderState = {
 	TRADE_COMPLETED = noAction,
 	SPELLCAST_CHANGED = noAction,
 	--ENCHANT_SUCCEEDED = noAction,
-	SPELLCAST_FAILED = noAction
+	SPELLCAST_FAILED = noAction,
+	CALLED_BACK = noAction
 }
 baseOrderState.__index = baseOrderState;
 
@@ -43,7 +44,7 @@ ns.OrderStates = {
 		Name = "WAIT_FOR_MATS",
 
 		TRADE_ITEM_CHANGED = function(customer, enteredItems)
-			if customer.CurrentOrder:isTradeAcceptable() then
+			if customer.CurrentOrder:isTradeAcceptable(enteredItems) then
 				ns.ActionQueue.clearTradeAction();
 				return ns.OrderStates.ACCEPT_MATS;
 			end
@@ -94,7 +95,7 @@ ns.OrderStates = {
 		-- When all CraftFocus items are in inventory, update OrderState to READY_FOR_DELIVERY
 
 		ENTER_STATE = function(customer)
-			if customer.CurrentOrder.Recipes[1].Type == "Enchanting" then
+			if customer.CurrentOrder.Recipes[customer.CurrentOrder.OrderIndex].Type == "Enchanting" then
 				customer:whisper(ns.L.enUS.ORDER_READY);
 				ns.ActionQueue.clearTradeAction();
 				return ns.OrderStates.READY_FOR_DELIVERY;
@@ -114,20 +115,48 @@ ns.OrderStates = {
 		end,
 		TRADE_SHOW = function(customer)
 			-- TODO: update for non exact materials
-			if customer.CurrentOrder.Recipes[1].Type == "Enchanting" then
-				customer:whisper(ns.L.enUS.ADD_ENCHANTABLE_ITEM);
-				ns.ActionQueue.clearTradeAction();
-				return ns.OrderStates.WAIT_FOR_ENCHANTABLE;
-			else
-				ns.ActionQueue.clearTradeAction();
-				return ns.OrderStates.DELIVER_ORDER;
+			if customer.CurrentOrder.Recipes[customer.CurrentOrder.OrderIndex] then
+				if customer.CurrentOrder.Recipes[customer.CurrentOrder.OrderIndex].Type == "Enchanting" then
+					customer:whisper(ns.L.enUS.ADD_ENCHANTABLE_ITEM);
+				end
 			end
+			return ns.OrderStates.DELIVER_ORDER;
 		end
 	}),
 
 	DELIVER_ORDER = baseOrderState:new({
 		Name = "DELIVER_ORDER",
+		ENTER_STATE = function(customer)
+			local returnables = {};
+			ns.debug(ns.LOG_ORDER_PREPARING_RETURNABLES);
+			for id, count in pairs(customer.CurrentOrder.ItemBalance) do
+				if count < 0 then
+					returnables[id] = -count;
+				end
+			end
 
+			if not ns.isEmpty(returnables) then
+				ns.breakStacksForReturn(returnables);
+			else
+				if customer.CurrentOrder.Recipes[customer.CurrentOrder.OrderIndex].Type == "Enchanting" then
+					return ns.OrderStates.WAIT_FOR_ENCHANTABLE;
+				else
+					return ns.OrderStates.AWAIT_PAYMENT;
+				end
+			end
+		end,
+		CALLED_BACK = function(customer, returnables)
+			for _, returnable in ipairs(returnables) do
+				ns.debugf(ns.LOG_RETURNABLES, returnable.id, returnable.container, returnable.slot);
+				UseContainerItem(returnable.container, returnable.slot);
+			end
+
+			if customer.CurrentOrder.Recipes[customer.CurrentOrder.OrderIndex] then
+				return ns.OrderStates.WAIT_FOR_ENCHANTABLE;
+			else
+				return ns.OrderStates.AWAIT_PAYMENT;
+			end
+		end,
 		TRADE_ITEM_CHANGED = function(customer, enteredItems)
 			-- local itemName, _, quantity = GetTradeTargetItemInfo(slotChanged);
 			-- local itemLink = GetTradeTargetItemLink(slotChanged);
@@ -152,14 +181,14 @@ ns.OrderStates = {
 		Name = "CAST_ENCHANT",
 
 		ENTER_STATE = function(customer)
-			ns.ActionQueue.castEnchant(customer.CurrentOrder.Recipes[1].Name);
+			ns.ActionQueue.castEnchant(customer.CurrentOrder.Recipes[customer.CurrentOrder.OrderIndex].Name);
 		end,
 		SPELLCAST_CHANGED = function(customer, cancelledCast)
-			if IsCurrentSpell(customer.CurrentOrder.Recipes[1].Id) then
+			if IsCurrentSpell(customer.CurrentOrder.Recipes[customer.CurrentOrder.OrderIndex].Id) then
 				ns.ActionQueue.clearTradeAction();
 				return ns.OrderStates.APPLY_ENCHANT;
 			else
-				ns.ActionQueue.castEnchant(customer.CurrentOrder.Recipes[1].Name);
+				ns.ActionQueue.castEnchant(customer.CurrentOrder.Recipes[customer.CurrentOrder.OrderIndex].Name);
 			end
 		end,
 		TRADE_ITEM_CHANGED = function(customer, enteredItems)
@@ -184,16 +213,17 @@ ns.OrderStates = {
 			else
 				local givenEnchant = select(6, GetTradeTargetItemInfo(7));
 
-				if givenEnchant == customer.CurrentOrder.Recipes[1].Name then
+				if givenEnchant == customer.CurrentOrder.Recipes[customer.CurrentOrder.OrderIndex].Name then
 					ns.ActionQueue.clearTradeAction();
 					return ns.OrderStates.AWAIT_PAYMENT;
 				end
 			end
 		end,
 		SPELLCAST_FAILED = function(customer, spellId)
-			if spellId == customer.CurrentOrder.Recipes[1].Id then
-				ns.warningf(ns.LOG_INVALID_ENCHANTABLE, customer.CurrentOrder.Recipes[1].Link);
-				customer:whisperf(ns.L.enUS.INVALID_ITEM, customer.CurrentOrder.Recipes[1].Link);
+
+			if spellId == customer.CurrentOrder.Recipes[customer.CurrentOrder.OrderIndex].Id then
+				ns.warningf(ns.LOG_INVALID_ENCHANTABLE, customer.CurrentOrder.Recipes[customer.CurrentOrder.OrderIndex].Link);
+				customer:whisperf(ns.L.enUS.INVALID_ITEM, customer.CurrentOrder.Recipes[customer.CurrentOrder.OrderIndex].Link);
 				ns.ActionQueue.clearTradeAction();
 				return ns.OrderStates.WAIT_FOR_ENCHANTABLE;
 			else
@@ -212,9 +242,7 @@ ns.OrderStates = {
 		Name = "AWAIT_PAYMENT",
 
 		ENTER_STATE = function(customer)
-			local balance = customer.CurrentOrder.RequiredMoney - customer.CurrentOrder.ReceivedMoney;
-
-			if balance > 0 then
+			if customer.CurrentOrder.MoneyBalance > 0 then
 				customer:whisperf(ns.L.enUS.MONEY_REQUIRED, ns.moneyToString(balance));
 			else
 				ns.ActionQueue.clearTradeAction();
@@ -223,9 +251,8 @@ ns.OrderStates = {
 		end,
 		TRADE_MONEY_CHANGED = function(customer)
 			local targetMoney = tonumber(GetTargetTradeMoney());
-			local balance = customer.CurrentOrder.RequiredMoney - customer.CurrentOrder.ReceivedMoney - targetMoney;
 
-			if balance <= 0 then
+			if customer.CurrentOrder.MoneyBalance - targetMoney < 0 then
 				ns.ActionQueue.clearTradeAction();
 				return ns.OrderStates.ACCEPT_DELIVERY
 			end
@@ -254,18 +281,19 @@ ns.OrderStates = {
 			end
 		end,
 		-- ENCHANT_SUCCEEDED = function(customer, spellId) -- This is just an extra error checking tool. May not be needed.
-		-- 	if spellId == customer.CurrentOrder.Recipes[1].Id then
+		-- 	if spellId == customer.CurrentOrder.Recipes[customer.CurrentOrder.OrderIndex].Id then
 		-- 		ns.ActionQueue.clearTradeAction();
 		-- 	end
 		-- end,
 		TRADE_COMPLETED = function(customer)
-			customer.CurrentOrder:reconcile(customer.CurrentOrder.Recipes[1]);
+			customer.CurrentOrder.OrderIndex = customer.CurrentOrder.OrderIndex + 1;
 
-			if ns.isEmpty(customer.CurrentOrder.ReceivedMats) then
+			if not customer.CurrentOrder.Recipes[customer.CurrentOrder.OrderIndex] and ns.isEmpty(customer.CurrentOrder.ItemBalance) then
 				ns.ActionQueue.clearTradeAction();
 				return ns.OrderStates.TRANSACTION_COMPLETE;
 			else
 				ns.ActionQueue.clearTradeAction();
+				customer.CurrentOrder.TradeAttempted = false;
 				return ns.OrderStates.READY_FOR_DELIVERY;
 			end
 		end,
@@ -279,5 +307,17 @@ ns.OrderStates = {
 			customer.CurrentOrder = nil;
 			ns.CurrentOrder = nil;
 		end
-	})
+	}),
+
+	DEBUG_STATES = {
+		SKIP_TO_AWAIT_PAYMENT = baseOrderState:new({
+			Name = "SKIP_TO_AWAIT_PAYMENT",
+			ENTER_STATE = function(customer)
+				ns.print(ns.DEBUG_SKIPPED_ENCHANT);
+				customer.CurrentOrder:credit(customer.CurrentOrder.Recipes[customer.CurrentOrder.OrderIndex].Mats);
+				customer:whisper(ns.L.enUS.DEBUG_SKIPPED_ENCHANT);
+				return ns.OrderStates.AWAIT_PAYMENT;
+			end
+		}),
+	}
 }
