@@ -36,7 +36,7 @@ ns.Trading = {
 			ns.debugf(ns.LOG_TRADE_ACCEPTED, customer.Name);
 		end
 	end,
-	tradeItemChanged = function(slot)
+	targetItemChanged = function(slot)
 		if not ns.CurrentTrade.Customer or not ns.CurrentTrade.Customer.CurrentOrder then return end;
 
 		local itemName, _, quantity = GetTradeTargetItemInfo(slot);

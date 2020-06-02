@@ -31,7 +31,7 @@ local eventHandlers = {
 		end
 	end,
 	TRADE_SHOW = function() ns.Trading.tradeOpened() end,
-	TRADE_TARGET_ITEM_CHANGED = function(slot) ns.Trading.tradeItemChanged(slot) end,
+	TRADE_TARGET_ITEM_CHANGED = function(slot) ns.Trading.targetItemChanged(slot) end,
 	TRADE_PLAYER_ITEM_CHANGED = function(slot) ns.Trading.playerItemChanged(slot) end,
 	TRADE_UPDATE = function() ns.Trading.tradeItemUpdated() end,
 	TRADE_MONEY_CHANGED = function() ns.Trading.tradeGoldChanged() end,
