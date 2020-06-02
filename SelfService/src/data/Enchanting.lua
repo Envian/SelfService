@@ -1372,3 +1372,12 @@ ns.Data.Enchanting_Results = {
 	[14807] = 11288, --Greater Magic Wand
 	[14293] = 11287, --Lesser Magic Wand
 }
+
+-- Temporary fix for GetItemCount("itemName") misbehaving
+ns.Data.Enchanting_Craft_Focus_Map = {
+	["Runed Copper Rod"] = 6218,
+	["Runed Silver Rod"] = 6339,
+	["Runed Golden Rod"] = 11130,
+	["Runed Truesilver Rod"] = 11145,
+	["Runed Arcanite Rod"] = 16207,
+}

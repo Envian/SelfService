@@ -103,8 +103,8 @@ ns.OrderStates = {
 					if GetItemCount(craftable.ProductId) < 1 then
 						readyToDeliver = false;
 
-						if craftable.CraftFocus and GetItemCount(craftable.CraftFocus) < 1 then
-							ns.errorf(ns.LOG_CRAFT_FOCUS_NOT_FOUND, craftable.CraftFocus);
+						if craftable.CraftFocusId and GetItemCount(craftable.CraftFocusId) < 1 then
+							ns.errorf(ns.LOG_CRAFT_FOCUS_NOT_FOUND, craftable.CraftFocusName);
 						else
 							-- Localize?
 							ns.debug("More crafted items needed to satisfy order.");
@@ -115,9 +115,9 @@ ns.OrderStates = {
 
 			if customer.CurrentOrder.Enchants[customer.CurrentOrder.EnchantIndex] then
 				for _, enchant in ipairs(customer.CurrentOrder.Enchants) do
-					if GetItemCount(enchant.CraftFocus) < 1 then
+					if GetItemCount(enchant.CraftFocusId) < 1 then
 						readyToDeliver = false;
-						ns.errorf(ns.LOG_CRAFT_FOCUS_NOT_FOUND, enchant.CraftFocus);
+						ns.errorf(ns.LOG_CRAFT_FOCUS_NOT_FOUND, enchant.CraftFocusName);
 					end
 				end
 			end
@@ -138,9 +138,9 @@ ns.OrderStates = {
 			end
 
 			for _, enchant in ipairs(customer.CurrentOrder.Enchants) do
-				if GetItemCount(enchant.CraftFocus) < 1 then
+				if GetItemCount(enchant.CraftFocusId) < 1 then
 					readyToDeliver = false;
-					ns.errorf(ns.LOG_CRAFT_FOCUS_NOT_FOUND, enchant.CraftFocus);
+					ns.errorf(ns.LOG_CRAFT_FOCUS_NOT_FOUND, enchant.CraftFocusName);
 				end
 			end
 

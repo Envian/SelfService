@@ -21,7 +21,8 @@ function ns.RecipeClass:newEnchant(id, recipe)
 	recipe.Id = id;
 	recipe.Type = "Enchanting";
 	recipe.IsCrafted = false;
-	recipe.CraftFocus = nil;
+	recipe.CraftFocusName = nil;
+	recipe.CraftFocusId = nil;
 	recipe.Mats = {};
 
 	setmetatable(recipe, enchantRecipeClass);
@@ -50,7 +51,8 @@ function enchantRecipeClass:loadFromIndex(index)
 	self.Name = name;
 	self.Owned = true;
 	self.Link = GetCraftItemLink(index);
-	self.CraftFocus = GetCraftSpellFocus(index);
+	self.CraftFocusName = GetCraftSpellFocus(index);
+	self.CraftFocusId = ns.Data.Enchanting_Craft_Focus_Map[GetCraftSpellFocus(index)];
 	self.Mats = {};
 
 	-- Load mats
