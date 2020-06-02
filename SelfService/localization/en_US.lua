@@ -69,6 +69,11 @@ ns.CMD_WIPE_ALL_WARNING = "WARNING: This will wipe all settings and reload the U
 ns.CMD_WIPE_CUSTOMERS_WARNING = "WARNING: This will wipe all customer data and current orders.";
 ns.CMD_WIPE_CUSTOMERS = "All customers and orders have been reset.";
 
+ns.CMD_DEBUG_SETSTATE_USAGE = "Invalid parameters for setstate. Usage: /ss debug setstate <CUSTOMER> <ORDER_STATE>";
+ns.CMD_DEBUG_SETSTATE_NO_ORDER = "No valid order for %s exists.";
+ns.CMD_DEBUG_SETSTATE_INVALID_STATE = "%s is not a recognized state.";
+ns.CMD_DEBUG_SETSTATE_TRANSITION_WARNING = "WARNING: Unexpected behavior may result from forcing this transition.";
+
 -- Debug mode messages
 ns.DEBUG_MODE_RELOAD_MESSAGE = "Debug mode cannot be disabled without reloading the UI.";
 ns.DEBUG_SKIP_ENCHANT_STATE = "Debug Mode Enabled - Enchants will no longer be cast.";
