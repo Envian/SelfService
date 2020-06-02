@@ -21,7 +21,7 @@ ns.LOG_ORDER_INSUFFICIENT_ITEMS = "Trade requires [%s]x%i however [%s]x%i was gi
 ns.LOG_ORDER_UNDESIRED_ITEM = "Received [%s]x%i from trade, but not required for the transaction.";
 ns.LOG_ORDER_TRADE_ACCEPTABLE = "Received all mats required for trade!";
 ns.LOG_ORDER_PREPARING_RETURNABLES = "Preparing returnable materials.";
-ns.LOG_RETURNABLES = "Return %s from Bag %s, Slot %s";
+ns.LOG_RETURNABLES = "Return [%s] from Bag %s, Slot %s";
 
 ns.LOG_TRADE_BLOCKED_NO_ORDER = "Cancelled trade with %s: No active order.";
 ns.LOG_TRADE_SERVING_OTHER = "Canceled trade with %s: Currently serving %s.";

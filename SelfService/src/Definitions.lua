@@ -47,7 +47,7 @@ ns.searchRecipes = func(searchStringOrList); -- Takes in a search string, or a l
 ns.enableAddon = func(); -- Enables bot event handling.
 ns.disableAddon = func(); -- Disables bot event handling.
 
-ns.findInInventory = func(itemId, count);
+ns.breakStacksForReturn = func(itemMap);
 
 -- Logging
 ns.setLogLevel = func(level); -- Sets the log level to a specified value.

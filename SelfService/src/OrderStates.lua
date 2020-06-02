@@ -131,12 +131,12 @@ ns.OrderStates = {
 			ns.debug(ns.LOG_ORDER_PREPARING_RETURNABLES);
 			for id, count in pairs(customer.CurrentOrder.ItemBalance) do
 				if count < 0 then
-					table.insert(returnables, {itemId = id, count = -count});
+					returnables[id] = -count;
 				end
 			end
 
 			if not ns.isEmpty(returnables) then
-				ns.findInInventory(returnables);
+				ns.breakStacksForReturn(returnables);
 			else
 				if customer.CurrentOrder.Recipes[customer.CurrentOrder.OrderIndex].Type == "Enchanting" then
 					return ns.OrderStates.WAIT_FOR_ENCHANTABLE;
@@ -147,8 +147,8 @@ ns.OrderStates = {
 		end,
 		CALLED_BACK = function(customer, returnables)
 			for _, returnable in ipairs(returnables) do
-				ns.debugf(ns.LOG_RETURNABLES, returnable.itemId, returnable.container, returnable.containerSlot);
-				UseContainerItem(returnable.container, returnable.containerSlot);
+				ns.debugf(ns.LOG_RETURNABLES, returnable.id, returnable.container, returnable.slot);
+				UseContainerItem(returnable.container, returnable.slot);
 			end
 
 			if customer.CurrentOrder.Recipes[customer.CurrentOrder.OrderIndex] then
