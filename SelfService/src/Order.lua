@@ -8,7 +8,7 @@ ns.OrderClass.__index = ns.OrderClass;
 function ns.OrderClass:new(data, customerName)
 	data = data or {
 		CustomerName = customerName,
-		State = ns.OrderStates["ORDER_PLACED"],
+		State = ns.OrderStates.ORDER_PLACED,
 		Craftables = {},
 		Enchants = {},
 		ItemBalance = {},
@@ -39,6 +39,7 @@ function ns.OrderClass:addToOrder(recipes)
 	for _, recipe in ipairs(recipes) do
 		if recipe.IsCrafted then
 			table.insert(self.Craftables, recipe);
+			self:credit({Id = recipe.ProductId, Count = 1});
 		else
 			table.insert(self.Enchants, recipe);
 		end

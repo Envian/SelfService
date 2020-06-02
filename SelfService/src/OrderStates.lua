@@ -99,37 +99,50 @@ ns.OrderStates = {
 			local readyToDeliver = true;
 
 			if not ns.isEmpty(customer.CurrentOrder.Craftables) then
-				readyToDeliver = false;
-				-- TODO: Queue up crafting the craftables with ActionQueueButton things
-			elseif customer.CurrentOrder.Enchants[customer.CurrentOrder.EnchantIndex] then
-				for _, enchant in ipairs(customer.CurrentOrder.Enchants) do
-					if GetItemCount(enchant.CraftFocus) < 1 then
-						ns.errorf(ns.LOG_CRAFT_FOCUS_NOT_FOUND, enchant.CraftFocus);
+				for _, craftable in ipairs(customer.CurrentOrder.Craftables) do
+					if GetItemCount(craftable.ProductId) < 1 then
 						readyToDeliver = false;
+
+						if craftable.CraftFocus and GetItemCount(craftable.CraftFocus) < 1 then
+							ns.errorf(ns.LOG_CRAFT_FOCUS_NOT_FOUND, craftable.CraftFocus);
+						else
+							-- Localize?
+							ns.debug("More crafted items needed to satisfy order.");
+						end
 					end
 				end
+			end
 
-				if readyToDeliver then
-					customer:whisper(ns.L.enUS.ORDER_READY);
-					ns.ActionQueue.clearAction();
-					return ns.OrderStates.READY_FOR_DELIVERY;
+			if customer.CurrentOrder.Enchants[customer.CurrentOrder.EnchantIndex] then
+				for _, enchant in ipairs(customer.CurrentOrder.Enchants) do
+					if GetItemCount(enchant.CraftFocus) < 1 then
+						readyToDeliver = false;
+						ns.errorf(ns.LOG_CRAFT_FOCUS_NOT_FOUND, enchant.CraftFocus);
+					end
 				end
-			else
-				ns.fatal("HOW THE FUCK DID WE GET HERE?!");
+			end
+
+			if readyToDeliver then
+				customer:whisper(ns.L.enUS.ORDER_READY);
+				ns.ActionQueue.clearAction();
+				return ns.OrderStates.READY_FOR_DELIVERY;
 			end
 		end,
-		INVENTORY_CHANGED = function(customer)
+		INVENTORY_CHANGED = function(customer, containerId)
 			local readyToDeliver = true;
+			ns.debug("Caught BAG_UPDATE event");
 
 			for _, craftable in ipairs(customer.CurrentOrder.Craftables) do
 				if GetItemCount(craftable.ProductId) < 1 then
 					readyToDeliver = false;
+					ns.debug("More crafted items needed to satisfy order.");
 				end
 			end
 
 			for _, enchant in ipairs(customer.CurrentOrder.EnchantIndex) do
 				if GetItemCount(enchant.CraftFocus) < 1 then
 					readyToDeliver = false;
+					ns.debug("Craft focus not found in inventory.");
 				end
 			end
 
@@ -356,6 +369,6 @@ ns.OrderStates = {
 				customer:whisper(ns.L.enUS.DEBUG_SKIPPED_ENCHANT);
 				return ns.OrderStates.AWAIT_PAYMENT;
 			end
-		}),
+		})
 	}
 }

@@ -1360,15 +1360,15 @@ ns.Data.Enchanting = {
 
 -- Used to connect product items with the recipe that makes them.
 ns.Data.Enchanting_Results = {
-	[20748] = ns.Data.Enchanting[25130],--Brilliant Mana Oil
-	[20749] = ns.Data.Enchanting[25129],--Brilliant Wizard Oil
-	[20750] = ns.Data.Enchanting[25128],--Wizard Oil
-	[20747] = ns.Data.Enchanting[25127],--Lesser Mana Oil
-	[20746] = ns.Data.Enchanting[25126],--Lesser Wizard Oil
-	[20745] = ns.Data.Enchanting[25125],--Minor Mana Oil
-	[20744] = ns.Data.Enchanting[25124],--Minor Wizard Oil
-	[11290] = ns.Data.Enchanting[14810],--Greater Mystic Wand
-	[11289] = ns.Data.Enchanting[14809],--Lesser Mystic Wand
-	[11288] = ns.Data.Enchanting[14807],--Greater Magic Wand
-	[11287] = ns.Data.Enchanting[14293],--Lesser Magic Wand
+	[25130] = 20748, --Brilliant Mana Oil
+	[25129] = 20749, --Brilliant Wizard Oil
+	[25128] = 20750, --Wizard Oil
+	[25127] = 20747, --Lesser Mana Oil
+	[25126] = 20746, --Lesser Wizard Oil
+	[25125] = 20745, --Minor Mana Oil
+	[25124] = 20744, --Minor Wizard Oil
+	[14810] = 11290, --Greater Mystic Wand
+	[14809] = 11289, --Lesser Mystic Wand
+	[14807] = 11288, --Greater Magic Wand
+	[14293] = 11287, --Lesser Magic Wand
 }
