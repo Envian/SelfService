@@ -52,7 +52,7 @@ local eventHandlers = {
 			ns.CurrentTrade.Customer.CurrentOrder:handleEvent("SPELLCAST_FAILED", spellId);
 		end
 	end,
-	BAG_UPDATE = function(containerId)
+	ITEM_UNLOCKED = function()
 		-- Not necessary to have a trade window open to handle this event
 		if ns.CurrentOrder then
 			ns.CurrentOrder:handleEvent("INVENTORY_CHANGED");

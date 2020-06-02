@@ -139,7 +139,7 @@ ns.OrderStates = {
 				end
 			end
 
-			for _, enchant in ipairs(customer.CurrentOrder.EnchantIndex) do
+			for _, enchant in ipairs(customer.CurrentOrder.Enchants) do
 				if GetItemCount(enchant.CraftFocus) < 1 then
 					readyToDeliver = false;
 					ns.debug("Craft focus not found in inventory.");
