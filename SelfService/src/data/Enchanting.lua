@@ -1312,6 +1312,14 @@ ns.Data.Enchanting = {
 
 	-- Non enchants, but should be purchaseable.
 
+	--Enchanted Leather
+	[17181] = {
+		Search = {"enchanted", "leather"}
+	},
+	--Enchanted Thorium
+	[17180] = {
+		Search = {"enchanted", "thorium", "bar"}
+	},
 	--Brilliant Mana Oil
 	[25130] = {
 		Search = {"brilliant", "mana", "oil"}
@@ -1360,6 +1368,8 @@ ns.Data.Enchanting = {
 
 -- Used to connect product items with the recipe that makes them.
 ns.Data.Enchanting_Results = {
+	[17181] = 12810, --Enchanted Leather
+	[17180] = 12655, --Enchanted Thorium
 	[25130] = 20748, --Brilliant Mana Oil
 	[25129] = 20749, --Brilliant Wizard Oil
 	[25128] = 20750, --Wizard Oil
