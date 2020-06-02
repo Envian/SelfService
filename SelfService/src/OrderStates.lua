@@ -89,12 +89,6 @@ ns.OrderStates = {
 	CRAFT_ORDER = baseOrderState:new({
 		Name = "CRAFT_ORDER",
 
-		-- Ensure we have the tools in bag, e.g. Runed Copper Rod
-		-- Compile list of all CraftFocus items required to complete order
-		-- Search bags for each CraftFocus
-		-- Search bank bags for each missing CraftFocus
-		-- When all CraftFocus items are in inventory, update OrderState to READY_FOR_DELIVERY
-
 		ENTER_STATE = function(customer)
 			local readyToDeliver = true;
 
@@ -106,8 +100,8 @@ ns.OrderStates = {
 						if craftable.CraftFocusId and GetItemCount(craftable.CraftFocusId) < 1 then
 							ns.errorf(ns.LOG_CRAFT_FOCUS_NOT_FOUND, craftable.CraftFocusName);
 						else
-							-- Localize?
-							ns.debug("More crafted items needed to satisfy order.");
+							ns.infof(ns.LOG_MORE_CRAFTS_REQUIRED, 1, craftable.Name);
+							ns.ActionQueue.castEnchant(craftable.Name);
 						end
 					end
 				end
@@ -133,7 +127,8 @@ ns.OrderStates = {
 			for _, craftable in ipairs(customer.CurrentOrder.Craftables) do
 				if GetItemCount(craftable.ProductId) < 1 then
 					readyToDeliver = false;
-					ns.debug("More crafted items needed to satisfy order.");
+					ns.infof(ns.LOG_MORE_CRAFTS_REQUIRED, 1, craftable.Name);
+					ns.ActionQueue.castEnchant(craftable.Name);
 				end
 			end
 

@@ -31,6 +31,7 @@ ns.LOG_TRADE_ACCEPTED = "Accepted trade with %s.";
 ns.LOG_LOADED = "Data for %s has been loaded.";
 ns.LOG_NEW_CUSTOMER = "Serving a new customer: %s";
 ns.LOG_RETURNING_CUSTOMER = "Serving a returning customer: %s";
+ns.LOG_MORE_CRAFTS_REQUIRED = "More items required to complete this order: %sx[%s]";
 
 -- Level 3 Warning
 ns.LOG_ENABLED = "has been enabled.";
