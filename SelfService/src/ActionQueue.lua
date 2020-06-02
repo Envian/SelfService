@@ -1,7 +1,7 @@
 local _, ns = ...;
 
 ns.ActionQueue = {
-	clearTradeAction = function()
+	clearAction = function()
 		SelfService_SecureButton:SetAttribute("type", nil);
 		SelfService_SecureButton:SetText("No Action");
 		ns.debugf(ns.LOG_SECURE_BUTTON_TRADE_ACTION, ns.LOG_SECURE_BUTTON_TYPES.CLEAR);

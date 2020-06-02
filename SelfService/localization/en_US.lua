@@ -46,6 +46,7 @@ ns.LOG_RECONCILE_UNRECEIVED_MATS = "ns.OrderClass:reconcile tried to remove mate
 ns.LOG_RECONCILE_NEGATIVE_MATS = "ns.OrderClass:reconcile resulted in a negative ReceivedMats balance.";
 ns.LOG_RETURN_INSUFFICIENT_ITEMS = "Inventory does not contain %s of [%s].";
 ns.LOG_INVENTORY_FULL = "Unable to break an appropriate stack size. Inventory is full.";
+ns.LOG_CRAFT_FOCUS_NOT_FOUND = "[%s] is required for this order, but it is not in inventory.";
 
 -- Level 1 Fatal
 

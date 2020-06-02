@@ -9,11 +9,12 @@ function ns.OrderClass:new(data, customerName)
 	data = data or {
 		CustomerName = customerName,
 		State = ns.OrderStates["ORDER_PLACED"],
-		Recipes = nil,
+		Craftables = {},
+		Enchants = {},
 		ItemBalance = {},
 		MoneyBalance = 0,
 		TradeAttempted = false,
-		OrderIndex = 1
+		EnchantIndex = 1
 	}
 	data.State = ns.OrderStates[data.State.Name];
 	setmetatable(data, ns.OrderClass);
@@ -35,8 +36,13 @@ function ns.OrderClass:handleEvent(event, ...)
 end
 
 function ns.OrderClass:addToOrder(recipes)
-	self.Recipes = recipes;
 	for _, recipe in ipairs(recipes) do
+		if recipe.IsCrafted then
+			table.insert(self.Craftables, recipe);
+		else
+			table.insert(self.Enchants, recipe);
+		end
+
 		self:debit(recipe.Mats);
 	end
 end

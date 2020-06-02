@@ -51,13 +51,13 @@ ns.dumpTable = function(table, indent)
 			if type(value) == "table" then
 				print(indent..ns.printType(key)..": {");
 				ns.dumpTable(value, indent.."  ");
-				print("}")
+				print(indent.."}");
 			else
 				print(indent..ns.printType(key)..": "..ns.printType(value));
 			end
 		end
 	else
-		print(ns.printType);
+		print(ns.printType(table));
 	end
 end
 

@@ -20,6 +20,7 @@ function ns.RecipeClass:newEnchant(id, recipe)
 	recipe.Owned = false;
 	recipe.Id = id;
 	recipe.Type = "Enchanting";
+	recipe.IsCrafted = false;
 	recipe.CraftFocus = nil;
 	recipe.Mats = {};
 
