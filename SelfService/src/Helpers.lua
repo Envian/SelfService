@@ -119,6 +119,19 @@ ns.pullFromCommandTable = function(commandObject, commandString)
 	return commandObject, commandString, commandStack;
 end
 
+ns.splitCommandArguments = function(arglist)
+	if type(arglist) ~= "string" or #arglist == 0 then return end;
+
+	local args = {};
+	local i = 1;
+	for arg in arglist:gmatch("%S+") do
+	   args[i] = arg;
+	   i = i + 1;
+	end
+
+	return args;
+end
+
 ns.searchRecipes = function(searchString)
 	local results = {}
 	for term in searchString:gmatch("[^+%s]+") do

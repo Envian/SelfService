@@ -101,13 +101,7 @@ local slashCommands = {
 			ns.OrderStates.CAST_ENCHANT = ns.OrderStates.DEBUG_STATES.SKIP_TO_AWAIT_PAYMENT;
 		end,
 		setstate = function(params)
-			local args = {};
-			local i = 1;
-
-			for arg in string.gmatch(params, "%S+") do
-			   args[i] = arg;
-			   i = i + 1;
-			end
+			local args = ns.splitCommandArguments(params);
 
 			if #args ~=2 then
 				ns.print(ns.CMD_DEBUG_SETSTATE_USAGE);
@@ -123,8 +117,6 @@ local slashCommands = {
 					ns.print(ns.CMD_DEBUG_SETSTATE_TRANSITION_WARNING);
 					customer.CurrentOrder.State = ns.OrderStates[newState];
 					customer.CurrentOrder:handleEvent("ENTER_STATE");
-					-- ns.debugf(ns.LOG_ORDER_STATE_CHANGE, customer.Name, customer.CurrentOrder.State.Name);
-					-- customer.CurrentOrder.State = customer.CurrentOrder.State.ENTER_STATE(customer);
 				end
 			end
 		end

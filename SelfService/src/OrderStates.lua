@@ -130,8 +130,6 @@ ns.OrderStates = {
 		end,
 		INVENTORY_CHANGED = function(customer, containerId)
 			local readyToDeliver = true;
-			ns.debug("Caught BAG_UPDATE event");
-
 			for _, craftable in ipairs(customer.CurrentOrder.Craftables) do
 				if GetItemCount(craftable.ProductId) < 1 then
 					readyToDeliver = false;
@@ -142,7 +140,7 @@ ns.OrderStates = {
 			for _, enchant in ipairs(customer.CurrentOrder.Enchants) do
 				if GetItemCount(enchant.CraftFocus) < 1 then
 					readyToDeliver = false;
-					ns.debug("Craft focus not found in inventory.");
+					ns.errorf(ns.LOG_CRAFT_FOCUS_NOT_FOUND, enchant.CraftFocus);
 				end
 			end
 
