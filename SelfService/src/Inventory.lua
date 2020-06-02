@@ -66,7 +66,7 @@ local makeMoveQueue = function(inventoryMap, freeSlots, itemMap)
 
 		if total < count then
 			-- TODO: Localize
-			ns.error("Inventory does not contain "..count.." of ["..itemId.."].");
+			ns.errorf(ns.LOG_RETURN_INSUFFICIENT_ITEMS, count, itemId);
 		elseif total == count then
 			for _, stack in ipairs(stackList) do
 				-- No stack break necessary
@@ -82,7 +82,7 @@ local makeMoveQueue = function(inventoryMap, freeSlots, itemMap)
 
 					if not freeSlot then
 						-- TODO: Localize
-						ns.error("Unable to break an appropriate stack size. Inventory is full.");
+						ns.error(ns.LOG_INVENTORY_FULL);
 						return;
 					end
 
@@ -128,13 +128,12 @@ local doNextAction = function()
 			else
 				ClearCursor();
 				-- TODO: For debugging only. Remove after testing.
-				ns.debug("Failed to pick up a stack.");
+				ns.error("Failed to pick up a stack.");
 			end
 		end
 	end
 end
 
--- ENTRY --
 ns.breakStacksForReturn = function(itemMap)
 	if not itemMap then
 		ns.error("Nil parameter supplied to breakStacksForReturn()");

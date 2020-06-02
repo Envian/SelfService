@@ -44,6 +44,8 @@ ns.LOG_CONFLICT = "Recipe conflict found. %s and %s share the same Id, and will 
 ns.LOG_CONFLICT_HIDING = "The recipe %s will not be available.";
 ns.LOG_RECONCILE_UNRECEIVED_MATS = "ns.OrderClass:reconcile tried to remove materials we did not receive.";
 ns.LOG_RECONCILE_NEGATIVE_MATS = "ns.OrderClass:reconcile resulted in a negative ReceivedMats balance.";
+ns.LOG_RETURN_INSUFFICIENT_ITEMS = "Inventory does not contain %s of [%s].";
+ns.LOG_INVENTORY_FULL = "Unable to break an appropriate stack size. Inventory is full.";
 
 -- Level 1 Fatal
 
