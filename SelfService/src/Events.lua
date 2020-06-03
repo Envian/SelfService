@@ -85,6 +85,12 @@ ns.enableAddon = function()
 			btn:SetScript("OnDragStop", btn.StopMovingOrSizing);
 			btn:SetScript("OnEnter", ActionButton_OnEnter);
 			btn:SetScript("OnLeave", ActionButton_OnLeave);
+			-- Debug
+			btn:SetScript("OnClick", function(self, button, down) ns.print("ActionButton clicked.") end);
+
+			if SetBindingClick("'", "SelfService_SecureButton") then
+				ns.print("Successfully bound SelfService_SecureButton to ' key.");
+			end
 
 			local t = btn:CreateTexture(nil,"BACKGROUND")
 			t:SetTexture("Interface\\Glues\\CharacterCreate\\UI-CharacterCreate-Factions.blp")
@@ -92,6 +98,9 @@ ns.enableAddon = function()
 			btn.texture = t
 		else
 			SelfService_SecureButton:Show();
+			if SetBindingClick("'", "SelfService_SecureButton") then
+				ns.print("Successfully rebound SelfService_SecureButton to ' key.");
+			end
 		end
 
 		ns.Enabled = true;
@@ -109,6 +118,10 @@ ns.disableAddon = function()
 		--ChatFrame_RemoveMessageEventFilter("CHAT_MSG_WHISPER", filterInbound);
 		--ChatFrame_RemoveMessageEventFilter("CHAT_MSG_WHISPER_INFORM", filterOutbound);
 		SelfService_SecureButton:Hide();
+
+		if SetBinding("'") then
+			ns.print("Successfully unbound ' key.");
+		end
 
 		ns.Enabled = false;
 		ns.warning(ns.LOG_DISABLED);
