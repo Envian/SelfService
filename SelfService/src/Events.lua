@@ -1,7 +1,5 @@
 local _, ns = ...;
 
-NS = ns;
-
 local COMMAND_REGEX = "^!%s*%a%a";
 local SEARCH_REGEX = "^%?%s*([|%a%d]+)";
 
