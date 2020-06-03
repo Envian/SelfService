@@ -116,6 +116,7 @@ local slashCommands = {
 				else
 					ns.print(ns.CMD_DEBUG_SETSTATE_TRANSITION_WARNING);
 					customer.CurrentOrder.State = ns.OrderStates[newState];
+					ns.debugf(ns.LOG_ORDER_STATE_CHANGE, customer.Name, customer.CurrentOrder.State.Name);
 					customer.CurrentOrder:handleEvent("ENTER_STATE");
 				end
 			end

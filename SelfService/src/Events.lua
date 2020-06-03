@@ -1,5 +1,7 @@
 local _, ns = ...;
 
+NS = ns;
+
 local COMMAND_REGEX = "^!%s*%a%a";
 local SEARCH_REGEX = "^%?%s*([|%a%d]+)";
 
@@ -135,11 +137,10 @@ loadingFrame:SetScript("OnEvent", function(_, event, ...)
 			end
 
 			-- Connects products (Wands, oils) with their "enchant", so product IDs can be linked to their recipe.
-			for recipeId, productId in pairs(ns.Data.Enchanting_Results) do
-				if ns.Recipes[recipeId] then
-					ns.Recipes[recipeId].IsCrafted = true;
-					ns.Recipes[recipeId].ProductId = productId;
-				end
+			for productId, recipe in pairs(ns.Data.Enchanting_Results) do
+				ns.Recipes[productId] = recipe;
+				recipe.IsCrafted = true;
+				recipe.ProductId = productId;
 			end
 			ns.Loaded.Enchanting = true;
 			ns.infof(ns.LOG_LOADED, "Enchanting");
