@@ -116,12 +116,10 @@ ns.OrderStates = {
 			end
 		end,
 		TRADE_SHOW = function(customer)
-			-- TODO: update for non exact materials
 			if customer.CurrentOrder.Enchants[customer.CurrentOrder.EnchantIndex] then
-				if customer.CurrentOrder.Enchants[customer.CurrentOrder.EnchantIndex].Type == "Enchanting" then
-					customer:whisper(ns.L.enUS.ADD_ENCHANTABLE_ITEM);
-				end
+				customer:whisperf(ns.L.enUS.ADD_ENCHANTABLE_ITEM, customer.CurrentOrder.Enchants[customer.CurrentOrder.EnchantIndex].Link);
 			end
+
 			return ns.OrderStates.DELIVER_ORDER;
 		end
 	}),
@@ -140,7 +138,7 @@ ns.OrderStates = {
 			if not ns.isEmpty(returnables) then
 				ns.breakStacksForReturn(returnables);
 			else
-				if customer.CurrentOrder.Enchants[customer.CurrentOrder.EnchantIndex].Type == "Enchanting" then
+				if customer.CurrentOrder.Enchants[customer.CurrentOrder.EnchantIndex] then
 					return ns.OrderStates.WAIT_FOR_ENCHANTABLE;
 				else
 					return ns.OrderStates.AWAIT_PAYMENT;
@@ -245,7 +243,7 @@ ns.OrderStates = {
 
 		ENTER_STATE = function(customer)
 			if customer.CurrentOrder.MoneyBalance > 0 then
-				customer:whisperf(ns.L.enUS.MONEY_REQUIRED, ns.moneyToString(balance));
+				customer:whisperf(ns.L.enUS.MONEY_REQUIRED, ns.moneyToString(customer.CurrentOrder.MoneyBalance));
 			else
 				ns.ActionQueue.clearTradeAction();
 				return ns.OrderStates.ACCEPT_DELIVERY;

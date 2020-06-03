@@ -39,7 +39,7 @@ function ns.OrderClass:addToOrder(recipes)
 	for _, recipe in ipairs(recipes) do
 		if recipe.IsCrafted then
 			table.insert(self.Craftables, recipe);
-			self:credit({Id = recipe.ProductId, Count = 1});
+			self:credit({{Id = recipe.ProductId, Count = 1}});
 		else
 			table.insert(self.Enchants, recipe);
 		end
