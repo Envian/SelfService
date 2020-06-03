@@ -8,12 +8,13 @@ ns.OrderClass.__index = ns.OrderClass;
 function ns.OrderClass:new(data, customerName)
 	data = data or {
 		CustomerName = customerName,
-		State = ns.OrderStates["ORDER_PLACED"],
-		Recipes = nil,
+		State = ns.OrderStates.ORDER_PLACED,
+		Craftables = {},
+		Enchants = {},
 		ItemBalance = {},
 		MoneyBalance = 0,
 		TradeAttempted = false,
-		OrderIndex = 1
+		EnchantIndex = 1
 	}
 	data.State = ns.OrderStates[data.State.Name];
 	setmetatable(data, ns.OrderClass);
@@ -35,8 +36,14 @@ function ns.OrderClass:handleEvent(event, ...)
 end
 
 function ns.OrderClass:addToOrder(recipes)
-	self.Recipes = recipes;
 	for _, recipe in ipairs(recipes) do
+		if recipe.IsCrafted then
+			table.insert(self.Craftables, recipe);
+			self:credit({{Id = recipe.ProductId, Count = 1}});
+		else
+			table.insert(self.Enchants, recipe);
+		end
+
 		self:debit(recipe.Mats);
 	end
 end
@@ -71,6 +78,32 @@ function ns.OrderClass:isTradeAcceptable(tradeMats) -- table{K, V}, key=itemID, 
 
 	ns.debugf(ns.LOG_ORDER_TRADE_ACCEPTABLE);
 	return receivedSufficientMats;
+end
+
+function ns.OrderClass:isDeliverable()
+	local readyToDeliver = true;
+
+	for _, craftable in ipairs(self.Craftables) do
+		if GetItemCount(craftable.ProductId) < 1 then
+			readyToDeliver = false;
+
+			if craftable.CraftFocusId and GetItemCount(craftable.CraftFocusId) < 1 then
+				ns.errorf(ns.LOG_CRAFT_FOCUS_NOT_FOUND, craftable.CraftFocusName);
+			else
+				ns.infof(ns.LOG_MORE_CRAFTS_REQUIRED, 1, craftable.Name);
+				ns.ActionQueue.castEnchant(craftable.Name);
+			end
+		end
+	end
+
+	for _, enchant in ipairs(self.Enchants) do
+		if GetItemCount(enchant.CraftFocusId) < 1 then
+			readyToDeliver = false;
+			ns.errorf(ns.LOG_CRAFT_FOCUS_NOT_FOUND, enchant.CraftFocusName);
+		end
+	end
+
+	return readyToDeliver;
 end
 
 function ns.OrderClass:credit(matList, count)

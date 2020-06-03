@@ -51,13 +51,13 @@ ns.dumpTable = function(table, indent)
 			if type(value) == "table" then
 				print(indent..ns.printType(key)..": {");
 				ns.dumpTable(value, indent.."  ");
-				print("}")
+				print(indent.."}");
 			else
 				print(indent..ns.printType(key)..": "..ns.printType(value));
 			end
 		end
 	else
-		print(ns.printType);
+		print(ns.printType(table));
 	end
 end
 
@@ -84,8 +84,8 @@ ns.moneyToString = function(value)
 	local gold   = math.floor(value/10000);
 
 	local cashString = copper > 0 and tostring(copper).."c" or "";
-	cashString = (silver > 0 and tostring(silver).."s ") or ""..cashString;
-	cashString = (gold > 0 and tostring(gold).."s ") or ""..cashString;
+	cashString = ((silver > 0 and tostring(silver).."s") or ((copper > 0 and gold > 0) and "0s") or "")..cashString;
+	cashString = ((gold > 0 and tostring(gold).."g") or "")..cashString;
 
 	return cashString;
 end
@@ -117,6 +117,19 @@ ns.pullFromCommandTable = function(commandObject, commandString)
 	end
 
 	return commandObject, commandString, commandStack;
+end
+
+ns.splitCommandArguments = function(arglist)
+	if type(arglist) ~= "string" or #arglist == 0 then return end;
+
+	local args = {};
+	local i = 1;
+	for arg in arglist:gmatch("%S+") do
+	   args[i] = arg;
+	   i = i + 1;
+	end
+
+	return args;
 end
 
 ns.searchRecipes = function(searchString)

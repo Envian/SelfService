@@ -52,6 +52,12 @@ local eventHandlers = {
 			ns.CurrentTrade.Customer.CurrentOrder:handleEvent("SPELLCAST_FAILED", spellId);
 		end
 	end,
+	BAG_UPDATE_DELAYED = function()
+		-- Not necessary to have a trade window open to handle this event
+		if ns.CurrentOrder then
+			ns.CurrentOrder:handleEvent("INVENTORY_CHANGED");
+		end
+	end
 	-- UNIT_SPELLCAST_SUCCEEDED = function(_, _, spellId)
 	-- 	if ns.CurrentTrade.Customer and ns.CurrentTrade.Customer.CurrentOrder then
 	-- 		ns.CurrentTrade.Customer.CurrentOrder:handleEvent("ENCHANT_SUCCEEDED", spellId);
@@ -129,8 +135,10 @@ loadingFrame:SetScript("OnEvent", function(_, event, ...)
 			end
 
 			-- Connects products (Wands, oils) with their "enchant", so product IDs can be linked to their recipe.
-			for itemId, recipe in pairs(ns.Data.Enchanting_Results) do
-				ns.Recipes[itemId] = recipe;
+			for productId, recipe in pairs(ns.Data.Enchanting_Results) do
+				ns.Recipes[productId] = recipe;
+				recipe.IsCrafted = true;
+				recipe.ProductId = productId;
 			end
 			ns.Loaded.Enchanting = true;
 			ns.infof(ns.LOG_LOADED, "Enchanting");

@@ -1312,6 +1312,14 @@ ns.Data.Enchanting = {
 
 	-- Non enchants, but should be purchaseable.
 
+	--Enchanted Leather
+	[17181] = {
+		Search = {"enchanted", "leather"}
+	},
+	--Enchanted Thorium
+	[17180] = {
+		Search = {"enchanted", "thorium", "bar"}
+	},
 	--Brilliant Mana Oil
 	[25130] = {
 		Search = {"brilliant", "mana", "oil"}
@@ -1360,6 +1368,8 @@ ns.Data.Enchanting = {
 
 -- Used to connect product items with the recipe that makes them.
 ns.Data.Enchanting_Results = {
+	[12810] = ns.Data.Enchanting[17181], --Enchanted Leather
+	[12655] = ns.Data.Enchanting[17180], --Enchanted Thorium
 	[20748] = ns.Data.Enchanting[25130],--Brilliant Mana Oil
 	[20749] = ns.Data.Enchanting[25129],--Brilliant Wizard Oil
 	[20750] = ns.Data.Enchanting[25128],--Wizard Oil
@@ -1371,4 +1381,13 @@ ns.Data.Enchanting_Results = {
 	[11289] = ns.Data.Enchanting[14809],--Lesser Mystic Wand
 	[11288] = ns.Data.Enchanting[14807],--Greater Magic Wand
 	[11287] = ns.Data.Enchanting[14293],--Lesser Magic Wand
+}
+
+-- Temporary fix for GetItemCount("itemName") misbehaving
+ns.Data.Enchanting_Craft_Focus_Map = {
+	["Runed Copper Rod"] = 6218,
+	["Runed Silver Rod"] = 6339,
+	["Runed Golden Rod"] = 11130,
+	["Runed Truesilver Rod"] = 11145,
+	["Runed Arcanite Rod"] = 16207,
 }

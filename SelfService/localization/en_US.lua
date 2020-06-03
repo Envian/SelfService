@@ -31,6 +31,7 @@ ns.LOG_TRADE_ACCEPTED = "Accepted trade with %s.";
 ns.LOG_LOADED = "Data for %s has been loaded.";
 ns.LOG_NEW_CUSTOMER = "Serving a new customer: %s";
 ns.LOG_RETURNING_CUSTOMER = "Serving a returning customer: %s";
+ns.LOG_MORE_CRAFTS_REQUIRED = "More items required to complete this order: %sx[%s]";
 
 -- Level 3 Warning
 ns.LOG_ENABLED = "has been enabled.";
@@ -46,6 +47,7 @@ ns.LOG_RECONCILE_UNRECEIVED_MATS = "ns.OrderClass:reconcile tried to remove mate
 ns.LOG_RECONCILE_NEGATIVE_MATS = "ns.OrderClass:reconcile resulted in a negative ReceivedMats balance.";
 ns.LOG_RETURN_INSUFFICIENT_ITEMS = "Inventory does not contain %s of [%s].";
 ns.LOG_INVENTORY_FULL = "Unable to break an appropriate stack size. Inventory is full.";
+ns.LOG_CRAFT_FOCUS_NOT_FOUND = "[%s] is required for this order, but it is not in inventory.";
 
 -- Level 1 Fatal
 
@@ -67,6 +69,11 @@ ns.CMD_RESET_NO_ORDER = "No order to reset.";
 ns.CMD_WIPE_ALL_WARNING = "WARNING: This will wipe all settings and reload the UI.";
 ns.CMD_WIPE_CUSTOMERS_WARNING = "WARNING: This will wipe all customer data and current orders.";
 ns.CMD_WIPE_CUSTOMERS = "All customers and orders have been reset.";
+
+ns.CMD_DEBUG_SETSTATE_USAGE = "Invalid parameters for setstate. Usage: /ss debug setstate <CUSTOMER> <ORDER_STATE>";
+ns.CMD_DEBUG_SETSTATE_NO_ORDER = "No valid order for %s exists.";
+ns.CMD_DEBUG_SETSTATE_INVALID_STATE = "%s is not a recognized state.";
+ns.CMD_DEBUG_SETSTATE_TRANSITION_WARNING = "WARNING: Unexpected behavior may result from forcing this transition.";
 
 -- Debug mode messages
 ns.DEBUG_MODE_RELOAD_MESSAGE = "Debug mode cannot be disabled without reloading the UI.";
@@ -124,7 +131,7 @@ ns.L.enUS = {
 	EXACT_MATERIALS_REQUIRED = "I need to receive exact materials for your order.",
 	CRAFTING_ORDER = "Please wait while I craft your order",
 	ORDER_READY = "Your order is ready.",
-	ADD_ENCHANTABLE_ITEM = "Place the item you want enchanted in the \"Will Not Be Traded\" slot.",
+	ADD_ENCHANTABLE_ITEM = "Now enchanting %s. Place the item you want enchanted in the \"Will Not Be Traded\" slot.",
 
 	DEBUG_SKIPPED_ENCHANT = "Debug mode enabled. Enchant has not been applied.",
 }
