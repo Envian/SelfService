@@ -79,6 +79,10 @@ ns.enableAddon = function()
 			btn:SetSize(42, 42);
 			btn:SetPoint("CENTER");
 			btn:SetText("No Action");
+			btn:SetMovable(true);
+			btn:RegisterForDrag("LeftButton");
+			btn:SetScript("OnDragStart", btn.StartMoving);
+			btn:SetScript("OnDragStop", btn.StopMovingOrSizing);
 			btn:SetScript("OnEnter", ActionButton_OnEnter);
 			btn:SetScript("OnLeave", ActionButton_OnLeave);
 
