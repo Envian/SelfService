@@ -1,0 +1,23 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ../FrameXML/UI.xsd">
+	<Button name="SelfService_ActionQueueButton" inherits="SecureActionButtonTemplate" parent="UIParent" movable="true" hidden="true" text="No Action">
+		<Size>
+			<AbsDimension x="42" y="42" />
+		</Size>
+		<NormalTexture file="Interface\Glues\CharacterCreate\UI-CharacterCreate-Factions.blp" />
+		<Anchors>
+			<Anchor point="CENTER">
+				<Offset>
+					<AbsDimension x="0" y="0" />
+				</Offset>
+			</Anchor>
+		</Anchors>
+		<Scripts>
+			<OnLoad> self:RegisterForDrag("LeftButton"); </OnLoad>
+			<OnDragStart> self:StartMoving(); </OnDragStart>
+			<OnDragStop> self:StopMovingOrSizing(); </OnDragStop>
+			<OnEnter> ActionQueueButton_OnEnter(self); </OnEnter>
+			<OnLeave> ActionQueueButton_OnLeave(self); </OnLeave>
+			<OnClick> print("ActionQueueButton Clicked."); </OnClick>
+		</Scripts>
+	</Button>
+</Ui>

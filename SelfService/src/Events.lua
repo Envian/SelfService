@@ -3,21 +3,25 @@ local _, ns = ...;
 local COMMAND_REGEX = "^!%s*%a%a";
 local SEARCH_REGEX = "^%?%s*([|%a%d]+)";
 
+BINDING_HEADER_SELFSERVICE = "Self Service";
+BINDING_NAME_SELFSERVICECLICK = "Click ActionQueue Button";
+
 local eventFrame = CreateFrame("Frame");
 local filterInbound = function(_, event, message, sender)
 	return ns.Enabled and (message:match(COMMAND_REGEX) or message:match(SEARCH_REGEX));
 end
+
 local filterOutbound = function(_, event, message, sender)
 	return ns.Enabled and message:sub(1, #ns.REPLY_PREFIX) == ns.REPLY_PREFIX;
 end
 
-local function ActionButton_OnEnter(self)
+function ActionQueueButton_OnEnter(self)
 	GameTooltip_SetDefaultAnchor(GameTooltip, UIParent);
 	GameTooltip:AddLine(self:GetText());
 	GameTooltip:Show();
 end
 
-local function ActionButton_OnLeave(self)
+function ActionQueueButton_OnLeave(self)
 	GameTooltip:Hide();
 end
 
@@ -74,35 +78,7 @@ ns.enableAddon = function()
 		-- ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER", filterInbound);
 		-- ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER_INFORM", filterOutbound);
 
-		if not SelfService_SecureButton then
-			local btn = CreateFrame("Button", "SelfService_SecureButton", UIParent, "SecureActionButtonTemplate");
-			btn:SetSize(42, 42);
-			btn:SetPoint("CENTER");
-			btn:SetText("No Action");
-			btn:SetMovable(true);
-			btn:RegisterForDrag("LeftButton");
-			btn:SetScript("OnDragStart", btn.StartMoving);
-			btn:SetScript("OnDragStop", btn.StopMovingOrSizing);
-			btn:SetScript("OnEnter", ActionButton_OnEnter);
-			btn:SetScript("OnLeave", ActionButton_OnLeave);
-			-- Debug
-			btn:SetScript("OnClick", function(self, button, down) ns.print("ActionButton clicked.") end);
-
-			if SetBindingClick("'", "SelfService_SecureButton") then
-				ns.print("Successfully bound SelfService_SecureButton to ' key.");
-			end
-
-			local t = btn:CreateTexture(nil,"BACKGROUND")
-			t:SetTexture("Interface\\Glues\\CharacterCreate\\UI-CharacterCreate-Factions.blp")
-			t:SetAllPoints(btn)
-			btn.texture = t
-		else
-			SelfService_SecureButton:Show();
-			if SetBindingClick("'", "SelfService_SecureButton") then
-				ns.print("Successfully rebound SelfService_SecureButton to ' key.");
-			end
-		end
-
+		SelfService_ActionQueueButton:Show();
 		ns.Enabled = true;
 		ns.warning(ns.LOG_ENABLED);
 	else
@@ -117,12 +93,7 @@ ns.disableAddon = function()
 		end
 		--ChatFrame_RemoveMessageEventFilter("CHAT_MSG_WHISPER", filterInbound);
 		--ChatFrame_RemoveMessageEventFilter("CHAT_MSG_WHISPER_INFORM", filterOutbound);
-		SelfService_SecureButton:Hide();
-
-		if SetBinding("'") then
-			ns.print("Successfully unbound ' key.");
-		end
-
+		SelfService_ActionQueueButton:Hide();
 		ns.Enabled = false;
 		ns.warning(ns.LOG_DISABLED);
 	else

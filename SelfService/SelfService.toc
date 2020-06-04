@@ -27,3 +27,5 @@ src/Inventory.lua
 
 src/Console.lua
 src/CustomerCommands.lua
+
+src/SelfService.xml
