@@ -79,7 +79,6 @@ ns.enableAddon = function()
 		-- ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER_INFORM", filterOutbound);
 
 		SelfService_ActionQueueButton:Show();
-		SelfService_ActionQueueButton:SetScript("OnClick", function (self, button, down) ns.print("ActionQueueButton clicked.") end);
 		ns.Enabled = true;
 		ns.warning(ns.LOG_ENABLED);
 	else
@@ -95,7 +94,6 @@ ns.disableAddon = function()
 		--ChatFrame_RemoveMessageEventFilter("CHAT_MSG_WHISPER", filterInbound);
 		--ChatFrame_RemoveMessageEventFilter("CHAT_MSG_WHISPER_INFORM", filterOutbound);
 		SelfService_ActionQueueButton:Hide();
-		SelfService_ActionQueueButton:SetScript("OnClick", function (self, button, down) end);
 		ns.Enabled = false;
 		ns.warning(ns.LOG_DISABLED);
 	else
