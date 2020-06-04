@@ -70,7 +70,12 @@ ns.CMD_WIPE_ALL_WARNING = "WARNING: This will wipe all settings and reload the U
 ns.CMD_WIPE_CUSTOMERS_WARNING = "WARNING: This will wipe all customer data and current orders.";
 ns.CMD_WIPE_CUSTOMERS = "All customers and orders have been reset.";
 
-ns.CMD_DEBUG_SETSTATE_USAGE = "Invalid parameters for setstate. Usage: /ss debug setstate <CUSTOMER> <ORDER_STATE>";
+ns.CMD_LOGLEVEL_USAGE = "Invalid parameters for loglevel. Usage: /ss loglevel [loglevel]";
+ns.CMD_LOGLEVEL_INVALID = "Invalid log level. Acceptable log levels: 1-Fatal, 2-Error, 3-Warning, 4-Info, 5-Debug.";
+ns.CMD_LOGLEVEL_CURRENT_LEVEL = "SelfServiceData.LogLevel currently set to %s.";
+ns.CMD_LOGLEVEL_SET = "SelfServiceData.LogLevel now set to %s.";
+
+ns.CMD_DEBUG_SETSTATE_USAGE = "Invalid parameters for setstate. Usage: /ss debug setstate Customer ORDER_STATE";
 ns.CMD_DEBUG_SETSTATE_NO_ORDER = "No valid order for %s exists.";
 ns.CMD_DEBUG_SETSTATE_INVALID_STATE = "%s is not a recognized state.";
 ns.CMD_DEBUG_SETSTATE_TRANSITION_WARNING = "WARNING: Unexpected behavior may result from forcing this transition.";
