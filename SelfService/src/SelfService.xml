@@ -17,7 +17,6 @@
 			<OnDragStop> self:StopMovingOrSizing(); </OnDragStop>
 			<OnEnter> ActionQueueButton_OnEnter(self); </OnEnter>
 			<OnLeave> ActionQueueButton_OnLeave(self); </OnLeave>
-			<OnClick> print("ActionQueueButton Clicked."); </OnClick>
 		</Scripts>
 	</Button>
 </Ui>
