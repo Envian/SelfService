@@ -3,8 +3,8 @@ local _, ns = ...;
 local COMMAND_REGEX = "^!%s*%a%a";
 local SEARCH_REGEX = "^%?%s*([|%a%d]+)";
 
-BINDING_HEADER_SELFSERVICE = "Self Service";
-setglobal("BINDING_NAME_CLICK SelfService_ActionQueueButton:LeftButton", "Click ActionQueue Button");
+BINDING_HEADER_SELFSERVICE = ns.ADDON_NAME;
+setglobal("BINDING_NAME_CLICK SelfService_ActionQueueButton:LeftButton", ns.KEYBIND_NEXT_ACTION);
 
 local eventFrame = CreateFrame("Frame");
 local filterInbound = function(_, event, message, sender)
