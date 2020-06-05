@@ -23,6 +23,7 @@
 			<OnLeave>
 				GameTooltip:Hide();
 			</OnLeave>
+			<OnLeave> GameTooltip:Hide(); </OnLeave>
 		</Scripts>
 	</Button>
 </Ui>
