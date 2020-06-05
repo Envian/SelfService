@@ -15,8 +15,14 @@
 			<OnLoad> self:RegisterForDrag("LeftButton"); </OnLoad>
 			<OnDragStart> self:StartMoving(); </OnDragStart>
 			<OnDragStop> self:StopMovingOrSizing(); </OnDragStop>
-			<OnEnter> ActionQueueButton_OnEnter(self); </OnEnter>
-			<OnLeave> ActionQueueButton_OnLeave(self); </OnLeave>
+			<OnEnter>
+				GameTooltip:SetOwner(self, "ANCHOR_CURSOR");
+				GameTooltip:AddLine(self:GetText());
+				GameTooltip:Show();
+			</OnEnter>
+			<OnLeave>
+				GameTooltip:Hide();
+			</OnLeave>
 		</Scripts>
 	</Button>
 </Ui>

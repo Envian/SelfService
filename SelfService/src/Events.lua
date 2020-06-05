@@ -15,16 +15,6 @@ local filterOutbound = function(_, event, message, sender)
 	return ns.Enabled and message:sub(1, #ns.REPLY_PREFIX) == ns.REPLY_PREFIX;
 end
 
-function ActionQueueButton_OnEnter(self)
-	GameTooltip_SetDefaultAnchor(GameTooltip, UIParent);
-	GameTooltip:AddLine(self:GetText());
-	GameTooltip:Show();
-end
-
-function ActionQueueButton_OnLeave(self)
-	GameTooltip:Hide();
-end
-
 local eventHandlers = {
 	CHAT_MSG_WHISPER = function(message, sender)
 		-- Convert messages including "?term" to "!search term"
