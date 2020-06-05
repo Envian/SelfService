@@ -15,8 +15,14 @@
 			<OnLoad> self:RegisterForDrag("LeftButton"); </OnLoad>
 			<OnDragStart> self:StartMoving(); </OnDragStart>
 			<OnDragStop> self:StopMovingOrSizing(); </OnDragStop>
-			<OnEnter> ActionQueueButton_OnEnter(self); </OnEnter>
-			<OnLeave> ActionQueueButton_OnLeave(self); </OnLeave>
+			<OnEnter>
+				GameTooltip_SetDefaultAnchor(GameTooltip, UIParent);
+				GameTooltip:AddLine(self:GetText());
+				GameTooltip:Show();
+			</OnEnter>
+			<OnLeave> GameTooltip:Hide(); </OnLeave>
+			<OnClick> self:handleOnClick(button); </OnClick>
 		</Scripts>
 	</Button>
+	<Script file="ui/SecureButton.lua" />
 </Ui>
