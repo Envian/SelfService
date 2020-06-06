@@ -33,6 +33,7 @@ end
 ns.OrderStates = {
 	ORDER_PLACED = baseOrderState:new({
 		Name = "ORDER_PLACED",
+		Phase = "ORDERING",
 
 		TRADE_SHOW = function(customer)
 			customer:whisper(ns.L.enUS.ADD_EXACT_MATERIALS);
@@ -43,6 +44,7 @@ ns.OrderStates = {
 
 	WAIT_FOR_MATS = baseOrderState:new({
 		Name = "WAIT_FOR_MATS",
+		Phase = "ORDERING",
 
 		TRADE_ITEM_CHANGED = function(customer, enteredItems)
 			if customer.CurrentOrder:isTradeAcceptable(enteredItems) then
@@ -64,6 +66,7 @@ ns.OrderStates = {
 
 	ACCEPT_MATS = baseOrderState:new({
 		Name = "ACCEPT_MATS",
+		Phase = "ORDERING",
 
 		ENTER_STATE = function(customer)
 			ns.ActionQueue.acceptTrade();
@@ -88,6 +91,7 @@ ns.OrderStates = {
 
 	CRAFT_ORDER = baseOrderState:new({
 		Name = "CRAFT_ORDER",
+		Phase = "CRAFTING",
 
 		ENTER_STATE = function(customer)
 			if customer.CurrentOrder:isDeliverable() then
@@ -107,6 +111,7 @@ ns.OrderStates = {
 
 	READY_FOR_DELIVERY = baseOrderState:new({
 		Name = "READY_FOR_DELIVERY",
+		Phase = "DELIVERY",
 
 		ENTER_STATE = function(customer)
 			if not customer.CurrentOrder.TradeAttempted then
@@ -126,6 +131,8 @@ ns.OrderStates = {
 
 	DELIVER_ORDER = baseOrderState:new({
 		Name = "DELIVER_ORDER",
+		Phase = "DELIVERY",
+
 		ENTER_STATE = function(customer)
 			local returnables = {};
 			ns.debug(ns.LOG_ORDER_PREPARING_RETURNABLES);
@@ -167,6 +174,7 @@ ns.OrderStates = {
 
 	WAIT_FOR_ENCHANTABLE = baseOrderState:new({
 		Name = "WAIT_FOR_ENCHANTABLE",
+		Phase = "DELIVERY",
 
 		TRADE_ITEM_CHANGED = function(customer, enteredItems)
 			if enteredItems[7].Id then
@@ -179,6 +187,7 @@ ns.OrderStates = {
 
 	CAST_ENCHANT = baseOrderState:new({
 		Name = "CAST_ENCHANT",
+		Phase = "DELIVERY",
 
 		ENTER_STATE = function(customer)
 			ns.ActionQueue.castEnchant(customer.CurrentOrder.Enchants[customer.CurrentOrder.EnchantIndex].Name);
@@ -202,6 +211,7 @@ ns.OrderStates = {
 
 	APPLY_ENCHANT = baseOrderState:new({
 		Name = "APPLY_ENCHANT",
+		Phase = "DELIVERY",
 
 		ENTER_STATE = function(customer)
 			ns.ActionQueue.applyEnchant();
@@ -240,6 +250,7 @@ ns.OrderStates = {
 
 	AWAIT_PAYMENT = baseOrderState:new({
 		Name = "AWAIT_PAYMENT",
+		Phase = "DELIVERY",
 
 		ENTER_STATE = function(customer)
 			if customer.CurrentOrder.MoneyBalance > 0 then
@@ -268,6 +279,7 @@ ns.OrderStates = {
 
 	ACCEPT_DELIVERY = baseOrderState:new({
 		Name = "ACCEPT_DELIVERY",
+		Phase = "DELIVERY",
 
 		ENTER_STATE = function(customer)
 			ns.ActionQueue.acceptTrade();
@@ -301,6 +313,7 @@ ns.OrderStates = {
 
 	TRANSACTION_COMPLETE = baseOrderState:new({
 		Name = "TRANSACTION_COMPLETE",
+		Phase = "DELIVERY",
 
 		ENTER_STATE = function(customer)
 			customer:whisper(ns.L.enUS.TRANSACTION_COMPLETE);
@@ -312,6 +325,8 @@ ns.OrderStates = {
 	DEBUG_STATES = {
 		SKIP_TO_AWAIT_PAYMENT = baseOrderState:new({
 			Name = "SKIP_TO_AWAIT_PAYMENT",
+			Phase = "DELIVERY",
+			
 			ENTER_STATE = function(customer)
 				ns.print(ns.DEBUG_SKIPPED_ENCHANT);
 				customer.CurrentOrder:credit(customer.CurrentOrder.Enchants[customer.CurrentOrder.EnchantIndex].Mats);
