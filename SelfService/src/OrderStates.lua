@@ -47,12 +47,17 @@ ns.OrderStates = {
 		Phase = "ORDERING",
 
 		TRADE_ITEM_CHANGED = function(customer, enteredItems)
-			if customer.CurrentOrder:isTradeAcceptable(enteredItems) then
+			if customer.CurrentOrder:isTradeCompletable(enteredItems) then
 				ns.ActionQueue.clearTradeAction();
 				return ns.OrderStates.ACCEPT_MATS;
 			end
 		end,
 		TRADE_ACCEPTED = function(customer, playerAccepted, customerAccepted)
+			if customer.CurrentOrder:isTradeAcceptable(enteredItems) then
+				ns.ActionQueue.clearTradeAction();
+				return ns.OrderStates.ACCEPT_MATS;
+			end
+
 			if playerAccepted == 0 and customerAccepted == 1 then
 				customer:whisper(ns.L.enUS.EXACT_MATERIALS_REQUIRED);
 			end
@@ -326,7 +331,7 @@ ns.OrderStates = {
 		SKIP_TO_AWAIT_PAYMENT = baseOrderState:new({
 			Name = "SKIP_TO_AWAIT_PAYMENT",
 			Phase = "DELIVERY",
-			
+
 			ENTER_STATE = function(customer)
 				ns.print(ns.DEBUG_SKIPPED_ENCHANT);
 				customer.CurrentOrder:credit(customer.CurrentOrder.Enchants[customer.CurrentOrder.EnchantIndex].Mats);

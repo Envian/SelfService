@@ -46,23 +46,28 @@ function ns.OrderClass:addToOrder(recipe)
 	self:debit(recipe.Mats);
 end
 
--- function ns.OrderClass:addTradedItems(items, money)
--- 	self.ReceivedMoney = self.ReceivedMoney + money;
--- 	for n = 1,6 do
--- 		if items[n] and items[n].Id then
--- 			self.ReceivedMats[items[n].Id] = (self.ReceivedMats[items[n].Id] or 0) + items[n].Count;
--- 		end
--- 	end
--- end
+function ns.OrderClass:isTradeAcceptable(tradeMats)
+	-- TODO: return true if the trade is completable, or if all slots are filled + all relevant Mats
+	
+	for n = 1,6 do
+		if not tradeMats[n] or not tradeMats[n].Id then
+			ns.debugf(ns.LOG_ORDER_EMPTY_SLOT, id, count);
+			return self:isTradeComplete();
+		end
 
-function ns.OrderClass:isTradeAcceptable(tradeMats) -- table{K, V}, key=itemID, V=+/- number
-	local receivedSufficientMats = true;
+	end
+
+	ns.debugf(ns.LOG_ORDER_TRADE_ACCEPTABLE);
+	return true;
+end
+
+function ns.OrderClass:isTradeCompletable(tradeMats) -- table{K, V}, key=itemID, V=+/- number
 	tradeMats = ns.Trading.totalTrade();
 
 	for id, count in pairs(self.ItemBalance) do
 		if count - (tradeMats[id] or 0) > 0 then
 			ns.debugf(ns.LOG_ORDER_INSUFFICIENT_ITEMS, id, count, id, tradeMats[id]);
-			receivedSufficientMats = false;
+			return false;
 		end
 	end
 
@@ -70,12 +75,12 @@ function ns.OrderClass:isTradeAcceptable(tradeMats) -- table{K, V}, key=itemID, 
 	for id, count in pairs(tradeMats) do
 		if not self.ItemBalance[id] then
 			ns.debugf(ns.LOG_ORDER_UNDESIRED_ITEM, id, count);
-			receivedSufficientMats = false;
+			return false;
 		end
 	end
 
 	ns.debugf(ns.LOG_ORDER_TRADE_ACCEPTABLE);
-	return receivedSufficientMats;
+	return true;
 end
 
 function ns.OrderClass:isDeliverable()

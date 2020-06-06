@@ -18,6 +18,7 @@ ns.LOG_ORDER_PLACED = "%s has placed an order for %i items.";
 ns.LOG_ORDER_STATE_CHANGE = "Order for %s has transitioned to the %s state.";
 ns.LOG_ORDER_INSUFFICIENT_ITEMS = "Trade requires [%s]x%i however [%s]x%i was given.";
 ns.LOG_ORDER_UNDESIRED_ITEM = "Received [%s]x%i from trade, but not required for the transaction.";
+ns.LOG_ORDER_EMPTY_SLOT = "There's an empty slot. Do not accept the trade unless its complete.";
 ns.LOG_ORDER_TRADE_ACCEPTABLE = "Received all mats required for trade!";
 ns.LOG_ORDER_PREPARING_RETURNABLES = "Preparing returnable materials.";
 ns.LOG_RETURNABLES = "Return [%s] from Bag %s, Slot %s";
