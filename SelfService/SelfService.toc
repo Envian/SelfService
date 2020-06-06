@@ -4,26 +4,31 @@
 ## Version: 0.1
 ## SavedVariablesPerCharacter: SelfServiceData
 
+# Definitions always first
 src/Definitions.lua
 
+# Data Files
 localization/en_US.lua
+data/Enchanting.lua
 
+# Initialization
+src/Helpers.lua
 src/Migration.lua
 src/Logging.lua
 
-src/data/Enchanting.lua
 
+# Classes
 src/Recipe.lua
 src/OrderStates.lua
 src/Order.lua
 src/Customer.lua
 
+# Managers
 src/ActionQueue.lua
-src/Helpers.lua
 src/Trading.lua
-src/Events.lua
-
 src/Inventory.lua
-
-src/Console.lua
 src/CustomerCommands.lua
+
+# Handlers
+src/Events.lua
+src/Console.lua
