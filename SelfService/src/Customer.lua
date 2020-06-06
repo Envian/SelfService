@@ -63,31 +63,34 @@ function CustomerClass:handleCommand(command, message)
 	self.MessagesAvailable = 0;
 end
 
-function CustomerClass:getOrder()
-	return self.CurrentOrder;
-end
-
-function CustomerClass:addToOrder(recipes)
-	local order = self:getOrder();
-
-	-- Temporary
-	if order then
+function CustomerClass:addToOrder(recipeIds)
+	if self.CurrentOrder and self.CurrentOrder.State.Phase ~= "ORDERING" then
 		self:reply(ns.L.enUS.ORDER_IN_PROGRESS);
-	elseif not recipes or #recipes ~= 1 then
-		self:reply(ns.L.enUS.ORDER_LIMIT);
-	else
-		local recipe = ns.Recipes[recipes[1]];
-		if recipe and recipe.Owned then
-			order = ns.OrderClass:new(nil, self.Name);
-			order:addToOrder({ recipe });
-			self.CurrentOrder = order;
-			ns.CurrentOrder = self.CurrentOrder;
-			self:replyJoin(ns.L.enUS.ORDER_PLACED:format(recipe.Name),
-				ns:imap(recipe.Mats, function(mat) return mat.Link end));
-		else
+		return;
+	end
+
+	-- Check recipe Ids. Can we do them?
+	for _, recipeId in recipeIds do
+		local recipe = ns.Recipes[recipeId];
+
+		if not recipe or not recipe.Owned then
+			-- TODO: What do we do if they order something we don't have?
 			self:reply(ns.L.enUS.RECIPES_UNAVAILABLE);
+			return;
 		end
 	end
+
+	local addedLinks = {};
+	if not self.CurrentOrder then self.CurrentOrder = ns.OrderClass:new(nil, self.Name) end;
+
+	for _, recipeId in recipeIds do
+		ns.CurrentOrder = self.CurrentOrder; -- HACK: Enforces exclusivity.
+		self.CurrentOrder:addToOrder(ns.Recipes[recipeId]);
+		addedLinks:insert(ns.Recipes[recipeId].Link);
+	end
+
+	addedLinks:insert(ORDER_PLACED_ENDING);
+	self:replyJoin(ns.L.enUS.ORDER_PLACED, addedLinks);
 end
 
 function CustomerClass:reply(message)

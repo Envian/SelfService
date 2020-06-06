@@ -1,7 +1,6 @@
 local _, ns = ...;
 
 ns.LOCALIZATION = "enUS";
-ns.ADDON_NAME = "SelfService";
 
 -- Logging
 -- Level 5 Debug
@@ -116,10 +115,11 @@ ns.L.enUS = {
 	HELP = "haha get wrecked nerd. you're on your own.",
 	RECIPES_OWNED = "I have %s.",
 	RECIPES_UNAVAILABLE = "I do not have that recipe.",
-	ORDER_PLACED = "Once you have obtained the mats for %s, open trade. Your total is: ",
+	ORDER_PLACED = "Order placed for: ",
+	ORDER_PLACED_ENDING = "Open trade when you're ready to checkout.",
 	ORDER_LIMIT = "I only support ordering 1 item at a time. Try again",
 	ORDER_MULTIPLE_SEARCH_RESULTS = "I found %i recipes that match that description. Please be more specific.",
-	ORDER_IN_PROGRESS = "I only support ordering 1 item at a time. Finish your order before requesting another",
+	ORDER_IN_PROGRESS = "I can not add a new item to your order right now. Please finish your order before requesting another",
 	BUY_FIRST = "Use command !buy before opening trade.",
 	BUSY = "I am serving another player right now. Please try again later.",
 	INVALID_ITEM = "%s cannot be applied to that item.",

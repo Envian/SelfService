@@ -35,17 +35,15 @@ function ns.OrderClass:handleEvent(event, ...)
 	end
 end
 
-function ns.OrderClass:addToOrder(recipes)
-	for _, recipe in ipairs(recipes) do
-		if recipe.IsCrafted then
-			table.insert(self.Craftables, recipe);
-			self:credit({{Id = recipe.ProductId, Count = 1}});
-		else
-			table.insert(self.Enchants, recipe);
-		end
-
-		self:debit(recipe.Mats);
+function ns.OrderClass:addToOrder(recipe)
+	if recipe.IsCrafted then
+		table.insert(self.Craftables, recipe);
+		self:credit({{Id = recipe.ProductId, Count = 1}});
+	else
+		table.insert(self.Enchants, recipe);
 	end
+
+	self:debit(recipe.Mats);
 end
 
 -- function ns.OrderClass:addTradedItems(items, money)

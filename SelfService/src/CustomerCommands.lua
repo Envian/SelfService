@@ -29,6 +29,7 @@ ns.CustomerCommands = {
 	end,
 
 	buy = function(customer, message)
+		-- HACK: Enforces Exclusivity
 		if ns.CurrentOrder and ns.CurrentOrder.CustomerName ~= customer.Name then
 			customer:reply(ns.L.enUS.BUSY);
 			return;
@@ -40,7 +41,11 @@ ns.CustomerCommands = {
 			if #result == 1 then
 				orders = { result[1].Id };
 			else
-				customer:replyf(ns.L.enUS.ORDER_MULTIPLE_SEARCH_RESULTS, #result);
+				if #results >1 then
+					customer:replyf(ns.L.enUS.ORDER_MULTIPLE_SEARCH_RESULTS, #result);
+				else
+					customer:reply(ns.L.enUS.NO_RESULTS);
+				end
 				return;
 			end
 		end

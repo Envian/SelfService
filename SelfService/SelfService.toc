@@ -23,12 +23,13 @@ src/OrderStates.lua
 src/Order.lua
 src/Customer.lua
 
-# Managers
+# Helpers
 src/ActionQueue.lua
 src/Trading.lua
-src/Inventory.lua
 src/CustomerCommands.lua
 
 # Handlers
+src/Inventory.lua
+src/CraftManager.lua
 src/Events.lua
 src/Console.lua
