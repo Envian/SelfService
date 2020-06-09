@@ -1,7 +1,7 @@
 local _, ns = ...;
 
 local noAction = function() end
-local tradeCancelledAfterOrderReadyForDelivery = function(customer)
+local tradeCancelledDuringDelivery = function(customer)
 	customer:whisper(ns.L.enUS.TRADE_CANCELLED);
 	ns.ActionQueue.clearTradeAction();
 	return ns.OrderStates.READY_FOR_DELIVERY;
@@ -174,7 +174,7 @@ ns.OrderStates = {
 			-- local itemLink = GetTradeTargetItemLink(slotChanged);
 			-- ns.CurrentTrade[slotChanged] = itemName ~= nil and { id = ns.getItemIdFromLink(itemLink), quantity = quantity } or nil;
 		end,
-		TRADE_CANCELLED = tradeCancelledAfterOrderReadyForDelivery,
+		TRADE_CANCELLED = tradeCancelledDuringDelivery,
 	}),
 
 	WAIT_FOR_ENCHANTABLE = baseOrderState:new({
@@ -187,7 +187,7 @@ ns.OrderStates = {
 				return ns.OrderStates.CAST_ENCHANT;
 			end
 		end,
-		TRADE_CANCELLED = tradeCancelledAfterOrderReadyForDelivery,
+		TRADE_CANCELLED = tradeCancelledDuringDelivery,
 	}),
 
 	CAST_ENCHANT = baseOrderState:new({
@@ -211,7 +211,7 @@ ns.OrderStates = {
 				return ns.OrderStates.WAIT_FOR_ENCHANTABLE;
 			end
 		end,
-		TRADE_CANCELLED = tradeCancelledAfterOrderReadyForDelivery,
+		TRADE_CANCELLED = tradeCancelledDuringDelivery,
 	}),
 
 	APPLY_ENCHANT = baseOrderState:new({
@@ -235,7 +235,6 @@ ns.OrderStates = {
 			end
 		end,
 		SPELLCAST_FAILED = function(customer, spellId)
-
 			if spellId == customer.CurrentOrder.Enchants[customer.CurrentOrder.EnchantIndex].Id then
 				ns.warningf(ns.LOG_INVALID_ENCHANTABLE, customer.CurrentOrder.Enchants[customer.CurrentOrder.EnchantIndex].Link);
 				customer:whisperf(ns.L.enUS.INVALID_ITEM, customer.CurrentOrder.Enchants[customer.CurrentOrder.EnchantIndex].Link);
@@ -250,7 +249,7 @@ ns.OrderStates = {
 			ReplaceTradeEnchant();
 			customer:whisperf(ns.L.enUS.REPLACE_ENCHANT, currentEnchant, newEnchant);
 		end,
-		TRADE_CANCELLED = tradeCancelledAfterOrderReadyForDelivery,
+		TRADE_CANCELLED = tradeCancelledDuringDelivery,
 	}),
 
 	AWAIT_PAYMENT = baseOrderState:new({
@@ -279,7 +278,7 @@ ns.OrderStates = {
 				return ns.OrderStates.WAIT_FOR_ENCHANTABLE;
 			end
 		end,
-		TRADE_CANCELLED = tradeCancelledAfterOrderReadyForDelivery,
+		TRADE_CANCELLED = tradeCancelledDuringDelivery,
 	}),
 
 	ACCEPT_DELIVERY = baseOrderState:new({
@@ -290,7 +289,7 @@ ns.OrderStates = {
 			ns.ActionQueue.acceptTrade();
 		end,
 
-		TRADE_CANCELLED = tradeCancelledAfterOrderReadyForDelivery,
+		TRADE_CANCELLED = tradeCancelledDuringDelivery,
 		TRADE_ITEM_CHANGED = function(customer, enteredItems)
 			if ns.isEmpty(enteredItems[7]) then
 				ns.ActionQueue.clearTradeAction();

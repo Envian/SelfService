@@ -87,13 +87,13 @@ function ns.OrderClass:isDeliverable()
 	local readyToDeliver = true;
 
 	for _, craftable in ipairs(self.Craftables) do
-		if GetItemCount(craftable.ProductId) < 1 then
+		if GetItemCount(craftable.ProductId) < -self.ItemBalance[craftable.ProductId] then
 			readyToDeliver = false;
 
 			if craftable.CraftFocusId and GetItemCount(craftable.CraftFocusId) < 1 then
 				ns.errorf(ns.LOG_CRAFT_FOCUS_NOT_FOUND, craftable.CraftFocusName);
 			else
-				ns.infof(ns.LOG_MORE_CRAFTS_REQUIRED, 1, craftable.Name);
+				ns.infof(ns.LOG_MORE_CRAFTS_REQUIRED, -(GetItemCount(craftable.ProductId) + self.ItemBalance[craftable.ProductId]), craftable.Name);
 				ns.ActionQueue.castEnchant(craftable.Name);
 			end
 		end
