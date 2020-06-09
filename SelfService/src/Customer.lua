@@ -42,12 +42,10 @@ function CustomerClass:handleCommand(command, message)
 	-- Do we send a greeting?
 	if self.LastWhisper == 0 then
 		ns.infof(ns.LOG_NEW_CUSTOMER, self.Name);
-		self.MessagesAvailable = 1; -- Allows an extra message in this case.
-		self:reply(ns.L.enUS.FIRST_TIME_CUSTOMER);
+		self:whisper(ns.L.enUS.FIRST_TIME_CUSTOMER);
 	elseif GetTime() - self.LastWhisper > 30 * 60 then
 		ns.infof(ns.LOG_RETURNING_CUSTOMER, self.Name);
-		self.MessagesAvailable = 1;
-		self:reply(ns.L.enUS.RETURNING_CUSTOMER);
+		self:whisper(ns.L.enUS.RETURNING_CUSTOMER);
 	end
 
 	self.MessagesAvailable = 2; -- Safeguard against spam.
@@ -70,7 +68,7 @@ function CustomerClass:addToOrder(recipeIds)
 	end
 
 	-- Check recipe Ids. Can we do them?
-	for _, recipeId in recipeIds do
+	for _, recipeId in ipairs(recipeIds) do
 		local recipe = ns.Recipes[recipeId];
 
 		if not recipe or not recipe.Owned then
@@ -83,13 +81,13 @@ function CustomerClass:addToOrder(recipeIds)
 	local addedLinks = {};
 	if not self.CurrentOrder then self.CurrentOrder = ns.OrderClass:new(nil, self.Name) end;
 
-	for _, recipeId in recipeIds do
+	for _, recipeId in ipairs(recipeIds) do
 		ns.CurrentOrder = self.CurrentOrder; -- HACK: Enforces exclusivity.
 		self.CurrentOrder:addToOrder(ns.Recipes[recipeId]);
-		addedLinks:insert(ns.Recipes[recipeId].Link);
+		table.insert(addedLinks, ns.Recipes[recipeId].Link);
 	end
 
-	addedLinks:insert(ORDER_PLACED_ENDING);
+	table.insert(addedLinks, ns.L.enUS.ORDER_PLACED_ENDING);
 	self:replyJoin(ns.L.enUS.ORDER_PLACED, addedLinks);
 end
 

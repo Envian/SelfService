@@ -47,8 +47,8 @@ function ns.OrderClass:addToOrder(recipe)
 end
 
 function ns.OrderClass:isTradeAcceptable(tradeMats)
-	-- TODO: return true if the trade is completable, or if all slots are filled + all relevant Mats
-	
+	if self:isTradeCompletable(tradeMats) then return true end;
+
 	for n = 1,6 do
 		if not tradeMats[n] or not tradeMats[n].Id then
 			ns.debugf(ns.LOG_ORDER_EMPTY_SLOT, id, count);
