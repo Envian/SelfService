@@ -76,8 +76,8 @@ ns.OrderStates = {
 		ENTER_STATE = function(customer)
 			ns.ActionQueue.acceptTrade();
 		end,
-		TRADE_ITEM_CHANGED = function(customer)
-			if not customer.CurrentOrder:isTradeAcceptable() then
+		TRADE_ITEM_CHANGED = function(customer, targetItems)
+			if not customer.CurrentOrder:isTradeAcceptable(targetItems) then
 				ns.ActionQueue.clearTradeAction();
 				return ns.OrderStates.WAIT_FOR_MATS;
 			end
@@ -88,7 +88,7 @@ ns.OrderStates = {
 			return ns.OrderStates.ORDER_PLACED;
 		end,
 		TRADE_COMPLETED = function(customer)
-			if customer.CurrentOrder:isTradeCompletable() then
+			if customer.CurrentOrder:areAllMatsReceived() then
 				customer:whisper(ns.L.enUS.CRAFTING_ORDER);
 				ns.ActionQueue.clearTradeAction();
 				return ns.OrderStates.CRAFT_ORDER;

@@ -47,41 +47,60 @@ function ns.OrderClass:addToOrder(recipe)
 end
 
 function ns.OrderClass:isTradeAcceptable(tradeMats)
-	if self:isTradeCompletable(tradeMats) then return true end;
+	local tradeAcceptable = true;
 
+	-- We do not want to accept any trade containing items unrelated to the order
+	for _, mat in pairs(tradeMats) do
+		if mat and mat.Id and not self.ItemBalance[mat.Id] then
+			ns.debugf(ns.LOG_ORDER_UNDESIRED_ITEM, mat.Id, mat.Count);
+			tradeAcceptable = false;
+		end
+	end
+
+	if not isTradeAcceptable then
+		return false;
+	end
+
+	tradeAcceptable = true;
 	for n = 1,6 do
 		if not tradeMats[n] or not tradeMats[n].Id then
-			ns.debugf(ns.LOG_ORDER_EMPTY_SLOT, id, count);
-			return self:isTradeComplete();
+			tradeAcceptable = false;
 		end
-
 	end
 
-	ns.debugf(ns.LOG_ORDER_TRADE_ACCEPTABLE);
-	return true;
+	if tradeAcceptable then
+		ns.debugf(ns.LOG_ORDER_TRADE_ACCEPTABLE);
+		return true;
+	end
+
+	local pendingBalance = {}
+	for _, mat in pairs(self.ItemBalance) do
+		if mat and mat.Id then
+			pendingBalance[mat.Id] = (pendingBalance[mat.Id] or 0) + mat.Count;
+		end
+	end
+
+	for itemId, quantityRequired in pairs(self.ItemBalance) do
+		if quantityRequired - pendingBalance[itemId] > 0 then
+			ns.debugf(ns.LOG_ORDER_INSUFFICIENT_ITEMS, itemId, quantityRequired, itemId, pendingBalance[itemId]);
+			tradeAcceptable = false;
+		end
+	end
+
+	if tradeAcceptable then
+		ns.debugf(ns.LOG_ORDER_TRADE_ACCEPTABLE);
+		return true;
+	else
+		-- messages posted above.
+		return false;
+	end
 end
 
-function ns.OrderClass:isTradeCompletable(tradeMats) -- table{K, V}, key=itemID, V=+/- number
-	tradeMats = ns.Trading.totalTrade();
-	local receivedSufficientMats = true;
-
-	for id, count in pairs(self.ItemBalance) do
-		if count - (tradeMats[id] or 0) > 0 then
-			ns.debugf(ns.LOG_ORDER_INSUFFICIENT_ITEMS, id, count, id, tradeMats[id]);
-			receivedSufficientMats = false;
-		end
+function ns.OrderClass:areAllMatsReceived()
+	for itemId, balance in pairs(self:ItemBalance) do
+		if balance > 0 return false;
 	end
-
-	-- Still do not want to accept any trade containing items unrelated to the order
-	for id, count in pairs(tradeMats) do
-		if not self.ItemBalance[id] then
-			ns.debugf(ns.LOG_ORDER_UNDESIRED_ITEM, id, count);
-			receivedSufficientMats = false;
-		end
-	end
-
-	ns.debugf(ns.LOG_ORDER_TRADE_ACCEPTABLE);
-	return receivedSufficientMats;
+	return true;
 end
 
 function ns.OrderClass:isDeliverable()
