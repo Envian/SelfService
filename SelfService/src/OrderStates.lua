@@ -36,7 +36,7 @@ ns.OrderStates = {
 		Phase = "ORDERING",
 
 		TRADE_SHOW = function(customer)
-			customer:whisper(ns.L.enUS.ADD_EXACT_MATERIALS);
+			customer:whisper(ns.L.enUS.ADD_MATERIALS);
 			ns.ActionQueue.clearTradeAction();
 			return ns.OrderStates.WAIT_FOR_MATS;
 		end
@@ -88,7 +88,7 @@ ns.OrderStates = {
 			return ns.OrderStates.ORDER_PLACED;
 		end,
 		TRADE_COMPLETED = function(customer)
-			if customer.CurrentOrder:areAllMatsReceived() then
+			if customer.CurrentOrder:isOrderCraftable() then
 				customer:whisper(ns.L.enUS.CRAFTING_ORDER);
 				ns.ActionQueue.clearTradeAction();
 				return ns.OrderStates.CRAFT_ORDER;

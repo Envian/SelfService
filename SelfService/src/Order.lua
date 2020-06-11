@@ -47,58 +47,39 @@ function ns.OrderClass:addToOrder(recipe)
 end
 
 function ns.OrderClass:isTradeAcceptable(tradeMats)
-	local tradeAcceptable = true;
+	local mustBeCraftable = false;
 
-	-- We do not want to accept any trade containing items unrelated to the order
-	for _, mat in pairs(tradeMats) do
-		if mat and mat.Id and not self.ItemBalance[mat.Id] then
-			ns.debugf(ns.LOG_ORDER_UNDESIRED_ITEM, mat.Id, mat.Count);
-			tradeAcceptable = false;
+	for i=1,6 do
+		if not tradeMats[i].Id then
+			mustBeCraftable = true;
+		elseif not self.ItemBalance[tradeMats[i].Id] then
+			ns.debugf(ns.LOG_ORDER_UNDESIRED_ITEM, tradeMats[i].Id, tradeMats[i].Count);
+			return false;
 		end
 	end
 
-	if not isTradeAcceptable then
-		return false;
-	end
+	if mustBeCraftable then
+		local tradeTotals = {};
 
-	tradeAcceptable = true;
-	for n = 1,6 do
-		if not tradeMats[n] or not tradeMats[n].Id then
-			tradeAcceptable = false;
+		for i=1,6 do
+			tradeTotals[tradeMats[i].Id] = (tradeTotals[tradeMats[i].Id] or 0) + tradeMats[i].Count;
+		end
+
+		for itemId, balance in ipairs(self.ItemBalance) do
+			if tradeTotals[itemId] < balance then
+				ns.debugf(ns.LOG_ORDER_INSUFFICIENT_ITEMS, itemId, balance, itemId, tradeTotals[itemId]);
+				return false;
+			end
 		end
 	end
 
-	if tradeAcceptable then
-		ns.debugf(ns.LOG_ORDER_TRADE_ACCEPTABLE);
-		return true;
-	end
-
-	local pendingBalance = {}
-	for _, mat in pairs(self.ItemBalance) do
-		if mat and mat.Id then
-			pendingBalance[mat.Id] = (pendingBalance[mat.Id] or 0) + mat.Count;
-		end
-	end
-
-	for itemId, quantityRequired in pairs(self.ItemBalance) do
-		if quantityRequired - pendingBalance[itemId] > 0 then
-			ns.debugf(ns.LOG_ORDER_INSUFFICIENT_ITEMS, itemId, quantityRequired, itemId, pendingBalance[itemId]);
-			tradeAcceptable = false;
-		end
-	end
-
-	if tradeAcceptable then
-		ns.debugf(ns.LOG_ORDER_TRADE_ACCEPTABLE);
-		return true;
-	else
-		-- messages posted above.
-		return false;
-	end
+	ns.debug(ns.LOG_ORDER_TRADE_ACCEPTABLE);
+	return true;
 end
 
-function ns.OrderClass:areAllMatsReceived()
-	for itemId, balance in pairs(self:ItemBalance) do
-		if balance > 0 return false;
+function ns.OrderClass:isOrderCraftable()
+	for itemId, balance in ipairs(self.ItemBalance) do
+		if balance > 0 then return false end;
 	end
 	return true;
 end
