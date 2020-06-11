@@ -63,11 +63,12 @@ end
 
 function ns.OrderClass:isTradeCompletable(tradeMats) -- table{K, V}, key=itemID, V=+/- number
 	tradeMats = ns.Trading.totalTrade();
+	local receivedSufficientMats = true;
 
 	for id, count in pairs(self.ItemBalance) do
 		if count - (tradeMats[id] or 0) > 0 then
 			ns.debugf(ns.LOG_ORDER_INSUFFICIENT_ITEMS, id, count, id, tradeMats[id]);
-			return false;
+			receivedSufficientMats = false;
 		end
 	end
 
@@ -75,12 +76,12 @@ function ns.OrderClass:isTradeCompletable(tradeMats) -- table{K, V}, key=itemID,
 	for id, count in pairs(tradeMats) do
 		if not self.ItemBalance[id] then
 			ns.debugf(ns.LOG_ORDER_UNDESIRED_ITEM, id, count);
-			return false;
+			receivedSufficientMats = false;
 		end
 	end
 
 	ns.debugf(ns.LOG_ORDER_TRADE_ACCEPTABLE);
-	return true;
+	return receivedSufficientMats;
 end
 
 function ns.OrderClass:isDeliverable()

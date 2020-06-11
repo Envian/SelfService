@@ -30,7 +30,6 @@ src/CustomerCommands.lua
 
 # Handlers
 src/Inventory.lua
-src/CraftManager.lua
 src/Events.lua
 src/Console.lua
 src/CustomerCommands.lua
