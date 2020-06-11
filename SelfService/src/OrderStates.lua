@@ -88,11 +88,14 @@ ns.OrderStates = {
 			return ns.OrderStates.ORDER_PLACED;
 		end,
 		TRADE_COMPLETED = function(customer)
-			customer:whisper(ns.L.enUS.CRAFTING_ORDER);
 			ns.ActionQueue.clearTradeAction();
 
 			if customer.CurrentOrder:isTradeCompletable() then
+				customer:whisper(ns.L.enUS.CRAFTING_ORDER);
 				return ns.OrderStates.CRAFT_ORDER;
+			else
+				customer:whipser("ns.L.enUS.MORE_MATS_ARE_REQUIRED because im just getting this pushed up atm")
+				return ns.OrderStates.ORDER_PLACED;
 			end
 		end
 	}),
