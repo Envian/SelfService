@@ -19,10 +19,29 @@ local logf = function(message, ...)
 	end
 end
 
+ns.LogLevel = {
+	["1"] = 1,
+	[1] = 1,
+	FATAL = 1,
+	["2"] = 2,
+	[2] = 2,
+	ERROR = 1,
+	["3"] = 3,
+	[3] = 3,
+	WARNING = 1,
+	["4"] = 4,
+	[4] = 4,
+	INFO = 1,
+	["5"] = 5,
+	[5] = 5,
+	DEBUG = 1,
+};
+
 ns.setLogLevel = function(level)
-	if type(level) ~= "number" or level < 1 or level > 5 then
-		error("Invalid level. Expected a number between 1 and 5. Got: "..tostring(level or "nil"), 2);
+	if not ns.LogLevel[level] then
+		error("Invalid level. Expected a number between 1 and 5, or a valid debug level. Got: "..tostring(level or "nil"), 2);
 	end
+	level = ns.LogLevel[level];
 
 	SelfServiceData.LogLevel = level;
 	ns.debug = level >= 5 and log or nolog;

@@ -102,13 +102,13 @@ local slashCommands = {
 		elseif #args > 1 then
 			ns.print(ns.CMD_LOGLEVEL_USAGE);
 		else
-			local level = tonumber(args[1]);
+			local level = args[1]:upper();
 
-			if not level or type(level) ~= "number" or level < 1 or level > 5 then
-				ns.print(ns.CMD_LOGLEVEL_INVALID);
-			else
-				ns.setLogLevel(level);
+			if ns.LogLevel[level] then
 				ns.printf(ns.CMD_LOGLEVEL_SET, level);
+				ns.setLogLevel(level);
+			else
+				ns.print(ns.CMD_LOGLEVEL_INVALID);
 			end
 		end
 	end,
