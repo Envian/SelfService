@@ -88,7 +88,6 @@ ns.OrderStates = {
 			return ns.OrderStates.ORDER_PLACED;
 		end,
 		TRADE_COMPLETED = function(customer)
-
 			if customer.CurrentOrder:isTradeCompletable() then
 				customer:whisper(ns.L.enUS.CRAFTING_ORDER);
 				ns.ActionQueue.clearTradeAction();
