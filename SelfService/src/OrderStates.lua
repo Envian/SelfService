@@ -52,8 +52,8 @@ ns.OrderStates = {
 				return ns.OrderStates.ACCEPT_MATS;
 			end
 		end,
-		TRADE_ACCEPTED = function(customer, playerAccepted, customerAccepted)
-			if customer.CurrentOrder:isTradeAcceptable(enteredItems) then
+		TRADE_ACCEPTED = function(customer, playerAccepted, customerAccepted, targetItems, playerItems)
+			if customer.CurrentOrder:isTradeAcceptable(targetItems) then
 				ns.ActionQueue.clearTradeAction();
 				return ns.OrderStates.ACCEPT_MATS;
 			end
@@ -90,7 +90,10 @@ ns.OrderStates = {
 		TRADE_COMPLETED = function(customer)
 			customer:whisper(ns.L.enUS.CRAFTING_ORDER);
 			ns.ActionQueue.clearTradeAction();
-			return ns.OrderStates.CRAFT_ORDER;
+
+			if customer.CurrentOrder:isTradeCompletable() then
+				return ns.OrderStates.CRAFT_ORDER;
+			end
 		end
 	}),
 

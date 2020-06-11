@@ -139,6 +139,7 @@ ns.breakStacksForReturn = function(itemMap)
 		ns.error("Nil parameter supplied to breakStacksForReturn()");
 		return;
 	else
+		returnStacks = {};
 		local inventoryMap, freeSlots = scanBags(itemMap);
 		makeMoveQueue(inventoryMap, freeSlots, itemMap);
 		eventFrame:RegisterEvent("ITEM_UNLOCKED");

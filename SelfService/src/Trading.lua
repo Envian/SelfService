@@ -74,7 +74,7 @@ ns.Trading = {
 	end,
 	tradeAccepted = function(playerAccepted, CustomerAccepted)
 		if not ns.CurrentTrade.Customer or not ns.CurrentTrade.Customer.CurrentOrder then return end;
-		ns.CurrentTrade.Customer.CurrentOrder:handleEvent("TRADE_ACCEPTED", playerAccepted, CustomerAccepted);
+		ns.CurrentTrade.Customer.CurrentOrder:handleEvent("TRADE_ACCEPTED", playerAccepted, CustomerAccepted, ns.CurrentTrade.TargetItems, ns.CurrentTrade.PlayerItems);
 	end,
 	overrideEnchant = function(currentEnchant, newEnchant)
 		if not ns.CurrentTrade.Customer or not ns.CurrentTrade.Customer.CurrentOrder then return end;
