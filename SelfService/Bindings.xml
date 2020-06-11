@@ -1,0 +1,3 @@
+<Bindings>
+	<Binding name="CLICK SelfService_ActionQueueButton:LeftButton" header="SELFSERVICE" default="'" category="ADDONS" />
+</Bindings>
