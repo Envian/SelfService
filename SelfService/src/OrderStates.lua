@@ -158,7 +158,8 @@ ns.OrderStates = {
 			end
 		end,
 		CALLED_BACK = function(customer, returnables)
-			for _, returnable in ipairs(returnables) do
+			for i=1,min(#returnables, 6) do
+				local returnable = returnables[i];
 				ns.debugf(ns.LOG_RETURNABLES, returnable.id, returnable.container, returnable.slot);
 				UseContainerItem(returnable.container, returnable.slot);
 			end
