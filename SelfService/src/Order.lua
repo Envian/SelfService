@@ -84,29 +84,27 @@ function ns.OrderClass:isTradeCompletable(tradeMats) -- table{K, V}, key=itemID,
 end
 
 function ns.OrderClass:isDeliverable()
-	local readyToDeliver = true;
-
 	for _, craftable in ipairs(self.Craftables) do
 		if GetItemCount(craftable.ProductId) < -self.ItemBalance[craftable.ProductId] then
-			readyToDeliver = false;
-
 			if craftable.CraftFocusId and GetItemCount(craftable.CraftFocusId) < 1 then
 				ns.errorf(ns.LOG_CRAFT_FOCUS_NOT_FOUND, craftable.CraftFocusName);
 			else
 				ns.infof(ns.LOG_MORE_CRAFTS_REQUIRED, -(GetItemCount(craftable.ProductId) + self.ItemBalance[craftable.ProductId]), craftable.Name);
 				ns.ActionQueue.castEnchant(craftable.Name);
 			end
+
+			return false;
 		end
 	end
 
 	for _, enchant in ipairs(self.Enchants) do
 		if GetItemCount(enchant.CraftFocusId) < 1 then
-			readyToDeliver = false;
 			ns.errorf(ns.LOG_CRAFT_FOCUS_NOT_FOUND, enchant.CraftFocusName);
+			return false;
 		end
 	end
 
-	return readyToDeliver;
+	return true;
 end
 
 function ns.OrderClass:credit(matList, count)
