@@ -110,6 +110,14 @@ ns.HELP_TEXT = {
 	}
 }
 
+-- ActionQueue Button Text
+ns.ActionQueueMessage = {
+	NO_ACTION = "No Action",
+	CAST = "Cast %s",
+	ACCEPT_TRADE = "Accept Trade",
+	APPLY_ENCHANT = "Apply Enchant",
+}
+
 -- Whispers
 ns.L.enUS = {
 	FIRST_TIME_CUSTOMER = "Thank you for using SelfService. When you are ready, use !buy <item link> to place your order. I currently only support ordering one item at a time.",
