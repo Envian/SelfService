@@ -21,6 +21,7 @@ ns.Loaded = {}; -- Map<String, Boolean> Map of profession name to whether its lo
 ns.Trading = {} -- A helper method collection, use to handle and manage events fired by the wow api related to trading and ordering.
 ns.CurrentTrade = {}; -- A complex object with information about the current trade. See Trading.lua
 ns.CurrentOrder = nil; -- A reference to the current OrderClass.
+ns.LogLevel = {}; -- A map containing debug level terms to their debug level number.
 
 -- Action Queue
 ns.ActionQueue = {}; -- Helper namespace

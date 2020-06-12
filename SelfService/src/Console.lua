@@ -94,6 +94,24 @@ local slashCommands = {
 			confirmFromUser(ns.CMD_WIPE_CUSTOMERS_WARNING, doWipeCustomers);
 		end,
 	},
+	loglevel = function(params)
+		local args = ns.splitCommandArguments(params);
+
+		if not args then
+			ns.printf(ns.CMD_LOGLEVEL_CURRENT_LEVEL, SelfServiceData.LogLevel);
+		elseif #args > 1 then
+			ns.print(ns.CMD_LOGLEVEL_USAGE);
+		else
+			local level = args[1]:upper();
+
+			if ns.LogLevel[level] then
+				ns.printf(ns.CMD_LOGLEVEL_SET, level);
+				ns.setLogLevel(level);
+			else
+				ns.print(ns.CMD_LOGLEVEL_INVALID);
+			end
+		end
+	end,
 	debug = {
 		mockenchants = function()
 			ns.print(ns.DEBUG_SKIP_ENCHANT_STATE);
