@@ -43,7 +43,7 @@ function CustomerClass:handleCommand(command, message)
 	if self.LastWhisper == 0 then
 		ns.infof(ns.LOG_NEW_CUSTOMER, self.Name);
 		self:whisper(ns.L.enUS.FIRST_TIME_CUSTOMER);
-	elseif GetTime() - self.LastWhisper > 30 * 60 then
+	elseif time() - self.LastWhisper > 30 * 60 then
 		ns.infof(ns.LOG_RETURNING_CUSTOMER, self.Name);
 		self:whisper(ns.L.enUS.RETURNING_CUSTOMER);
 	end
@@ -57,7 +57,7 @@ function CustomerClass:handleCommand(command, message)
 		cmdFunction(self, message);
 	end
 
-	self.LastWhisper = GetTime();
+	self.LastWhisper = time();
 	self.MessagesAvailable = 0;
 end
 
