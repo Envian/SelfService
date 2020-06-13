@@ -1,5 +1,7 @@
 local _, ns = ...;
 
+ss = ns;
+
 -- Placeholder defintion for documenting function parameters
 local func = function() end;
 

@@ -35,75 +35,79 @@ function ns.OrderClass:handleEvent(event, ...)
 	end
 end
 
-function ns.OrderClass:addToOrder(recipes)
-	for _, recipe in ipairs(recipes) do
-		if recipe.IsCrafted then
-			table.insert(self.Craftables, recipe);
-			self:credit({{Id = recipe.ProductId, Count = 1}});
-		else
-			table.insert(self.Enchants, recipe);
-		end
-
-		self:debit(recipe.Mats);
+function ns.OrderClass:addToOrder(recipe)
+	if recipe.IsCrafted then
+		table.insert(self.Craftables, recipe);
+		self:credit({{Id = recipe.ProductId, Count = 1}});
+	else
+		table.insert(self.Enchants, recipe);
 	end
+
+	self:debit(recipe.Mats);
 end
 
--- function ns.OrderClass:addTradedItems(items, money)
--- 	self.ReceivedMoney = self.ReceivedMoney + money;
--- 	for n = 1,6 do
--- 		if items[n] and items[n].Id then
--- 			self.ReceivedMats[items[n].Id] = (self.ReceivedMats[items[n].Id] or 0) + items[n].Count;
--- 		end
--- 	end
--- end
+function ns.OrderClass:isTradeAcceptable(tradeMats)
+	local mustBeCraftable = false;
 
-function ns.OrderClass:isTradeAcceptable(tradeMats) -- table{K, V}, key=itemID, V=+/- number
-	local receivedSufficientMats = true;
-	tradeMats = ns.Trading.totalTrade();
-
-	for id, count in pairs(self.ItemBalance) do
-		if count - (tradeMats[id] or 0) > 0 then
-			ns.debugf(ns.LOG_ORDER_INSUFFICIENT_ITEMS, id, count, id, tradeMats[id]);
-			receivedSufficientMats = false;
+	for i=1,6 do
+		if ns.isEmpty(tradeMats[i]) then
+			mustBeCraftable = true;
+		elseif not self.ItemBalance[tradeMats[i].Id] then
+			ns.debugf(ns.LOG_ORDER_UNDESIRED_ITEM, tradeMats[i].Id, tradeMats[i].Count);
+			return false;
 		end
 	end
 
-	-- Still do not want to accept any trade containing items unrelated to the order
-	for id, count in pairs(tradeMats) do
-		if not self.ItemBalance[id] then
-			ns.debugf(ns.LOG_ORDER_UNDESIRED_ITEM, id, count);
-			receivedSufficientMats = false;
+	if mustBeCraftable then
+		local tradeTotals = {};
+
+		for i=1,6 do
+			if not ns.isEmpty(tradeMats[i]) then
+				tradeTotals[tradeMats[i].Id] = (tradeTotals[tradeMats[i].Id] or 0) + tradeMats[i].Count;
+			end
+		end
+
+		for itemId, balance in pairs(self.ItemBalance) do
+			if (tradeTotals[itemId] or 0) < balance then
+				ns.debugf(ns.LOG_ORDER_INSUFFICIENT_ITEMS, itemId, balance, itemId, tradeTotals[itemId] or 0);
+				return false;
+			end
 		end
 	end
 
-	ns.debugf(ns.LOG_ORDER_TRADE_ACCEPTABLE);
-	return receivedSufficientMats;
+	ns.debug(ns.LOG_ORDER_TRADE_ACCEPTABLE);
+	return true;
+end
+
+function ns.OrderClass:isOrderCraftable()
+	for itemId, balance in pairs(self.ItemBalance) do
+		if balance > 0 then return false end;
+	end
+	return true;
 end
 
 function ns.OrderClass:isDeliverable()
-	local readyToDeliver = true;
-
 	for _, craftable in ipairs(self.Craftables) do
-		if GetItemCount(craftable.ProductId) < 1 then
-			readyToDeliver = false;
-
+		if GetItemCount(craftable.ProductId) < -self.ItemBalance[craftable.ProductId] then
 			if craftable.CraftFocusId and GetItemCount(craftable.CraftFocusId) < 1 then
 				ns.errorf(ns.LOG_CRAFT_FOCUS_NOT_FOUND, craftable.CraftFocusName);
 			else
-				ns.infof(ns.LOG_MORE_CRAFTS_REQUIRED, 1, craftable.Name);
+				ns.infof(ns.LOG_MORE_CRAFTS_REQUIRED, -(GetItemCount(craftable.ProductId) + self.ItemBalance[craftable.ProductId]), craftable.Name);
 				ns.ActionQueue.castEnchant(craftable.Name);
 			end
+
+			return false;
 		end
 	end
 
 	for _, enchant in ipairs(self.Enchants) do
 		if GetItemCount(enchant.CraftFocusId) < 1 then
-			readyToDeliver = false;
 			ns.errorf(ns.LOG_CRAFT_FOCUS_NOT_FOUND, enchant.CraftFocusName);
+			return false;
 		end
 	end
 
-	return readyToDeliver;
+	return true;
 end
 
 function ns.OrderClass:credit(matList, count)

@@ -1,7 +1,6 @@
 local _, ns = ...;
 
 ns.LOCALIZATION = "enUS";
-ns.ADDON_NAME = "SelfService";
 
 -- Logging
 -- Level 5 Debug
@@ -19,6 +18,7 @@ ns.LOG_ORDER_PLACED = "%s has placed an order for %i items.";
 ns.LOG_ORDER_STATE_CHANGE = "Order for %s has transitioned to the %s state.";
 ns.LOG_ORDER_INSUFFICIENT_ITEMS = "Trade requires [%s]x%i however [%s]x%i was given.";
 ns.LOG_ORDER_UNDESIRED_ITEM = "Received [%s]x%i from trade, but not required for the transaction.";
+ns.LOG_ORDER_EMPTY_SLOT = "There's an empty slot. Do not accept the trade unless its complete.";
 ns.LOG_ORDER_TRADE_ACCEPTABLE = "Received all mats required for trade!";
 ns.LOG_ORDER_PREPARING_RETURNABLES = "Preparing returnable materials.";
 ns.LOG_RETURNABLES = "Return [%s] from Bag %s, Slot %s";
@@ -115,6 +115,14 @@ ns.HELP_TEXT = {
 	}
 }
 
+-- ActionQueue Button Text
+ns.ActionQueueMessage = {
+	NO_ACTION = "No Action",
+	CAST = "Cast %s",
+	ACCEPT_TRADE = "Accept Trade",
+	APPLY_ENCHANT = "Apply Enchant",
+}
+
 -- Whispers
 ns.L.enUS = {
 	FIRST_TIME_CUSTOMER = "Thank you for using SelfService. When you are ready, use !buy <item link> to place your order. I currently only support ordering one item at a time.",
@@ -124,10 +132,11 @@ ns.L.enUS = {
 	HELP = "haha get wrecked nerd. you're on your own.",
 	RECIPES_OWNED = "I have %s.",
 	RECIPES_UNAVAILABLE = "I do not have that recipe.",
-	ORDER_PLACED = "Once you have obtained the mats for %s, open trade. Your total is: ",
+	ORDER_PLACED = "Order placed for: ",
+	ORDER_PLACED_ENDING = "Open trade when you're ready to checkout.",
 	ORDER_LIMIT = "I only support ordering 1 item at a time. Try again",
 	ORDER_MULTIPLE_SEARCH_RESULTS = "I found %i recipes that match that description. Please be more specific.",
-	ORDER_IN_PROGRESS = "I only support ordering 1 item at a time. Finish your order before requesting another",
+	ORDER_IN_PROGRESS = "I can not add a new item to your order right now. Please finish your order before requesting another",
 	BUY_FIRST = "Use command !buy before opening trade.",
 	BUSY = "I am serving another player right now. Please try again later.",
 	INVALID_ITEM = "%s cannot be applied to that item.",
@@ -135,7 +144,7 @@ ns.L.enUS = {
 	TRADE_CANCELLED = "The trade was cancelled. Open a trade window when you are ready to continue.",
 	MONEY_REQUIRED = "I need %s more to complete your order.",
 	TRANSACTION_COMPLETE = "Your transaction is complete. Come back again now, ya hear?",
-	ADD_EXACT_MATERIALS = "Place the exact materials for your order in the trade window.",
+	ADD_MATERIALS = "Place crafting materials for your order in the trade window.",
 	EXACT_MATERIALS_REQUIRED = "I need to receive exact materials for your order.",
 	CRAFTING_ORDER = "Please wait while I craft your order",
 	ORDER_READY = "Your order is ready.",

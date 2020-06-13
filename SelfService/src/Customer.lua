@@ -42,12 +42,10 @@ function CustomerClass:handleCommand(command, message)
 	-- Do we send a greeting?
 	if self.LastWhisper == 0 then
 		ns.infof(ns.LOG_NEW_CUSTOMER, self.Name);
-		self.MessagesAvailable = 1; -- Allows an extra message in this case.
-		self:reply(ns.L.enUS.FIRST_TIME_CUSTOMER);
-	elseif GetTime() - self.LastWhisper > 30 * 60 then
+		self:whisper(ns.L.enUS.FIRST_TIME_CUSTOMER);
+	elseif time() - self.LastWhisper > 30 * 60 then
 		ns.infof(ns.LOG_RETURNING_CUSTOMER, self.Name);
-		self.MessagesAvailable = 1;
-		self:reply(ns.L.enUS.RETURNING_CUSTOMER);
+		self:whisper(ns.L.enUS.RETURNING_CUSTOMER);
 	end
 
 	self.MessagesAvailable = 2; -- Safeguard against spam.
@@ -59,35 +57,38 @@ function CustomerClass:handleCommand(command, message)
 		cmdFunction(self, message);
 	end
 
-	self.LastWhisper = GetTime();
+	self.LastWhisper = time();
 	self.MessagesAvailable = 0;
 end
 
-function CustomerClass:getOrder()
-	return self.CurrentOrder;
-end
-
-function CustomerClass:addToOrder(recipes)
-	local order = self:getOrder();
-
-	-- Temporary
-	if order then
+function CustomerClass:addToOrder(recipeIds)
+	if self.CurrentOrder and self.CurrentOrder.State.Phase ~= "ORDERING" then
 		self:reply(ns.L.enUS.ORDER_IN_PROGRESS);
-	elseif not recipes or #recipes ~= 1 then
-		self:reply(ns.L.enUS.ORDER_LIMIT);
-	else
-		local recipe = ns.Recipes[recipes[1]];
-		if recipe and recipe.Owned then
-			order = ns.OrderClass:new(nil, self.Name);
-			order:addToOrder({ recipe });
-			self.CurrentOrder = order;
-			ns.CurrentOrder = self.CurrentOrder;
-			self:replyJoin(ns.L.enUS.ORDER_PLACED:format(recipe.Name),
-				ns:imap(recipe.Mats, function(mat) return mat.Link end));
-		else
+		return;
+	end
+
+	-- Check recipe Ids. Can we do them?
+	for _, recipeId in ipairs(recipeIds) do
+		local recipe = ns.Recipes[recipeId];
+
+		if not recipe or not recipe.Owned then
+			-- TODO: What do we do if they order something we don't have?
 			self:reply(ns.L.enUS.RECIPES_UNAVAILABLE);
+			return;
 		end
 	end
+
+	local addedLinks = {};
+	if not self.CurrentOrder then self.CurrentOrder = ns.OrderClass:new(nil, self.Name) end;
+
+	for _, recipeId in ipairs(recipeIds) do
+		ns.CurrentOrder = self.CurrentOrder; -- HACK: Enforces exclusivity.
+		self.CurrentOrder:addToOrder(ns.Recipes[recipeId]);
+		table.insert(addedLinks, ns.Recipes[recipeId].Link);
+	end
+
+	table.insert(addedLinks, ns.L.enUS.ORDER_PLACED_ENDING);
+	self:replyJoin(ns.L.enUS.ORDER_PLACED, addedLinks);
 end
 
 function CustomerClass:reply(message)

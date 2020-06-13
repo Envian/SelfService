@@ -1,7 +1,7 @@
 local _, ns = ...;
 
 local noAction = function() end
-local tradeCancelledAfterOrderReadyForDelivery = function(customer)
+local tradeCancelledDuringDelivery = function(customer)
 	customer:whisper(ns.L.enUS.TRADE_CANCELLED);
 	ns.ActionQueue.clearTradeAction();
 	return ns.OrderStates.READY_FOR_DELIVERY;
@@ -33,9 +33,10 @@ end
 ns.OrderStates = {
 	ORDER_PLACED = baseOrderState:new({
 		Name = "ORDER_PLACED",
+		Phase = "ORDERING",
 
 		TRADE_SHOW = function(customer)
-			customer:whisper(ns.L.enUS.ADD_EXACT_MATERIALS);
+			customer:whisper(ns.L.enUS.ADD_MATERIALS);
 			ns.ActionQueue.clearTradeAction();
 			return ns.OrderStates.WAIT_FOR_MATS;
 		end
@@ -43,6 +44,7 @@ ns.OrderStates = {
 
 	WAIT_FOR_MATS = baseOrderState:new({
 		Name = "WAIT_FOR_MATS",
+		Phase = "ORDERING",
 
 		TRADE_ITEM_CHANGED = function(customer, enteredItems)
 			if customer.CurrentOrder:isTradeAcceptable(enteredItems) then
@@ -50,7 +52,12 @@ ns.OrderStates = {
 				return ns.OrderStates.ACCEPT_MATS;
 			end
 		end,
-		TRADE_ACCEPTED = function(customer, playerAccepted, customerAccepted)
+		TRADE_ACCEPTED = function(customer, playerAccepted, customerAccepted, targetItems, playerItems)
+			if customer.CurrentOrder:isTradeAcceptable(targetItems) then
+				ns.ActionQueue.clearTradeAction();
+				return ns.OrderStates.ACCEPT_MATS;
+			end
+
 			if playerAccepted == 0 and customerAccepted == 1 then
 				customer:whisper(ns.L.enUS.EXACT_MATERIALS_REQUIRED);
 			end
@@ -64,12 +71,13 @@ ns.OrderStates = {
 
 	ACCEPT_MATS = baseOrderState:new({
 		Name = "ACCEPT_MATS",
+		Phase = "ORDERING",
 
 		ENTER_STATE = function(customer)
 			ns.ActionQueue.acceptTrade();
 		end,
-		TRADE_ITEM_CHANGED = function(customer)
-			if not customer.CurrentOrder:isTradeAcceptable() then
+		TRADE_ITEM_CHANGED = function(customer, targetItems)
+			if not customer.CurrentOrder:isTradeAcceptable(targetItems) then
 				ns.ActionQueue.clearTradeAction();
 				return ns.OrderStates.WAIT_FOR_MATS;
 			end
@@ -80,14 +88,20 @@ ns.OrderStates = {
 			return ns.OrderStates.ORDER_PLACED;
 		end,
 		TRADE_COMPLETED = function(customer)
-			customer:whisper(ns.L.enUS.CRAFTING_ORDER);
-			ns.ActionQueue.clearTradeAction();
-			return ns.OrderStates.CRAFT_ORDER;
+			if customer.CurrentOrder:isOrderCraftable() then
+				customer:whisper(ns.L.enUS.CRAFTING_ORDER);
+				ns.ActionQueue.clearTradeAction();
+				return ns.OrderStates.CRAFT_ORDER;
+			else
+				ns.ActionQueue.clearTradeAction();
+				return ns.OrderStates.ORDER_PLACED;
+			end
 		end
 	}),
 
 	CRAFT_ORDER = baseOrderState:new({
 		Name = "CRAFT_ORDER",
+		Phase = "CRAFTING",
 
 		ENTER_STATE = function(customer)
 			if customer.CurrentOrder:isDeliverable() then
@@ -107,6 +121,7 @@ ns.OrderStates = {
 
 	READY_FOR_DELIVERY = baseOrderState:new({
 		Name = "READY_FOR_DELIVERY",
+		Phase = "DELIVERY",
 
 		ENTER_STATE = function(customer)
 			if not customer.CurrentOrder.TradeAttempted then
@@ -126,6 +141,8 @@ ns.OrderStates = {
 
 	DELIVER_ORDER = baseOrderState:new({
 		Name = "DELIVER_ORDER",
+		Phase = "DELIVERY",
+
 		ENTER_STATE = function(customer)
 			local returnables = {};
 			ns.debug(ns.LOG_ORDER_PREPARING_RETURNABLES);
@@ -146,7 +163,8 @@ ns.OrderStates = {
 			end
 		end,
 		CALLED_BACK = function(customer, returnables)
-			for _, returnable in ipairs(returnables) do
+			for i=1,min(#returnables, 6) do
+				local returnable = returnables[i];
 				ns.debugf(ns.LOG_RETURNABLES, returnable.id, returnable.container, returnable.slot);
 				UseContainerItem(returnable.container, returnable.slot);
 			end
@@ -162,11 +180,12 @@ ns.OrderStates = {
 			-- local itemLink = GetTradeTargetItemLink(slotChanged);
 			-- ns.CurrentTrade[slotChanged] = itemName ~= nil and { id = ns.getItemIdFromLink(itemLink), quantity = quantity } or nil;
 		end,
-		TRADE_CANCELLED = tradeCancelledAfterOrderReadyForDelivery,
+		TRADE_CANCELLED = tradeCancelledDuringDelivery,
 	}),
 
 	WAIT_FOR_ENCHANTABLE = baseOrderState:new({
 		Name = "WAIT_FOR_ENCHANTABLE",
+		Phase = "DELIVERY",
 
 		TRADE_ITEM_CHANGED = function(customer, enteredItems)
 			if enteredItems[7].Id then
@@ -174,11 +193,12 @@ ns.OrderStates = {
 				return ns.OrderStates.CAST_ENCHANT;
 			end
 		end,
-		TRADE_CANCELLED = tradeCancelledAfterOrderReadyForDelivery,
+		TRADE_CANCELLED = tradeCancelledDuringDelivery,
 	}),
 
 	CAST_ENCHANT = baseOrderState:new({
 		Name = "CAST_ENCHANT",
+		Phase = "DELIVERY",
 
 		ENTER_STATE = function(customer)
 			ns.ActionQueue.castEnchant(customer.CurrentOrder.Enchants[customer.CurrentOrder.EnchantIndex].Name);
@@ -197,11 +217,12 @@ ns.OrderStates = {
 				return ns.OrderStates.WAIT_FOR_ENCHANTABLE;
 			end
 		end,
-		TRADE_CANCELLED = tradeCancelledAfterOrderReadyForDelivery,
+		TRADE_CANCELLED = tradeCancelledDuringDelivery,
 	}),
 
 	APPLY_ENCHANT = baseOrderState:new({
 		Name = "APPLY_ENCHANT",
+		Phase = "DELIVERY",
 
 		ENTER_STATE = function(customer)
 			ns.ActionQueue.applyEnchant();
@@ -220,7 +241,6 @@ ns.OrderStates = {
 			end
 		end,
 		SPELLCAST_FAILED = function(customer, spellId)
-
 			if spellId == customer.CurrentOrder.Enchants[customer.CurrentOrder.EnchantIndex].Id then
 				ns.warningf(ns.LOG_INVALID_ENCHANTABLE, customer.CurrentOrder.Enchants[customer.CurrentOrder.EnchantIndex].Link);
 				customer:whisperf(ns.L.enUS.INVALID_ITEM, customer.CurrentOrder.Enchants[customer.CurrentOrder.EnchantIndex].Link);
@@ -235,11 +255,12 @@ ns.OrderStates = {
 			ReplaceTradeEnchant();
 			customer:whisperf(ns.L.enUS.REPLACE_ENCHANT, currentEnchant, newEnchant);
 		end,
-		TRADE_CANCELLED = tradeCancelledAfterOrderReadyForDelivery,
+		TRADE_CANCELLED = tradeCancelledDuringDelivery,
 	}),
 
 	AWAIT_PAYMENT = baseOrderState:new({
 		Name = "AWAIT_PAYMENT",
+		Phase = "DELIVERY",
 
 		ENTER_STATE = function(customer)
 			if customer.CurrentOrder.MoneyBalance > 0 then
@@ -263,17 +284,18 @@ ns.OrderStates = {
 				return ns.OrderStates.WAIT_FOR_ENCHANTABLE;
 			end
 		end,
-		TRADE_CANCELLED = tradeCancelledAfterOrderReadyForDelivery,
+		TRADE_CANCELLED = tradeCancelledDuringDelivery,
 	}),
 
 	ACCEPT_DELIVERY = baseOrderState:new({
 		Name = "ACCEPT_DELIVERY",
+		Phase = "DELIVERY",
 
 		ENTER_STATE = function(customer)
 			ns.ActionQueue.acceptTrade();
 		end,
 
-		TRADE_CANCELLED = tradeCancelledAfterOrderReadyForDelivery,
+		TRADE_CANCELLED = tradeCancelledDuringDelivery,
 		TRADE_ITEM_CHANGED = function(customer, enteredItems)
 			if ns.isEmpty(enteredItems[7]) then
 				ns.ActionQueue.clearTradeAction();
@@ -301,6 +323,7 @@ ns.OrderStates = {
 
 	TRANSACTION_COMPLETE = baseOrderState:new({
 		Name = "TRANSACTION_COMPLETE",
+		Phase = "DELIVERY",
 
 		ENTER_STATE = function(customer)
 			customer:whisper(ns.L.enUS.TRANSACTION_COMPLETE);
@@ -312,6 +335,8 @@ ns.OrderStates = {
 	DEBUG_STATES = {
 		SKIP_TO_AWAIT_PAYMENT = baseOrderState:new({
 			Name = "SKIP_TO_AWAIT_PAYMENT",
+			Phase = "DELIVERY",
+
 			ENTER_STATE = function(customer)
 				ns.print(ns.DEBUG_SKIPPED_ENCHANT);
 				customer.CurrentOrder:credit(customer.CurrentOrder.Enchants[customer.CurrentOrder.EnchantIndex].Mats);

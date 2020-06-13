@@ -3,25 +3,25 @@ local _, ns = ...;
 ns.ActionQueue = {
 	clearTradeAction = function()
 		SelfService_ActionQueueButton:SetAttribute("type", nil);
-		SelfService_ActionQueueButton:SetText("No Action");
+		SelfService_ActionQueueButton:SetText(ns.ActionQueueMessage.NO_ACTION);
 		ns.debugf(ns.LOG_SECURE_BUTTON_TRADE_ACTION, ns.LOG_SECURE_BUTTON_TYPES.CLEAR);
 	end,
 	castEnchant = function(enchantName)
 		SelfService_ActionQueueButton:SetAttribute("type", "spell");
 		SelfService_ActionQueueButton:SetAttribute("spell", enchantName);
-		SelfService_ActionQueueButton:SetText("Cast "..enchantName);
+		SelfService_ActionQueueButton:SetText(string.format(ns.ActionQueueMessage.CAST, enchantName));
 		ns.debugf(ns.LOG_SECURE_BUTTON_TRADE_ACTION, ns.LOG_SECURE_BUTTON_TYPES.CAST_ENCHANT);
 	end,
 	acceptTrade = function()
 		SelfService_ActionQueueButton:SetAttribute("type", "script");
 		SelfService_ActionQueueButton:SetAttribute("_script", function() AcceptTrade() end);
-		SelfService_ActionQueueButton:SetText("Accept Trade");
+		SelfService_ActionQueueButton:SetText(ns.ActionQueueMessage.ACCEPT_TRADE);
 		ns.debugf(ns.LOG_SECURE_BUTTON_TRADE_ACTION, ns.LOG_SECURE_BUTTON_TYPES.ACCEPT_TRADE);
 	end,
 	applyEnchant = function()
 		SelfService_ActionQueueButton:SetAttribute("type", "script");
 		SelfService_ActionQueueButton:SetAttribute("_script", function() ClickTargetTradeButton(7) end);
-		SelfService_ActionQueueButton:SetText("Apply Enchant");
+		SelfService_ActionQueueButton:SetText(ns.ActionQueueMessage.APPLY_ENCHANT);
 		ns.debugf(ns.LOG_SECURE_BUTTON_TRADE_ACTION, ns.LOG_SECURE_BUTTON_TYPES.APPLY_ENCHANT);
 	end,
 	openTrade = function(playerName)
