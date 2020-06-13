@@ -6,8 +6,6 @@ ns.CustomerCommands = {
 		if time() - customer.LastSearch < 2 then return end;
 		customer.LastSearch = GetTime();
 
-		ns.dumpTable(self);
-
 		-- Do we have links? Check links
 		local links = ns.getLinkedItemIds(message);
 		if #links > 0 then
