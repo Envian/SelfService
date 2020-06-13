@@ -50,7 +50,7 @@ function ns.OrderClass:isTradeAcceptable(tradeMats)
 	local mustBeCraftable = false;
 
 	for i=1,6 do
-		if not tradeMats[i].Id then
+		if ns.isEmpty(tradeMats[i]) then
 			mustBeCraftable = true;
 		elseif not self.ItemBalance[tradeMats[i].Id] then
 			ns.debugf(ns.LOG_ORDER_UNDESIRED_ITEM, tradeMats[i].Id, tradeMats[i].Count);
@@ -62,12 +62,14 @@ function ns.OrderClass:isTradeAcceptable(tradeMats)
 		local tradeTotals = {};
 
 		for i=1,6 do
-			tradeTotals[tradeMats[i].Id] = (tradeTotals[tradeMats[i].Id] or 0) + tradeMats[i].Count;
+			if not ns.isEmpty(tradeMats[i]) then
+				tradeTotals[tradeMats[i].Id] = (tradeTotals[tradeMats[i].Id] or 0) + tradeMats[i].Count;
+			end
 		end
 
-		for itemId, balance in ipairs(self.ItemBalance) do
-			if tradeTotals[itemId] < balance then
-				ns.debugf(ns.LOG_ORDER_INSUFFICIENT_ITEMS, itemId, balance, itemId, tradeTotals[itemId]);
+		for itemId, balance in pairs(self.ItemBalance) do
+			if (tradeTotals[itemId] or 0) < balance then
+				ns.debugf(ns.LOG_ORDER_INSUFFICIENT_ITEMS, itemId, balance, itemId, tradeTotals[itemId] or 0);
 				return false;
 			end
 		end
@@ -78,7 +80,7 @@ function ns.OrderClass:isTradeAcceptable(tradeMats)
 end
 
 function ns.OrderClass:isOrderCraftable()
-	for itemId, balance in ipairs(self.ItemBalance) do
+	for itemId, balance in pairs(self.ItemBalance) do
 		if balance > 0 then return false end;
 	end
 	return true;

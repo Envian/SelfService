@@ -47,7 +47,7 @@ ns.OrderStates = {
 		Phase = "ORDERING",
 
 		TRADE_ITEM_CHANGED = function(customer, enteredItems)
-			if customer.CurrentOrder:isTradeCompletable(enteredItems) then
+			if customer.CurrentOrder:isTradeAcceptable(enteredItems) then
 				ns.ActionQueue.clearTradeAction();
 				return ns.OrderStates.ACCEPT_MATS;
 			end
