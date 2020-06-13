@@ -4,7 +4,7 @@ ns.CustomerCommands = {
 	search = function(customer, message)
 		-- Only allow searching with a small delay.
 		if time() - customer.LastSearch < 2 then return end;
-		customer.LastSearch = GetTime();
+		customer.LastSearch = time();
 
 		-- Do we have links? Check links
 		local links = ns.getLinkedItemIds(message);
