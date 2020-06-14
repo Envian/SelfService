@@ -1,11 +1,21 @@
 local _, ns = ...;
 
 local noAction = function() end
+
 local tradeCancelledDuringDelivery = function(customer)
 	customer:whisper(ns.L.enUS.TRADE_CANCELLED);
 	ns.ActionQueue.clearTradeAction();
 	return ns.OrderStates.READY_FOR_DELIVERY;
 end
+
+local checkDeliverable = function(customer)
+	if customer.CurrentOrder:isDeliverable() then
+		customer:whisper(ns.L.enUS.ORDER_READY);
+		ns.ActionQueue.clearTradeAction();
+		return ns.OrderStates.READY_FOR_DELIVERY;
+	end
+end
+
 -- Base state - All events which are not defiend fall back here, and return self.
 -- Note: these are not actual blizzard events.
 local baseOrderState = {
@@ -21,7 +31,8 @@ local baseOrderState = {
 	--ENCHANT_SUCCEEDED = noAction,
 	SPELLCAST_FAILED = noAction,
 	INVENTORY_CHANGED = noAction,
-	CALLED_BACK = noAction
+	CALLED_BACK = noAction,
+	ORDER_CANCEL = noAction
 }
 baseOrderState.__index = baseOrderState;
 
@@ -103,20 +114,9 @@ ns.OrderStates = {
 		Name = "CRAFT_ORDER",
 		Phase = "CRAFTING",
 
-		ENTER_STATE = function(customer)
-			if customer.CurrentOrder:isDeliverable() then
-				customer:whisper(ns.L.enUS.ORDER_READY);
-				ns.ActionQueue.clearTradeAction();
-				return ns.OrderStates.READY_FOR_DELIVERY;
-			end
-		end,
-		INVENTORY_CHANGED = function(customer, containerId)
-			if customer.CurrentOrder:isDeliverable() then
-				customer:whisper(ns.L.enUS.ORDER_READY);
-				ns.ActionQueue.clearTradeAction();
-				return ns.OrderStates.READY_FOR_DELIVERY;
-			end
-		end
+		ENTER_STATE = checkDeliverable,
+		INVENTORY_CHANGED = checkDeliverable,
+		ORDER_CANCEL = checkDeliverable
 	}),
 
 	READY_FOR_DELIVERY = baseOrderState:new({

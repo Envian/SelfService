@@ -35,6 +35,27 @@ function ns.OrderClass:handleEvent(event, ...)
 	end
 end
 
+function ns.OrderClass:removeFromOrder(recipe)
+	if recipe.IsCrafted then
+		for i, craftable in ipairs(self.Craftables) do
+			if recipe == craftable then
+				self:debit({{Id = recipe.ProductId, Count = 1}});
+				table.remove(self.Craftables, i);
+				break;
+			end
+		end
+	else
+		for i, enchant in ipairs(self.Enchants) do
+			if recipe == enchant then
+				table.remove(self.Enchants, i);
+				break;
+			end
+		end
+	end
+
+	self:credit(recipe.Mats);
+end
+
 function ns.OrderClass:addToOrder(recipe)
 	if recipe.IsCrafted then
 		table.insert(self.Craftables, recipe);

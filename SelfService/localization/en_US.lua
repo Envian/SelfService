@@ -15,6 +15,7 @@ ns.LOG_SECURE_BUTTON_TYPES = {
 }
 
 ns.LOG_ORDER_PLACED = "%s has placed an order for %i items.";
+ns.LOG_ORDER_CANCELLED = "%s has cancelled orders on %i items.";
 ns.LOG_ORDER_STATE_CHANGE = "Order for %s has transitioned to the %s state.";
 ns.LOG_ORDER_INSUFFICIENT_ITEMS = "Trade requires [%s]x%i however [%s]x%i was given.";
 ns.LOG_ORDER_UNDESIRED_ITEM = "Received [%s]x%i from trade, but not required for the transaction.";
@@ -136,7 +137,12 @@ ns.L.enUS = {
 	ORDER_PLACED_ENDING = "Open trade when you're ready to checkout.",
 	ORDER_LIMIT = "I only support ordering 1 item at a time. Try again",
 	ORDER_MULTIPLE_SEARCH_RESULTS = "I found %i recipes that match that description. Please be more specific.",
-	ORDER_IN_PROGRESS = "I can not add a new item to your order right now. Please finish your order before requesting another",
+	ORDER_IN_PROGRESS = "I can not add a new item to your order right now. Please finish your order before requesting another.",
+	NO_ORDERS_TO_CANCEL = "You do not have any active orders to cancel.",
+	CANCELLED_ITEM = "Successfully cancelled the following items: ",
+	FAILED_CANCELLED_ITEM = "Failed to cancel the following items: ",
+	CANCEL_INVALID_ITEM = "%s is not in your order.",
+	CANCEL_CRAFT_LATE = "I have already started crafting your order and can no longer accept cancellations for crafted items.",
 	BUY_FIRST = "Use command !buy before opening trade.",
 	BUSY = "I am serving another player right now. Please try again later.",
 	INVALID_ITEM = "%s cannot be applied to that item.",

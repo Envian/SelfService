@@ -41,7 +41,7 @@ ns.CustomerCommands = {
 			if #result == 1 then
 				orders = { result[1].Id };
 			else
-				if #results > 1 then
+				if #result > 1 then
 					customer:replyf(ns.L.enUS.ORDER_MULTIPLE_SEARCH_RESULTS, #result);
 				else
 					customer:reply(ns.L.enUS.NO_RESULTS);
@@ -51,6 +51,28 @@ ns.CustomerCommands = {
 		end
 		customer:addToOrder(orders);
 		ns.infof(ns.LOG_ORDER_PLACED, customer.Name, #orders);
+	end,
+
+	cancel = function(customer, message)
+		if not customer.CurrentOrder then
+			customer:reply("You do not have any active orders to cancel!");
+		else
+			local cancellations = ns.getLinkedItemIds(message);
+			if #cancellations == 0 then
+				local result = ns.searchRecipes(message);
+				if #result == 1 then
+					cancellations = { result[1].Id };
+				else
+					if #result > 1 then
+						customer:replyf(ns.L.enUS.ORDER_MULTIPLE_SEARCH_RESULTS, #result);
+					else
+						customer:reply(ns.L.enUS.NO_RESULTS);
+					end
+					return;
+				end
+			end
+			customer:removeFromOrder(cancellations);
+		end
 	end,
 
 	help = function(customer, message)
