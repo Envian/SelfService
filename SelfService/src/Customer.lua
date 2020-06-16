@@ -78,7 +78,7 @@ function CustomerClass:removeFromOrder(recipeIds)
 		local ordered = false;
 
 		if recipe.IsCrafted then
-			if self.CurrentOrder.State.Phase ~= "ORDERING" then
+			if self.CurrentOrder.State.Phase ~= "ORDER" then
 				self:reply(ns.L.enUS.CANCEL_CRAFT_LATE);
 				table.insert(failed, recipe.Link);
 				fc = (fc or "Failed to cancel ")..recipe.Link.."-too late ";
@@ -118,7 +118,7 @@ function CustomerClass:removeFromOrder(recipeIds)
 end
 
 function CustomerClass:addToOrder(recipeIds)
-	if self.CurrentOrder and self.CurrentOrder.State.Phase ~= "ORDERING" then
+	if self.CurrentOrder and self.CurrentOrder.State.Phase ~= "ORDER" then
 		self:reply(ns.L.enUS.ORDER_IN_PROGRESS);
 		return;
 	end
