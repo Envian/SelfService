@@ -74,7 +74,7 @@ ns.CustomerCommands = {
 
 	status = function(customer)
 		if not customer.CurrentOrder then
-			customer:reply("No active orders.");
+			customer:reply(ns.L.enUS.INACTIVE_CUSTOMER);
 		else
 			if not ns.isEmpty(customer.CurrentOrder.Enchants) then
 				customer:replyJoin(ns.L.enUS.STATUS_ENCHANTS, ns.getOrderLinks(customer.CurrentOrder.Enchants));
