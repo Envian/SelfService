@@ -31,6 +31,16 @@ ns.getLinkedItemIds = function(text, type)
 	return matches;
 end
 
+ns.getOrderLinks = function(recipes)
+	local links = {};
+
+	for _, recipe in ipairs(recipes) do
+		table.insert(links, recipe.Link);
+	end
+
+	return links;
+end
+
 ns.delink = function(text)
 	return gsub(text, "\124c[^\124]+\124H[^\124]+\124h(%[[^%]]+%])\124h\124r", "%1");
 end
@@ -134,26 +144,39 @@ end
 
 ns.searchRecipes = function(searchString)
 	local results = {}
-	for term in searchString:gmatch("[^+%s]+") do
-		local matches = ns.Search[string.lower(term)];
+	-- First pass to pull all links out and add to results list
+	searchString = searchString:gsub("\124c.-\124r", function(match) table.insert(results, {Term = match, Results = {ns.Recipes[ns.getItemIdFromLink(match)]}}); return ","; end);
 
-		-- Ignore terms that don't match anything
-		if matches then
-			if #results == 0 then
-				-- Clones the array (we'll modify it later.)
-				for n, result in ipairs(matches) do
-					results[n] = result;
+	-- Second pass to get all non-link results
+	--for term in searchString:gmatch("[^+,%s]+") do
+	-- Comma delimited terms
+	for searchTerm in searchString:gmatch("[^,]+") do
+		-- Trim whitespace from the ends of the term
+		searchTerm = string.lower(searchTerm:gsub("^%s*(.-)%s*$", "%1"));
+		local subResults = {};
+
+		-- Each search string within the term
+		for subTerm in searchTerm:gmatch("[^+%s]+") do
+			local matches = ns.Search[subTerm];
+
+			-- Ignore terms that don't match anything
+			if matches then
+				if #subResults == 0 then
+					subResults = matches;
+				else
+					-- If we have multiple terms, only show results that match all.
+					subResults = ns.ifilter(subResults, function(result)
+						for _, match in ipairs(matches) do
+							if match.Id == result.Id then return true end;
+						end
+						return false;
+					end);
 				end
-			else
-				-- If we have multiple terms, only show results that match all.
-				results = ns.ifilter(results, function(result)
-					for _, newEntry in ipairs(matches) do
-						if newEntry.Id == result.Id then return true end;
-					end
-					return false;
-				end);
 			end
 		end
+
+		table.insert(results, {Term = searchTerm, Results = subResults});
 	end
+
 	return results;
 end

@@ -39,6 +39,14 @@ local orderPhaseState = baseOrderState:new({
 	Phase = "ORDER"
 });
 
+local craftPhaseState = baseOrderState:new({
+	Phase = "CRAFT",
+
+	ENTER_STATE = checkDeliverable,
+	INVENTORY_CHANGED = checkDeliverable,
+	ORDER_CANCEL = checkDeliverable
+})
+
 local deliveryPhaseState = baseOrderState:new({
 	Phase = "DELIVERY",
 
@@ -115,13 +123,8 @@ ns.OrderStates = {
 		end
 	}),
 
-	CRAFT_ORDER = baseOrderState:new({
+	CRAFT_ORDER = craftPhaseState:new({
 		Name = "CRAFT_ORDER",
-		Phase = "CRAFTING",
-
-		ENTER_STATE = checkDeliverable,
-		INVENTORY_CHANGED = checkDeliverable,
-		ORDER_CANCEL = checkDeliverable
 	}),
 
 	READY_FOR_DELIVERY = deliveryPhaseState:new({

@@ -70,18 +70,15 @@ function CustomerClass:removeFromOrder(recipeIds)
 	local successful = {};
 	local failed = {};
 
-	local sc, fc;
-
 	-- Check recipe Ids. Are they ordered?
 	for _, recipeId in ipairs(recipeIds) do
 		local recipe = ns.Recipes[recipeId];
 		local ordered = false;
 
 		if recipe.IsCrafted then
+			-- Additional tracking/checks needed to cancel crafted items during craft/delivery phases
 			if self.CurrentOrder.State.Phase ~= "ORDER" then
-				self:reply(ns.L.enUS.CANCEL_CRAFT_LATE);
 				table.insert(failed, recipe.Link);
-				fc = (fc or "Failed to cancel ")..recipe.Link.."-too late ";
 			else
 				for _, craftable in ipairs(self.CurrentOrder.Craftables) do
 					if recipe == craftable then
@@ -93,26 +90,27 @@ function CustomerClass:removeFromOrder(recipeIds)
 				end
 			end
 		else
-			for _, enchant in ipairs(self.CurrentOrder.Enchants) do
-				if recipe == enchant then
-					ordered = true;
-					self.CurrentOrder:removeFromOrder(recipe);
-					table.insert(successful, recipe.Link);
-					break;
+			if self.CurrentOrder.State.Phase == "DELIVERY" then
+				table.insert(failed, recipe.Link);
+			else
+				for _, enchant in ipairs(self.CurrentOrder.Enchants) do
+					if recipe == enchant then
+						ordered = true;
+						self.CurrentOrder:removeFromOrder(recipe);
+						table.insert(successful, recipe.Link);
+						break;
+					end
 				end
 			end
 		end
 
 		if not ordered then
 			table.insert(failed, recipe.Link);
-			fc = (fc or "Failed to cancel ")..recipe.Link.."-not in order ";
 		end
 	end
 
-	if not ns.isEmpty(successful) then self:replyJoin(ns.L.enUS.CANCELLED_ITEM, successful) end
-	if not ns.isEmpty(failed) then self:replyJoin(ns.L.enUS.FAILED_CANCELLED_ITEM, failed) end
-
-	if fc then ns.debug(fc) end
+	if not ns.isEmpty(successful) then self:replyJoin(ns.L.enUS.CANCELLED_ITEM, successful)	end
+	if not ns.isEmpty(failed) then self:replyJoin(ns.L.enUS.FAILED_CANCELLED_ITEM, failed)	end
 
 	self.CurrentOrder:handleEvent("ORDER_CANCEL");
 end
