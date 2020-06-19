@@ -79,6 +79,7 @@ ns.CMD_DEBUG_SETSTATE_USAGE = "Invalid parameters for setstate. Usage: /ss debug
 ns.CMD_DEBUG_SETSTATE_NO_ORDER = "No valid order for %s exists.";
 ns.CMD_DEBUG_SETSTATE_INVALID_STATE = "%s is not a recognized state.";
 ns.CMD_DEBUG_SETSTATE_TRANSITION_WARNING = "WARNING: Unexpected behavior may result from forcing this transition.";
+ns.CMD_DEBUG_SETGLOBAL = "Addon's 'ns' variable has been set to the global '%s'";
 
 -- Debug mode messages
 ns.DEBUG_MODE_RELOAD_MESSAGE = "Debug mode cannot be disabled without reloading the UI.";

@@ -138,6 +138,11 @@ local slashCommands = {
 					customer.CurrentOrder:handleEvent("ENTER_STATE");
 				end
 			end
+		end,
+		global = function(var)
+			var = #var > 0 and var or "ss";
+			_G[var] = ns;
+			ns.printf(ns.CMD_DEBUG_SETGLOBAL, var);
 		end
 	},
 }
