@@ -1,20 +1,88 @@
 local _, ns = ...;
 
-ns.imap = function(list, callback)
-	local result = {};
-	for index, item in ipairs(list) do
-		result[index] = callback(item);
+function assertType(var, name, depth, ...)
+	for n = 1,select("#", ...) do
+		if type(var) == select(n, ...) then return end;
 	end
-	return result;
+	error(string.format("%s is type '%s', but expeceted %s", name, type(var), table.concat({...}, ", ")), depth + 1);
 end
 
-ns.ifilter = function(list, callback)
-	local result = {};
-	for index, item in ipairs(list) do
-		if callback(item) then result[#result + 1] = item end;
+-- Javascript style helper methods.
+function ns.imap(source, callback, destination)
+	ns.assertType(source, "source", 2, "table");
+	ns.assertType(callback, "callback", 2, "function");
+	ns.assertType(destination, "destination", 2, "table", "nil");
+
+	destination = destination or source;
+	for key, value in pairs(source) do
+		destination[key] = callback(value);
 	end
-	return result;
+	return source;
 end
+ns.map = ns.imap; -- No difference between map and imap
+
+function ns.ifilter(source, callback, destination)
+	ns.assertType(source, "source", 2, "table");
+	ns.assertType(callback, "callback", 2, "function");
+	ns.assertType(destination, "destination", 2, "table", "nil");
+
+	if destination then
+		-- add true items to the destination
+		for _, value in ipairs(source) do
+			if callback(value) then table.insert(destination, item) end;
+		end
+		return destination;
+	else
+		-- remove false items from the source
+		for n = 1,#source do
+			if not callback(value) then table.remove(source, n) end;
+		end
+		return source;
+	end
+end
+
+function ns.filter(source, callback, destination)
+	ns.assertType(source, "source", 2, "table");
+	ns.assertType(callback, "callback", 2, "function");
+	ns.assertType(destination, "destination", 2, "table", "nil");
+
+	if destination then
+		-- add true items to the destination
+		for key, value in pairs(source) do
+			if callback(value) then destination[key] = item end;
+		end
+		return destination;
+	else
+		-- remove false items from the source
+		for key, value in pairs(source) do
+			if not callback(value) then destination[key] = nil end;
+		end
+		return source;
+	end
+end
+
+function ns.ireduce(source, callback, acc)
+	ns.assertType(source, "source", 2, "table");
+	ns.assertType(callback, "callback", 2, "function");
+
+	for key, value in ipairs(soruce) do
+		acc = callback(acc, value, key);
+	end
+
+	return acc;
+end
+
+function ns.reduce(source, callback, acc)
+	ns.assertType(source, "source", 2, "table");
+	ns.assertType(callback, "callback", 2, "function");
+
+	for key, value in pairs(soruce) do
+		acc = callback(acc, value, key);
+	end
+
+	return acc;
+end
+-- End of javascript style helpers
 
 ns.getItemIdFromLink = function(link, type)
 	type = type or "[^:]+"; -- type by default is any. Callers can pass in "item" or "enchant"
