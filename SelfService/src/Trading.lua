@@ -48,12 +48,12 @@ ns.Trading = {
 
 			-- Disables accept button
 			TradeFrameTradeButton:Disable();
-			TradeFrameTradeButton:HookScript("OnEnter", function()
-				GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT");
+			TradeFrameTradeButton:SetScript("OnEnter", function()
+				GameTooltip:SetOwner(self, "ANCHOR_CURSOR");
 				GameTooltip:AddLine(ns.UI_TRADE_DISABLED);
 				GameTooltip:Show();
 			end);
-			TradeFrameTradeButton:HookScript("OnLeave", function() GameTooltip:Hide() end);
+			TradeFrameTradeButton:SetScript("OnLeave", function() GameTooltip:Hide() end);
 
 			ns.CurrentTrade.Customer.CurrentOrder:handleEvent("TRADE_SHOW");
 			ns.debugf(ns.LOG_TRADE_ACCEPTED, customer.Name);

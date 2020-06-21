@@ -55,7 +55,7 @@ ns.CustomerCommands = {
 			if #result == 1 then
 				orders = { result[1].Id };
 			else
-				if #results > 1 then
+				if #result > 1 then
 					customer:replyf(ns.L.enUS.ORDER_MULTIPLE_SEARCH_RESULTS, #result);
 				else
 					customer:reply(ns.L.enUS.NO_RESULTS);

@@ -73,6 +73,8 @@ local eventHandlers = {
 	-- end
 };
 
+local closeOnLoad = false;
+
 ns.enableAddon = function()
 	if not ns.Enabled then
 		for event, _ in pairs(eventHandlers) do
@@ -84,6 +86,12 @@ ns.enableAddon = function()
 
 		SelfService_ActionQueueButton:Show();
 		ns.Enabled = true;
+
+		if not ns.Loaded.Enchanting then
+			CastSpellByName("Enchanting");
+			closeOnLoad = true;
+		end
+
 		ns.warning(ns.LOG_ENABLED);
 	else
 		ns.warning(ns.LOG_ALREADY_ENABLED);
@@ -101,7 +109,7 @@ ns.disableAddon = function()
 
 		-- Reenable trade button just in case
 		TradeFrameTradeButton:Enable();
-		TradeFrameTradeButton:HookScript("OnEnter", nil);
+		TradeFrameTradeButton:SetScript("OnEnter", nil);
 
 		ns.Enabled = false;
 		ns.warning(ns.LOG_DISABLED);
@@ -137,6 +145,11 @@ loadingFrame:SetScript("OnEvent", function(_, event, ...)
 				recipe.IsCrafted = true;
 				recipe.ProductId = productId;
 			end
+
+			if closeOnLoad then
+				CloseCraft();
+			end
+
 			ns.Loaded.Enchanting = true;
 			ns.infof(ns.LOG_LOADED, "Enchanting");
 		end
