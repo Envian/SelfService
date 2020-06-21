@@ -98,6 +98,11 @@ ns.disableAddon = function()
 		--ChatFrame_RemoveMessageEventFilter("CHAT_MSG_WHISPER", filterInbound);
 		--ChatFrame_RemoveMessageEventFilter("CHAT_MSG_WHISPER_INFORM", filterOutbound);
 		SelfService_ActionQueueButton:Hide();
+
+		-- Reenable trade button just in case
+		TradeFrameTradeButton:Enable();
+		TradeFrameTradeButton:HookScript("OnEnter", nil);
+
 		ns.Enabled = false;
 		ns.warning(ns.LOG_DISABLED);
 	else
