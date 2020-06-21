@@ -40,11 +40,11 @@ local orderPhaseState = baseOrderState:new({
 	Phase = "ORDER",
 
 	ORDER_REQUEST = function(customer, recipes)
-		customer.CurrentOrder:addToOrder(recipes);
+		customer:addToOrder(recipes);
 		return ns.OrderStates.WAIT_FOR_MATS;
 	end,
 	CANCEL_REQUEST = function(customer, recipes)
-		customer.CurrentOrder:removeFromOrder(recipes);
+		customer:removeFromOrder(recipes);
 		return ns.OrderStates.WAIT_FOR_MATS;
 	end
 });
@@ -55,7 +55,7 @@ local craftPhaseState = baseOrderState:new({
 	ENTER_STATE = checkDeliverable,
 	INVENTORY_CHANGED = checkDeliverable,
 	ORDER_REQUEST = function(customer, recipes)
-		customer.CurrentOrder:addToOrder(recipes);
+		customer:addToOrder(recipes);
 		return ns.OrderStates.WAIT_FOR_MATS;
 	end,
 	CANCEL_REQUEST = checkDeliverable

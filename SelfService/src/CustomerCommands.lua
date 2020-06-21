@@ -40,6 +40,7 @@ ns.CustomerCommands = {
 			end
 
 			if not ns.isEmpty(addedIds) then
+				customer.CurrentOrder = customer.CurrentOrder or ns.OrderClass:new(nil, customer.Name);
 				customer.CurrentOrder:handleEvent("ORDER_REQUEST", addedIds);
 				ns.infof(ns.LOG_ORDER_PLACED, customer.Name, #addedIds);
 			else
