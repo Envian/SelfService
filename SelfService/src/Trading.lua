@@ -53,7 +53,7 @@ ns.Trading = {
 				GameTooltip:AddLine(ns.UI_TRADE_DISABLED);
 				GameTooltip:Show();
 			end);
-			TradeFrameTradeButton:HookScript("OnLeave", GameTooltip:Hide);
+			TradeFrameTradeButton:HookScript("OnLeave", function() GameTooltip:Hide() end);
 
 			ns.CurrentTrade.Customer.CurrentOrder:handleEvent("TRADE_SHOW");
 			ns.debugf(ns.LOG_TRADE_ACCEPTED, customer.Name);
