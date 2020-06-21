@@ -26,7 +26,8 @@ local baseOrderState = {
 	SPELLCAST_FAILED = noAction,
 	INVENTORY_CHANGED = noAction,
 	CALLED_BACK = noAction,
-	ORDER_CANCEL = noAction
+	CANCEL_REQUEST = noAction,
+	ORDER_REQUEST = noAction
 }
 
 function baseOrderState:new(state)
@@ -36,7 +37,16 @@ function baseOrderState:new(state)
 end
 
 local orderPhaseState = baseOrderState:new({
-	Phase = "ORDER"
+	Phase = "ORDER",
+
+	ORDER_REQUEST = function(customer, recipes)
+		customer.CurrentOrder:addToOrder(recipes);
+		return ns.OrderStates.WAIT_FOR_MATS;
+	end,
+	CANCEL_REQUEST = function(customer, recipes)
+		customer.CurrentOrder:removeFromOrder(recipes);
+		return ns.OrderStates.WAIT_FOR_MATS;
+	end
 });
 
 local craftPhaseState = baseOrderState:new({
@@ -44,7 +54,11 @@ local craftPhaseState = baseOrderState:new({
 
 	ENTER_STATE = checkDeliverable,
 	INVENTORY_CHANGED = checkDeliverable,
-	ORDER_CANCEL = checkDeliverable
+	ORDER_REQUEST = function(customer, recipes)
+		customer.CurrentOrder:addToOrder(recipes);
+		return ns.OrderStates.WAIT_FOR_MATS;
+	end,
+	CANCEL_REQUEST = checkDeliverable
 })
 
 local deliveryPhaseState = baseOrderState:new({

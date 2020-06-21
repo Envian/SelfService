@@ -40,7 +40,7 @@ ns.CustomerCommands = {
 			end
 
 			if not ns.isEmpty(addedIds) then
-				customer:addToOrder(addedIds);
+				customer.CurrentOrder:handleEvent("ORDER_REQUEST", addedIds);
 				ns.infof(ns.LOG_ORDER_PLACED, customer.Name, #addedIds);
 			else
 				customer:reply(ns.L.enUS.NO_RESULTS);
@@ -64,7 +64,7 @@ ns.CustomerCommands = {
 			end
 
 			if not ns.isEmpty(cancelledIds) then
-				customer:removeFromOrder(cancelledIds);
+				customer.CurrentOrder:handleEvent("CANCEL_REQUEST", cancelledIds);
 				ns.infof(ns.LOG_ORDER_CANCELLED, customer.Name, #cancelledIds);
 			else
 				customer:reply(ns.L.enUS.NO_RESULTS);

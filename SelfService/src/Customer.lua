@@ -111,8 +111,6 @@ function CustomerClass:removeFromOrder(recipeIds)
 
 	if not ns.isEmpty(successful) then self:replyJoin(ns.L.enUS.CANCELLED_ITEM, successful)	end
 	if not ns.isEmpty(failed) then self:replyJoin(ns.L.enUS.FAILED_CANCELLED_ITEM, failed)	end
-
-	self.CurrentOrder:handleEvent("ORDER_CANCEL");
 end
 
 function CustomerClass:addToOrder(recipeIds)
