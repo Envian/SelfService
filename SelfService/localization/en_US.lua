@@ -102,6 +102,9 @@ ns.DEBUG_SKIPPED_ENCHANT = "Debug Mode Enabled - Customer's item has not been en
 -- Keybindings
 ns.KEYBIND_NEXT_ACTION = "Perform SelfService Action";
 
+-- UI
+ns.UI_TRADE_DISABLED = "Disabled by "..ADDON_NAME..".";
+
 -- Console command help text
 -- This is a map/array hybrid. The map part is used to get the command's help text. the list is printed as help text.
 ns.HELP_TEXT = {

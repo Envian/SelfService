@@ -46,6 +46,15 @@ ns.Trading = {
 			ns.CurrentTrade.PlayerMoney = 0;
 			ns.CurrentTrade.Customer = customer;
 
+			-- Disables accept button
+			TradeFrameTradeButton:Disable();
+			TradeFrameTradeButton:HookScript("OnEnter", function()
+				GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT");
+				GameTooltip:AddLine(ns.UI_TRADE_DISABLED);
+				GameTooltip:Show();
+			end);
+			TradeFrameTradeButton:HookScript("OnLeave", GameTooltip:Hide);
+
 			ns.CurrentTrade.Customer.CurrentOrder:handleEvent("TRADE_SHOW");
 			ns.debugf(ns.LOG_TRADE_ACCEPTED, customer.Name);
 		end
