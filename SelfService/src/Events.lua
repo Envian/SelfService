@@ -1,9 +1,9 @@
-local _, ns = ...;
+local ADDON_NAME, ns = ...;
 
 local COMMAND_REGEX = "^!%s*%a%a";
 local SEARCH_REGEX = "^%?%s*([|%a%d]+)";
 
-BINDING_HEADER_SELFSERVICE = ns.ADDON_NAME;
+BINDING_HEADER_SELFSERVICE = ADDON_NAME;
 setglobal("BINDING_NAME_CLICK SelfService_ActionQueueButton:LeftButton", ns.KEYBIND_NEXT_ACTION);
 
 local eventFrame = CreateFrame("Frame");
