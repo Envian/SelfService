@@ -52,7 +52,7 @@ function ns.OrderClass:isTradeAcceptable(tradeMats)
 	for i=1,6 do
 		if ns.isEmpty(tradeMats[i]) then
 			mustBeCraftable = true;
-		elseif not self.ItemBalance[tradeMats[i].Id] then
+		elseif not self.ItemBalance[tradeMats[i].Id] >= 0 then
 			ns.debugf(ns.LOG_ORDER_UNDESIRED_ITEM, tradeMats[i].Id, tradeMats[i].Count);
 			return false;
 		end
