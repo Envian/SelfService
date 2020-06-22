@@ -15,7 +15,7 @@ data/Enchanting.lua
 src/Helpers.lua
 src/Migration.lua
 src/Logging.lua
-
+src/Events.lua
 
 # Classes
 src/Recipe.lua
@@ -28,10 +28,13 @@ src/ActionQueue.lua
 src/Trading.lua
 src/CustomerCommands.lua
 
-# Handlers
+
+# Handlers & Setup
 src/Inventory.lua
-src/Events.lua
+src/GameEvents.lua
 src/Console.lua
 src/CustomerCommands.lua
 
+# UI
+ui/TradeFrameModifications.xml
 ui/SecureButton.xml

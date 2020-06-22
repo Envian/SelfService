@@ -99,11 +99,11 @@ ns.DEBUG_MODE_RELOAD_MESSAGE = "Debug mode cannot be disabled without reloading 
 ns.DEBUG_SKIP_ENCHANT_STATE = "Debug Mode Enabled - Enchants will no longer be cast.";
 ns.DEBUG_SKIPPED_ENCHANT = "Debug Mode Enabled - Customer's item has not been enchanted.";
 
--- Keybindings
-ns.KEYBIND_NEXT_ACTION = "Perform SelfService Action";
-
 -- UI
-ns.UI_TRADE_DISABLED = "Disabled by "..ADDON_NAME..".";
+BINDING_HEADER_SELFSERVICE = ADDON_NAME;
+_G["BINDING_NAME_CLICK SelfService_ActionQueueButton:LeftButton"] = "Perform SelfService Action";
+
+SELFSERVICE_TRADEHELPTEXT = "Disabled by "..ADDON_NAME..".";
 
 -- Console command help text
 -- This is a map/array hybrid. The map part is used to get the command's help text. the list is printed as help text.

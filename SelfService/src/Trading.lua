@@ -46,15 +46,6 @@ ns.Trading = {
 			ns.CurrentTrade.PlayerMoney = 0;
 			ns.CurrentTrade.Customer = customer;
 
-			-- Disables accept button
-			TradeFrameTradeButton:Disable();
-			TradeFrameTradeButton:SetScript("OnEnter", function()
-				GameTooltip:SetOwner(self, "ANCHOR_CURSOR");
-				GameTooltip:AddLine(ns.UI_TRADE_DISABLED);
-				GameTooltip:Show();
-			end);
-			TradeFrameTradeButton:SetScript("OnLeave", function() GameTooltip:Hide() end);
-
 			ns.CurrentTrade.Customer.CurrentOrder:handleEvent("TRADE_SHOW");
 			ns.debugf(ns.LOG_TRADE_ACCEPTED, customer.Name);
 		end
@@ -141,3 +132,14 @@ ns.Trading = {
 		return tradeMats;
 	end
 }
+
+ns.registerEvent(ns.EVENT.ENABLE, function()
+	CancelTrade();
+end);
+
+ns.registerEvent(ns.EVENT.DISABLE, function()
+	-- This prevents orders from being stuck in a strange state, such as if the addon is disabled while waiting for payment from a customer.
+	if ns.CurrentTrade.Customer and ns.CurrentTrade.Customer.CurrentOrder then
+		ns.CurrentTrade.Customer.CurrentOrder:handleEvent("TRADE_CANCELLED");
+	end
+end)
