@@ -15,4 +15,5 @@
 			</Layer>
 		</Layers>
 	</Frame>
+	<Script file="ui/TradeFrameModifications.lua" />
 </Ui>
