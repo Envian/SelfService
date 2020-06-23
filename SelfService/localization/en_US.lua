@@ -1,4 +1,18 @@
-local _, ns = ...;
+-- This file is part of SelfService.
+--
+-- SelfService is free software: you can redistribute it and/or modify
+-- it under the terms of the GNU General Public License as published by
+-- the Free Software Foundation, either version 3 of the License, or
+-- (at your option) any later version.
+--
+-- SelfService is distributed in the hope that it will be useful,
+-- but WITHOUT ANY WARRANTY; without even the implied warranty of
+-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-- GNU General Public License for more details.
+--
+-- You should have received a copy of the GNU General Public License
+-- along with SelfService.  If not, see <https://www.gnu.org/licenses/>.
+local ADDON_NAME, ns = ...;
 
 ns.LOCALIZATION = "enUS";
 
@@ -88,8 +102,11 @@ ns.DEBUG_MODE_RELOAD_MESSAGE = "Debug mode cannot be disabled without reloading 
 ns.DEBUG_SKIP_ENCHANT_STATE = "Debug Mode Enabled - Enchants will no longer be cast.";
 ns.DEBUG_SKIPPED_ENCHANT = "Debug Mode Enabled - Customer's item has not been enchanted.";
 
--- Keybindings
-ns.KEYBIND_NEXT_ACTION = "Perform SelfService Action";
+-- UI
+BINDING_HEADER_SELFSERVICE = ADDON_NAME;
+_G["BINDING_NAME_CLICK SelfService_ActionQueueButton:LeftButton"] = "Perform SelfService Action";
+
+SELFSERVICE_TRADEHELPTEXT = "Disabled by "..ADDON_NAME..".";
 
 -- Console command help text
 -- This is a map/array hybrid. The map part is used to get the command's help text. the list is printed as help text.
