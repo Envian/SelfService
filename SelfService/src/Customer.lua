@@ -61,8 +61,60 @@ function CustomerClass:handleCommand(command, message)
 	self.MessagesAvailable = 0;
 end
 
+function CustomerClass:removeFromOrder(recipeIds)
+	if not self.CurrentOrder then
+		self:reply(ns.L.enUS.NO_ORDERS_TO_CANCEL);
+		return;
+	end
+
+	local successful = {};
+	local failed = {};
+
+	-- Check recipe Ids. Are they ordered?
+	for _, recipeId in ipairs(recipeIds) do
+		local recipe = ns.Recipes[recipeId];
+		local ordered = false;
+
+		if recipe.IsCrafted then
+			-- Additional tracking/checks needed to cancel crafted items during craft/delivery phases
+			if self.CurrentOrder.State.Phase ~= "ORDER" then
+				table.insert(failed, recipe.Link);
+			else
+				for _, craftable in ipairs(self.CurrentOrder.Craftables) do
+					if recipe == craftable then
+						ordered = true;
+						self.CurrentOrder:removeFromOrder(recipe);
+						table.insert(successful, recipe.Link);
+						break;
+					end
+				end
+			end
+		else
+			if self.CurrentOrder.State.Phase == "DELIVERY" then
+				table.insert(failed, recipe.Link);
+			else
+				for _, enchant in ipairs(self.CurrentOrder.Enchants) do
+					if recipe == enchant then
+						ordered = true;
+						self.CurrentOrder:removeFromOrder(recipe);
+						table.insert(successful, recipe.Link);
+						break;
+					end
+				end
+			end
+		end
+
+		if not ordered then
+			table.insert(failed, recipe.Link);
+		end
+	end
+
+	if not ns.isEmpty(successful) then self:replyJoin(ns.L.enUS.CANCELLED_ITEM, successful)	end
+	if not ns.isEmpty(failed) then self:replyJoin(ns.L.enUS.FAILED_CANCELLED_ITEM, failed)	end
+end
+
 function CustomerClass:addToOrder(recipeIds)
-	if self.CurrentOrder and self.CurrentOrder.State.Phase ~= "ORDERING" then
+	if self.CurrentOrder and self.CurrentOrder.State.Phase ~= "ORDER" then
 		self:reply(ns.L.enUS.ORDER_IN_PROGRESS);
 		return;
 	end
@@ -95,6 +147,8 @@ function CustomerClass:reply(message)
 	if self.MessagesAvailable > 0 then
 		self.MessagesAvailable = self.MessagesAvailable - 1;
 		SendChatMessage(ns.REPLY_PREFIX .. message, "WHISPER", nil, self.Name);
+	else
+		ns.debug("Antispam blocked message: "..message);
 	end
 end
 

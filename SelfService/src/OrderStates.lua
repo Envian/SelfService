@@ -1,11 +1,15 @@
 local _, ns = ...;
 
 local noAction = function() end
-local tradeCancelledDuringDelivery = function(customer)
-	customer:whisper(ns.L.enUS.TRADE_CANCELLED);
-	ns.ActionQueue.clearTradeAction();
-	return ns.OrderStates.READY_FOR_DELIVERY;
+
+local checkDeliverable = function(customer)
+	if customer.CurrentOrder:isDeliverable() then
+		customer:whisper(ns.L.enUS.ORDER_READY);
+		ns.ActionQueue.clearTradeAction();
+		return ns.OrderStates.READY_FOR_DELIVERY;
+	end
 end
+
 -- Base state - All events which are not defiend fall back here, and return self.
 -- Note: these are not actual blizzard events.
 local baseOrderState = {
@@ -21,19 +25,55 @@ local baseOrderState = {
 	--ENCHANT_SUCCEEDED = noAction,
 	SPELLCAST_FAILED = noAction,
 	INVENTORY_CHANGED = noAction,
-	CALLED_BACK = noAction
+	CALLED_BACK = noAction,
+	CANCEL_REQUEST = noAction,
+	ORDER_REQUEST = noAction
 }
-baseOrderState.__index = baseOrderState;
 
 function baseOrderState:new(state)
-	setmetatable(state, baseOrderState);
+	self.__index = self;
+	setmetatable(state, self);
 	return state;
 end
 
+local orderPhaseState = baseOrderState:new({
+	Phase = "ORDER",
+
+	ORDER_REQUEST = function(customer, recipes)
+		customer:addToOrder(recipes);
+		return ns.OrderStates.WAIT_FOR_MATS;
+	end,
+	CANCEL_REQUEST = function(customer, recipes)
+		customer:removeFromOrder(recipes);
+		return ns.OrderStates.WAIT_FOR_MATS;
+	end
+});
+
+local craftPhaseState = baseOrderState:new({
+	Phase = "CRAFT",
+
+	ENTER_STATE = checkDeliverable,
+	INVENTORY_CHANGED = checkDeliverable,
+	ORDER_REQUEST = function(customer, recipes)
+		customer:addToOrder(recipes);
+		return ns.OrderStates.WAIT_FOR_MATS;
+	end,
+	CANCEL_REQUEST = checkDeliverable
+})
+
+local deliveryPhaseState = baseOrderState:new({
+	Phase = "DELIVERY",
+
+	TRADE_CANCELLED = function(customer)
+		customer:whisper(ns.L.enUS.TRADE_CANCELLED);
+		ns.ActionQueue.clearTradeAction();
+		return ns.OrderStates.READY_FOR_DELIVERY;
+	end
+});
+
 ns.OrderStates = {
-	ORDER_PLACED = baseOrderState:new({
+	ORDER_PLACED = orderPhaseState:new({
 		Name = "ORDER_PLACED",
-		Phase = "ORDERING",
 
 		TRADE_SHOW = function(customer)
 			customer:whisper(ns.L.enUS.ADD_MATERIALS);
@@ -42,9 +82,8 @@ ns.OrderStates = {
 		end
 	}),
 
-	WAIT_FOR_MATS = baseOrderState:new({
+	WAIT_FOR_MATS = orderPhaseState:new({
 		Name = "WAIT_FOR_MATS",
-		Phase = "ORDERING",
 
 		TRADE_ITEM_CHANGED = function(customer, enteredItems)
 			if customer.CurrentOrder:isTradeAcceptable(enteredItems) then
@@ -69,9 +108,8 @@ ns.OrderStates = {
 		end
 	}),
 
-	ACCEPT_MATS = baseOrderState:new({
+	ACCEPT_MATS = orderPhaseState:new({
 		Name = "ACCEPT_MATS",
-		Phase = "ORDERING",
 
 		ENTER_STATE = function(customer)
 			ns.ActionQueue.acceptTrade();
@@ -99,29 +137,12 @@ ns.OrderStates = {
 		end
 	}),
 
-	CRAFT_ORDER = baseOrderState:new({
+	CRAFT_ORDER = craftPhaseState:new({
 		Name = "CRAFT_ORDER",
-		Phase = "CRAFTING",
-
-		ENTER_STATE = function(customer)
-			if customer.CurrentOrder:isDeliverable() then
-				customer:whisper(ns.L.enUS.ORDER_READY);
-				ns.ActionQueue.clearTradeAction();
-				return ns.OrderStates.READY_FOR_DELIVERY;
-			end
-		end,
-		INVENTORY_CHANGED = function(customer, containerId)
-			if customer.CurrentOrder:isDeliverable() then
-				customer:whisper(ns.L.enUS.ORDER_READY);
-				ns.ActionQueue.clearTradeAction();
-				return ns.OrderStates.READY_FOR_DELIVERY;
-			end
-		end
 	}),
 
-	READY_FOR_DELIVERY = baseOrderState:new({
+	READY_FOR_DELIVERY = deliveryPhaseState:new({
 		Name = "READY_FOR_DELIVERY",
-		Phase = "DELIVERY",
 
 		ENTER_STATE = function(customer)
 			if not customer.CurrentOrder.TradeAttempted then
@@ -139,9 +160,8 @@ ns.OrderStates = {
 		end
 	}),
 
-	DELIVER_ORDER = baseOrderState:new({
+	DELIVER_ORDER = deliveryPhaseState:new({
 		Name = "DELIVER_ORDER",
-		Phase = "DELIVERY",
 
 		ENTER_STATE = function(customer)
 			local returnables = {};
@@ -183,9 +203,8 @@ ns.OrderStates = {
 		TRADE_CANCELLED = tradeCancelledDuringDelivery,
 	}),
 
-	WAIT_FOR_ENCHANTABLE = baseOrderState:new({
+	WAIT_FOR_ENCHANTABLE = deliveryPhaseState:new({
 		Name = "WAIT_FOR_ENCHANTABLE",
-		Phase = "DELIVERY",
 
 		TRADE_ITEM_CHANGED = function(customer, enteredItems)
 			if enteredItems[7].Id then
@@ -196,9 +215,8 @@ ns.OrderStates = {
 		TRADE_CANCELLED = tradeCancelledDuringDelivery,
 	}),
 
-	CAST_ENCHANT = baseOrderState:new({
+	CAST_ENCHANT = deliveryPhaseState:new({
 		Name = "CAST_ENCHANT",
-		Phase = "DELIVERY",
 
 		ENTER_STATE = function(customer)
 			ns.ActionQueue.castEnchant(customer.CurrentOrder.Enchants[customer.CurrentOrder.EnchantIndex].Name);
@@ -220,9 +238,8 @@ ns.OrderStates = {
 		TRADE_CANCELLED = tradeCancelledDuringDelivery,
 	}),
 
-	APPLY_ENCHANT = baseOrderState:new({
+	APPLY_ENCHANT = deliveryPhaseState:new({
 		Name = "APPLY_ENCHANT",
-		Phase = "DELIVERY",
 
 		ENTER_STATE = function(customer)
 			ns.ActionQueue.applyEnchant();
@@ -258,9 +275,8 @@ ns.OrderStates = {
 		TRADE_CANCELLED = tradeCancelledDuringDelivery,
 	}),
 
-	AWAIT_PAYMENT = baseOrderState:new({
+	AWAIT_PAYMENT = deliveryPhaseState:new({
 		Name = "AWAIT_PAYMENT",
-		Phase = "DELIVERY",
 
 		ENTER_STATE = function(customer)
 			if customer.CurrentOrder.MoneyBalance > 0 then
@@ -287,9 +303,8 @@ ns.OrderStates = {
 		TRADE_CANCELLED = tradeCancelledDuringDelivery,
 	}),
 
-	ACCEPT_DELIVERY = baseOrderState:new({
+	ACCEPT_DELIVERY = deliveryPhaseState:new({
 		Name = "ACCEPT_DELIVERY",
-		Phase = "DELIVERY",
 
 		ENTER_STATE = function(customer)
 			ns.ActionQueue.acceptTrade();
@@ -321,9 +336,8 @@ ns.OrderStates = {
 		end,
 	}),
 
-	TRANSACTION_COMPLETE = baseOrderState:new({
+	TRANSACTION_COMPLETE = deliveryPhaseState:new({
 		Name = "TRANSACTION_COMPLETE",
-		Phase = "DELIVERY",
 
 		ENTER_STATE = function(customer)
 			customer:whisper(ns.L.enUS.TRANSACTION_COMPLETE);
@@ -333,9 +347,8 @@ ns.OrderStates = {
 	}),
 
 	DEBUG_STATES = {
-		SKIP_TO_AWAIT_PAYMENT = baseOrderState:new({
+		SKIP_TO_AWAIT_PAYMENT = deliveryPhaseState:new({
 			Name = "SKIP_TO_AWAIT_PAYMENT",
-			Phase = "DELIVERY",
 
 			ENTER_STATE = function(customer)
 				ns.print(ns.DEBUG_SKIPPED_ENCHANT);

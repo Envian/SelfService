@@ -15,6 +15,7 @@ ns.LOG_SECURE_BUTTON_TYPES = {
 }
 
 ns.LOG_ORDER_PLACED = "%s has placed an order for %i items.";
+ns.LOG_ORDER_CANCELLED = "%s has cancelled orders on %i items.";
 ns.LOG_ORDER_STATE_CHANGE = "Order for %s has transitioned to the %s state.";
 ns.LOG_ORDER_INSUFFICIENT_ITEMS = "Trade requires [%s]x%i however [%s]x%i was given.";
 ns.LOG_ORDER_UNDESIRED_ITEM = "Received [%s]x%i from trade, but not required for the transaction.";
@@ -127,18 +128,27 @@ ns.ActionQueueMessage = {
 
 -- Whispers
 ns.L.enUS = {
-	FIRST_TIME_CUSTOMER = "Thank you for using SelfService. When you are ready, use !buy <item link> to place your order. I currently only support ordering one item at a time.",
-	RETURNING_CUSTOMER = "Welcome back to SelfService. When you are ready, use !buy <item link> to place your order. I currently only support ordering one item at a time.",
+	FIRST_TIME_CUSTOMER = "Thank you for using SelfService. When you are ready, use !buy <item link> to place your order.",
+	RETURNING_CUSTOMER = "Welcome back to SelfService. When you are ready, use !buy <item link> to place your order.",
 	UNKNOWN_COMMAND = "Unknown command. Use !help to see a list of commands.",
-	NO_RESULTS = "No results found. Maybe I don't have the recipe? Try searching by slot (wrist), stat (int), and/or value (7 int).",
+	NO_RESULTS = "I didn't find any recipes I can craft for your search terms. Try searching by slot (wrist), stat (int), and/or value (7 int).",
+	BUYS_NOT_FOUND = "I could not place orders for the following search terms: ",
 	HELP = "haha get wrecked nerd. you're on your own.",
+	STATUS_ENCHANTS = "Enchants: ",
+	STATUS_CRAFTS = "Crafts: ",
 	RECIPES_OWNED = "I have %s.",
 	RECIPES_UNAVAILABLE = "I do not have that recipe.",
 	ORDER_PLACED = "Order placed for: ",
 	ORDER_PLACED_ENDING = "Open trade when you're ready to checkout.",
-	ORDER_LIMIT = "I only support ordering 1 item at a time. Try again",
-	ORDER_MULTIPLE_SEARCH_RESULTS = "I found %i recipes that match that description. Please be more specific.",
-	ORDER_IN_PROGRESS = "I can not add a new item to your order right now. Please finish your order before requesting another",
+	ORDER_LIMIT = "I only support ordering 1 item at a time. Try again.",
+	MULTIPLE_SEARCH_RESULTS = "I found %i recipes that match \"%s\". Please be more specific.",
+	ORDER_IN_PROGRESS = "I can not add a new item to your order right now. Please finish your order before requesting another.",
+	INACTIVE_CUSTOMER = "You have no active orders to cancel.",
+	NO_ORDERS_TO_CANCEL = "You do not have any active orders to cancel.",
+	CANCELLED_ITEM = "I cancelled the following items from your order: ",
+	FAILED_CANCELLED_ITEM = "I could not cancel the following items from your order:",
+	FAILED_CANCEL_ITEM_INVALID = "not in your order",
+	FAILED_CANCEL_CRAFT_LATE = "too late",
 	BUY_FIRST = "Use command !buy before opening trade.",
 	BUSY = "I am serving another player right now. Please try again later.",
 	INVALID_ITEM = "%s cannot be applied to that item.",
