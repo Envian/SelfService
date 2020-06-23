@@ -152,6 +152,15 @@ local slashCommands = {
 					customer.CurrentOrder:handleEvent("ENTER_STATE");
 				end
 			end
+		end,
+		global = function(var)
+			var = #var > 0 and var or "ss";
+			if _G[var] then
+				ns.printf(ns.CMD_DEBUG_SETGLOBAL_EXISTS, var);
+			else
+				_G[var] = ns;
+				ns.printf(ns.CMD_DEBUG_SETGLOBAL, var);
+			end
 		end
 	},
 }

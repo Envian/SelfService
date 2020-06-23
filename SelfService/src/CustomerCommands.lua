@@ -20,23 +20,18 @@ ns.CustomerCommands = {
 		if time() - customer.LastSearch < 2 then return end;
 		customer.LastSearch = time();
 
-		-- Do we have links? Check links
-		local links = ns.getLinkedItemIds(message);
-		if #links > 0 then
-			local requestedRecipe = ns.Recipes[links[1]];
-			if requestedRecipe and requestedRecipe.Owned then
-				customer:replyf(ns.L.enUS.RECIPES_OWNED, requestedRecipe.Link);
-			else
-				customer:reply(ns.L.enUS.RECIPES_UNAVAILABLE);
+		local searchResults = ns.searchRecipes(message);
+		local resultLinks = {};
+		local noHits = {};
+
+		for _, search in ipairs(searchResults) do
+			for _, result in ipairs(search.Results) do
+				table.insert(resultLinks, result.Link);
 			end
-			return;
 		end
 
-		-- Search by terms
-		local results = ns.searchRecipes(message);
-
-		if #results > 0 then
-			customer:replyJoin("", ns.imap(results, function(result) return result.Link end), " ");
+		if not ns.isEmpty(resultLinks) then
+			customer:replyJoin("", resultLinks);
 		else
 			customer:reply(ns.L.enUS.NO_RESULTS);
 		end
@@ -46,25 +41,64 @@ ns.CustomerCommands = {
 		-- HACK: Enforces Exclusivity
 		if ns.CurrentOrder and ns.CurrentOrder.CustomerName ~= customer.Name then
 			customer:reply(ns.L.enUS.BUSY);
-			return;
-		end
+		else
+			local orders = ns.searchRecipes(message);
+			local addedIds = {};
 
-		local orders = ns.getLinkedItemIds(message);
-		if #orders == 0 then
-			local result = ns.searchRecipes(message);
-			if #result == 1 then
-				orders = { result[1].Id };
-			else
-				if #result > 1 then
-					customer:replyf(ns.L.enUS.ORDER_MULTIPLE_SEARCH_RESULTS, #result);
-				else
-					customer:reply(ns.L.enUS.NO_RESULTS);
+			for _, search in ipairs(orders) do
+				if #search.Results > 1 then
+					customer:replyf(ns.L.enUS.MULTIPLE_SEARCH_RESULTS, #search.Results, search.Term);
+				elseif #search.Results == 1 then
+					table.insert(addedIds, search.Results[1].Id);
 				end
-				return;
+			end
+
+			if not ns.isEmpty(addedIds) then
+				customer.CurrentOrder = customer.CurrentOrder or ns.OrderClass:new(nil, customer.Name);
+				customer.CurrentOrder:handleEvent("ORDER_REQUEST", addedIds);
+				ns.infof(ns.LOG_ORDER_PLACED, customer.Name, #addedIds);
+			else
+				customer:reply(ns.L.enUS.NO_RESULTS);
 			end
 		end
-		customer:addToOrder(orders);
-		ns.infof(ns.LOG_ORDER_PLACED, customer.Name, #orders);
+	end,
+
+	cancel = function(customer, message)
+		if not customer.CurrentOrder then
+			customer:reply(ns.L.enUS.NO_ORDERS_TO_CANCEL);
+		else
+			local cancellations = ns.searchRecipes(message);
+			local cancelledIds = {};
+
+			for _, search in ipairs(cancellations) do
+				if #search.Results > 1 then
+					customer:replyf(ns.L.enUS.MULTIPLE_SEARCH_RESULTS, #search.Results, search.Term);
+				elseif #search.Results == 1 then
+					table.insert(cancelledIds, search.Results[1].Id);
+				end
+			end
+
+			if not ns.isEmpty(cancelledIds) then
+				customer.CurrentOrder:handleEvent("CANCEL_REQUEST", cancelledIds);
+				ns.infof(ns.LOG_ORDER_CANCELLED, customer.Name, #cancelledIds);
+			else
+				customer:reply(ns.L.enUS.NO_RESULTS);
+			end
+		end
+	end,
+
+	status = function(customer)
+		if not customer.CurrentOrder then
+			customer:reply(ns.L.enUS.INACTIVE_CUSTOMER);
+		else
+			if not ns.isEmpty(customer.CurrentOrder.Enchants) then
+				customer:replyJoin(ns.L.enUS.STATUS_ENCHANTS, ns.getOrderLinks(customer.CurrentOrder.Enchants));
+			end
+
+			if not ns.isEmpty(customer.CurrentOrder.Craftables) then
+				customer:replyJoin(ns.L.enUS.STATUS_CRAFTS, ns.getOrderLinks(customer.CurrentOrder.Craftables));
+			end
+		end
 	end,
 
 	help = function(customer, message)
