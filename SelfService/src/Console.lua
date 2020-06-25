@@ -146,7 +146,7 @@ local slashCommands = {
 	},
 	config = function(params)
 		local args = ns.splitCommandArguments(params);
-		local setting = configCommands[table.remove(args, 1)] or configCommands["default"];
+		local setting = configCommands[table.remove(args, 1)] or configCommands.default;
 		setting(unpack(args));
 	end,
 	debug = {
