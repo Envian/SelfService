@@ -14,8 +14,6 @@
 -- along with SelfService.  If not, see <https://www.gnu.org/licenses/>.
 local ADDON_NAME, ns = ...;
 
-ss = ns;
-
 -- Placeholder defintion for documenting function parameters
 local func = function() end;
 

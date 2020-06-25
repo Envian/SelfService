@@ -107,7 +107,7 @@ ns.moneyToString = function(value)
 	local silver = math.floor(value/100) % 100;
 	local gold   = math.floor(value/10000);
 
-	local cashString = copper > 0 and tostring(copper).."c" or "";
+	local cashString = ((gold == 0 and silver == 0 and copper == 0) and "0c") or copper > 0 and tostring(copper).."c" or "";
 	cashString = ((silver > 0 and tostring(silver).."s") or ((copper > 0 and gold > 0) and "0s") or "")..cashString;
 	cashString = ((gold > 0 and tostring(gold).."g") or "")..cashString;
 
@@ -144,7 +144,7 @@ ns.pullFromCommandTable = function(commandObject, commandString)
 end
 
 ns.splitCommandArguments = function(arglist)
-	if type(arglist) ~= "string" or #arglist == 0 then return end;
+	if type(arglist) ~= "string" or #arglist == 0 then return {} end;
 
 	local args = {};
 	local i = 1;
