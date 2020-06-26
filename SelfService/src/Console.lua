@@ -145,9 +145,9 @@ local slashCommands = {
 		end,
 	},
 	config = function(params)
-		local setting, ... = unpack(ns.splitCommandArguments(params));
-		local setting = configCommands[setting] or configCommands.default;
-		setting(...);
+		local args = ns.splitCommandArguments(params);
+		local setting = configCommands[table.remove(args, 1)] or configCommands.default;
+		setting(args);
 	end,
 	debug = {
 		mockenchants = function()
