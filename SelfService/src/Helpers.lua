@@ -1,4 +1,18 @@
-local _, ns = ...;
+-- This file is part of SelfService.
+--
+-- SelfService is free software: you can redistribute it and/or modify
+-- it under the terms of the GNU General Public License as published by
+-- the Free Software Foundation, either version 3 of the License, or
+-- (at your option) any later version.
+--
+-- SelfService is distributed in the hope that it will be useful,
+-- but WITHOUT ANY WARRANTY; without even the implied warranty of
+-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-- GNU General Public License for more details.
+--
+-- You should have received a copy of the GNU General Public License
+-- along with SelfService.  If not, see <https://www.gnu.org/licenses/>.
+local ADDON_NAME, ns = ...;
 
 function assertType(var, name, depth, ...)
 	for n = 1,select("#", ...) do
@@ -97,6 +111,16 @@ ns.getLinkedItemIds = function(text, type)
 		matches[#matches + 1] = tonumber(match);
 	end
 	return matches;
+end
+
+ns.getOrderLinks = function(recipes)
+	local links = {};
+
+	for _, recipe in ipairs(recipes) do
+		table.insert(links, recipe.Link);
+	end
+
+	return links;
 end
 
 ns.delink = function(text)
@@ -202,26 +226,39 @@ end
 
 ns.searchRecipes = function(searchString)
 	local results = {}
-	for term in searchString:gmatch("[^+%s]+") do
-		local matches = ns.Search[string.lower(term)];
+	-- First pass to pull all links out and add to results list
+	searchString = searchString:gsub("\124c.-\124r", function(match) table.insert(results, {Term = match, Results = {ns.Recipes[ns.getItemIdFromLink(match)]}}); return ","; end);
 
-		-- Ignore terms that don't match anything
-		if matches then
-			if #results == 0 then
-				-- Clones the array (we'll modify it later.)
-				for n, result in ipairs(matches) do
-					results[n] = result;
+	-- Second pass to get all non-link results
+	--for term in searchString:gmatch("[^+,%s]+") do
+	-- Comma delimited terms
+	for searchTerm in searchString:gmatch("[^,]+") do
+		-- Trim whitespace from the ends of the term
+		searchTerm = string.lower(searchTerm:gsub("^%s*(.-)%s*$", "%1"));
+		local subResults = {};
+
+		-- Each search string within the term
+		for subTerm in searchTerm:gmatch("[^+%s]+") do
+			local matches = ns.Search[subTerm];
+
+			-- Ignore terms that don't match anything
+			if matches then
+				if #subResults == 0 then
+					subResults = matches;
+				else
+					-- If we have multiple terms, only show results that match all.
+					subResults = ns.ifilter(subResults, function(result)
+						for _, match in ipairs(matches) do
+							if match.Id == result.Id then return true end;
+						end
+						return false;
+					end);
 				end
-			else
-				-- If we have multiple terms, only show results that match all.
-				results = ns.ifilter(results, function(result)
-					for _, newEntry in ipairs(matches) do
-						if newEntry.Id == result.Id then return true end;
-					end
-					return false;
-				end);
 			end
 		end
+
+		table.insert(results, {Term = searchTerm, Results = subResults});
 	end
+
 	return results;
 end

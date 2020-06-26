@@ -1,4 +1,18 @@
-local _, ns = ...;
+-- This file is part of SelfService.
+--
+-- SelfService is free software: you can redistribute it and/or modify
+-- it under the terms of the GNU General Public License as published by
+-- the Free Software Foundation, either version 3 of the License, or
+-- (at your option) any later version.
+--
+-- SelfService is distributed in the hope that it will be useful,
+-- but WITHOUT ANY WARRANTY; without even the implied warranty of
+-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-- GNU General Public License for more details.
+--
+-- You should have received a copy of the GNU General Public License
+-- along with SelfService.  If not, see <https://www.gnu.org/licenses/>.
+local ADDON_NAME, ns = ...;
 
 -- Order Definition
 ns.OrderClass = {};
@@ -35,6 +49,27 @@ function ns.OrderClass:handleEvent(event, ...)
 	end
 end
 
+function ns.OrderClass:removeFromOrder(recipe)
+	if recipe.IsCrafted then
+		for i, craftable in ipairs(self.Craftables) do
+			if recipe == craftable then
+				self:debit({{Id = recipe.ProductId, Count = 1}});
+				table.remove(self.Craftables, i);
+				break;
+			end
+		end
+	else
+		for i, enchant in ipairs(self.Enchants) do
+			if recipe == enchant then
+				table.remove(self.Enchants, i);
+				break;
+			end
+		end
+	end
+
+	self:credit(recipe.Mats);
+end
+
 function ns.OrderClass:addToOrder(recipe)
 	if recipe.IsCrafted then
 		table.insert(self.Craftables, recipe);
@@ -52,7 +87,7 @@ function ns.OrderClass:isTradeAcceptable(tradeMats)
 	for i=1,6 do
 		if ns.isEmpty(tradeMats[i]) then
 			mustBeCraftable = true;
-		elseif not self.ItemBalance[tradeMats[i].Id] then
+		elseif not self.ItemBalance[tradeMats[i].Id] or self.ItemBalance[tradeMats[i].Id] < 0 then
 			ns.debugf(ns.LOG_ORDER_UNDESIRED_ITEM, tradeMats[i].Id, tradeMats[i].Count);
 			return false;
 		end

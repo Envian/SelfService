@@ -1,4 +1,18 @@
-local _, ns = ...;
+-- This file is part of SelfService.
+--
+-- SelfService is free software: you can redistribute it and/or modify
+-- it under the terms of the GNU General Public License as published by
+-- the Free Software Foundation, either version 3 of the License, or
+-- (at your option) any later version.
+--
+-- SelfService is distributed in the hope that it will be useful,
+-- but WITHOUT ANY WARRANTY; without even the implied warranty of
+-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-- GNU General Public License for more details.
+--
+-- You should have received a copy of the GNU General Public License
+-- along with SelfService.  If not, see <https://www.gnu.org/licenses/>.
+local ADDON_NAME, ns = ...;
 
 ns.CurrentTrade = {
 	TargetItems = {{},{},{},{},{},{},{}},
@@ -118,3 +132,14 @@ ns.Trading = {
 		return tradeMats;
 	end
 }
+
+ns.registerEvent(ns.EVENT.ENABLE, function()
+	CancelTrade();
+end);
+
+ns.registerEvent(ns.EVENT.DISABLE, function()
+	-- This prevents orders from being stuck in a strange state, such as if the addon is disabled while waiting for payment from a customer.
+	if ns.CurrentTrade.Customer and ns.CurrentTrade.Customer.CurrentOrder then
+		ns.CurrentTrade.Customer.CurrentOrder:handleEvent("TRADE_CANCELLED");
+	end
+end)
