@@ -144,7 +144,8 @@ ns.pullFromCommandTable = function(commandObject, commandString)
 end
 
 ns.splitCommandArguments = function(arglist)
-	if type(arglist) ~= "string" or #arglist == 0 then return {} end;
+	if type(arglist) ~= "nil" and type(arglist) ~= "string" then error("Invalid argument type", 2) end;
+	if not arglist or #arglist == 0 then return {} end;
 
 	local args = {};
 	local i = 1;

@@ -145,9 +145,9 @@ local slashCommands = {
 		end,
 	},
 	config = function(params)
-		local args = ns.splitCommandArguments(params);
-		local setting = configCommands[table.remove(args, 1)] or configCommands.default;
-		setting(unpack(args));
+		local setting, ... = unpack(ns.splitCommandArguments(params));
+		local setting = configCommands[setting] or configCommands.default;
+		setting(...);
 	end,
 	debug = {
 		mockenchants = function()
@@ -177,7 +177,9 @@ local slashCommands = {
 			end
 		end,
 		free = function()
-			ns.print("Everything is free!!!!");
+			for _, recipe in ipairs(ns.Recipes) do
+				wipe(ns.recipe.Mats);
+			end
 		end,
 		global = function(var)
 			var = #var > 0 and var or "ss";
