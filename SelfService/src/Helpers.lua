@@ -29,7 +29,7 @@ function ns.imap(source, callback, destination)
 
 	destination = destination or source;
 	for key, value in pairs(source) do
-		destination[key] = callback(value);
+		destination[key] = callback(value, key);
 	end
 	return source;
 end
@@ -42,14 +42,14 @@ function ns.ifilter(source, callback, destination)
 
 	if destination then
 		-- add true items to the destination
-		for _, value in ipairs(source) do
-			if callback(value) then table.insert(destination, item) end;
+		for index, value in ipairs(source) do
+			if callback(value, index) then table.insert(destination, item) end;
 		end
 		return destination;
 	else
 		-- remove false items from the source
-		for n = 1,#source do
-			if not callback(value) then table.remove(source, n) end;
+		for index = #source,1,-1 do
+			if not callback(value, index) then table.remove(source, index) end;
 		end
 		return source;
 	end
@@ -63,13 +63,13 @@ function ns.filter(source, callback, destination)
 	if destination then
 		-- add true items to the destination
 		for key, value in pairs(source) do
-			if callback(value) then destination[key] = item end;
+			if callback(value, key) then destination[key] = item end;
 		end
 		return destination;
 	else
 		-- remove false items from the source
 		for key, value in pairs(source) do
-			if not callback(value) then destination[key] = nil end;
+			if not callback(value, key) then destination[key] = nil end;
 		end
 		return source;
 	end
