@@ -182,6 +182,7 @@ local slashCommands = {
 			end
 
 			ns.print(ns.CMD_DEBUG_FREE_RECIPES);
+			ns.print(ns.DEBUG_MODE_RELOAD_MESSAGE);
 		end,
 		global = function(var)
 			var = #var > 0 and var or "ss";
