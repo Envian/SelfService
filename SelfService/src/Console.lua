@@ -180,6 +180,8 @@ local slashCommands = {
 			for _, recipe in ipairs(ns.Recipes) do
 				wipe(ns.recipe.Mats);
 			end
+
+			ns.print(ns.CMD_DEBUG_FREE_RECIPES);
 		end,
 		global = function(var)
 			var = #var > 0 and var or "ss";

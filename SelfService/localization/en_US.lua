@@ -105,6 +105,7 @@ ns.CMD_CONFIG_MONEYBALANCE_CHANGED = "MoneyBalance for the current order has bee
 ns.DEBUG_MODE_RELOAD_MESSAGE = "Debug mode cannot be disabled without reloading the UI.";
 ns.DEBUG_SKIP_ENCHANT_STATE = "Debug Mode Enabled - Enchants will no longer be cast.";
 ns.DEBUG_SKIPPED_ENCHANT = "Debug Mode Enabled - Customer's item has not been enchanted.";
+ns.CMD_DEBUG_FREE_RECIPES = "Debug Mode Enabled - Materials cost for all recipes set to zero.";
 
 -- UI
 BINDING_HEADER_SELFSERVICE = ADDON_NAME;
