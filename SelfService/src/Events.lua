@@ -50,7 +50,7 @@ end
 function ns.disableAddon()
 	if ns.Enabled then
 		fireEvent(ns.EVENT.DISABLE);
-		ns.Enabled = true;
+		ns.Enabled = false;
 		ns.print(ns.LOG_DISABLED);
 	else
 		ns.print(ns.LOG_ALREADY_DISABLED);

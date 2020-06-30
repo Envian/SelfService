@@ -97,10 +97,15 @@ ns.CMD_DEBUG_SETSTATE_TRANSITION_WARNING = "WARNING: Unexpected behavior may res
 ns.CMD_DEBUG_SETGLOBAL = "Addon's 'ns' variable has been set to the global '%s'.";
 ns.CMD_DEBUG_SETGLOBAL_EXISTS = "The global variable '%s' is already set. Pick a different variable name.";
 
+ns.CMD_CONFIG_SETTING_NOT_FOUND = "Configuration setting not available.";
+ns.CMD_CONFIG_CHANGE_FAILED = "Configuration change failed.";
+ns.CMD_CONFIG_MONEYBALANCE_CHANGED = "MoneyBalance for the current order has been set to %s.";
+
 -- Debug mode messages
 ns.DEBUG_MODE_RELOAD_MESSAGE = "Debug mode cannot be disabled without reloading the UI.";
 ns.DEBUG_SKIP_ENCHANT_STATE = "Debug Mode Enabled - Enchants will no longer be cast.";
 ns.DEBUG_SKIPPED_ENCHANT = "Debug Mode Enabled - Customer's item has not been enchanted.";
+ns.CMD_DEBUG_FREE_RECIPES = "Debug Mode Enabled - Materials cost for all recipes set to zero.";
 
 -- UI
 BINDING_HEADER_SELFSERVICE = ADDON_NAME;

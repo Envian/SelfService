@@ -329,6 +329,13 @@ ns.OrderStates = {
 			if ns.isEmpty(enteredItems[7]) then
 				ns.ActionQueue.clearTradeAction();
 				return ns.OrderStates.WAIT_FOR_ENCHANTABLE;
+			else
+				local givenEnchant = select(6, GetTradeTargetItemInfo(7));
+
+				if givenEnchant ~= customer.CurrentOrder.Enchants[customer.CurrentOrder.EnchantIndex].Name then
+					ns.ActionQueue.clearTradeAction();
+					return ns.OrderStates.CAST_ENCHANT;
+				end
 			end
 		end,
 		-- ENCHANT_SUCCEEDED = function(customer, spellId) -- This is just an extra error checking tool. May not be needed.

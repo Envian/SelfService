@@ -18,6 +18,42 @@ SLASH_SELFSERVICE1 = "/selfservice";
 SLASH_SELFSERVICE2 = "/service";
 SLASH_SELFSERVICE3 = "/ss";
 
+local configCommands = {
+	loglevel = function(level)
+		local level = level:upper();
+
+		if ns.LogLevel[level] then
+			ns.printf(ns.CMD_LOGLEVEL_SET, level);
+			ns.setLogLevel(level);
+		else
+			ns.print(ns.CMD_LOGLEVEL_INVALID);
+		end
+	end,
+	setMoney = function(value)
+		value = tonumber(value);
+
+		if value and ns.CurrentOrder then
+			ns.CurrentOrder.MoneyBalance = value;
+			ns.infof(ns.CMD_CONFIG_MONEYBALANCE_CHANGED, ns.moneyToString(ns.CurrentOrder.MoneyBalance));
+		else
+			ns.error(ns.CMD_CONFIG_CHANGE_FAILED);
+		end
+	end,
+	adjustMoney = function(value)
+		value = tonumber(value);
+
+		if value and ns.CurrentOrder then
+			ns.CurrentOrder.MoneyBalance = ns.CurrentOrder.MoneyBalance + value;
+			ns.infof(ns.CMD_CONFIG_MONEYBALANCE_CHANGED, ns.moneyToString(ns.CurrentOrder.MoneyBalance));
+		else
+			ns.error(ns.CMD_CONFIG_CHANGE_FAILED);
+		end
+	end,
+	default = function()
+		ns.error(ns.CMD_CONFIG_SETTING_NOT_FOUND);
+	end
+}
+
 -- Callbacks for wipe commands. Goes through with the wipe
 local doWipeAll = function()
 	SelfServiceData = nil;
@@ -108,23 +144,10 @@ local slashCommands = {
 			confirmFromUser(ns.CMD_WIPE_CUSTOMERS_WARNING, doWipeCustomers);
 		end,
 	},
-	loglevel = function(params)
+	config = function(params)
 		local args = ns.splitCommandArguments(params);
-
-		if not args then
-			ns.printf(ns.CMD_LOGLEVEL_CURRENT_LEVEL, SelfServiceData.LogLevel);
-		elseif #args > 1 then
-			ns.print(ns.CMD_LOGLEVEL_USAGE);
-		else
-			local level = args[1]:upper();
-
-			if ns.LogLevel[level] then
-				ns.printf(ns.CMD_LOGLEVEL_SET, level);
-				ns.setLogLevel(level);
-			else
-				ns.print(ns.CMD_LOGLEVEL_INVALID);
-			end
-		end
+		local setting = configCommands[table.remove(args, 1)] or configCommands.default;
+		setting(args);
 	end,
 	debug = {
 		mockenchants = function()
@@ -152,6 +175,14 @@ local slashCommands = {
 					customer.CurrentOrder:handleEvent("ENTER_STATE");
 				end
 			end
+		end,
+		free = function()
+			for _, recipe in ipairs(ns.Recipes) do
+				wipe(ns.recipe.Mats);
+			end
+
+			ns.print(ns.CMD_DEBUG_FREE_RECIPES);
+			ns.print(ns.DEBUG_MODE_RELOAD_MESSAGE);
 		end,
 		global = function(var)
 			var = #var > 0 and var or "ss";
