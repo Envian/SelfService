@@ -106,6 +106,7 @@ loadingFrame:SetScript("OnEvent", function(_, event, ...)
 
 			ns.Loaded.Enchanting = true;
 			ns.infof(ns.LOG_LOADED, "Enchanting");
+			ns.postEnable();
 		end
 	end
 end);
@@ -121,9 +122,19 @@ ns.registerEvent(ns.EVENT.ENABLE, function()
 
 	SelfService_ActionQueueButton:Show();
 
+	-- Reloads customer information after log in or reload
+	for name, data in pairs(SelfServiceData.Customers) do
+		if data.CurrentOrder then
+			ns.getCustomer(name);
+			ns.CurrentOrder = ns.CurrentOrder or (SelfServiceData.CurrentCustomer and ns.Customers[name].CurrentOrder or nil);
+		end
+	end
+
 	if not ns.Loaded.Enchanting then
 		CastSpellByName("Enchanting");
 		closeOnLoad = true;
+	else
+		ns.postEnable();
 	end
 end);
 
@@ -135,3 +146,7 @@ ns.registerEvent(ns.EVENT.DISABLE, function()
 	-- ChatFrame_RemoveMessageEventFilter("CHAT_MSG_WHISPER_INFORM", filterOutbound);
 	SelfService_ActionQueueButton:Hide();
 end);
+
+ns.registerEvent(ns.EVENT.POST_ENABLE, function()
+	if ns.CurrentOrder then ns.CurrentOrder:handleEvent("ENTER_STATE") end
+end)

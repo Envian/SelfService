@@ -116,27 +116,35 @@ SELFSERVICE_TRADEHELPTEXT = "Disabled by "..ADDON_NAME..".";
 -- Console command help text
 -- This is a map/array hybrid. The map part is used to get the command's help text. the list is printed as help text.
 ns.HELP_TEXT = {
-	"This is the help text for the entire project. Try /ss help command",
-	"it can be multilined too!",
+	"-- Currently Supported "..ADDON_NAME.." Commands --",
+	"help - Insults your intelligence",
+	"enable - Enables the AddOn",
+	"disable - Disables the AddOn",
+	"reset - Resets AddOn data",
+	"wipe - Erases saved AddOn data",
+	"debug - Provides testing tools",
+	"config - Allows changing AddOn settings",
 	help = {"This is the help text for help. you're so fucked."},
-	enable = {"Enables the SelfService bot."},
-	disable = {
-		"Hard disables the SelfService bot.",
-		" Warning: This may cause trades in progress to be stuck."
-	},
+	enable = {"enable - Enables the AddOn"},
+	disable = {"disable - Disables the AddOn."},
 	reset = {
-		"Resets some aspect of the mod.",
-		order = {"Resets the order for the passed in player."},
-		currentorder = {"Resets the current order"}
+		"reset order [Player Name] - Resets the order for the given character",
+		"reset currentorder - Resets the currently active order"
 	},
 	wipe = {
-		"Wipes saved SelfService data, deleting it permanently.",
-		all = {"Wipes all data and reloads the UI."},
-		customers = {"Wipes all customer information and pending orders."}
+		"wipe all - Wipes all data and reloads the UI",
+		"wipe customers - Wipes all customer information and pending orders"
 	},
 	debug = {
-		"Various debug commands for testing this addon.",
-		mockenchants = {"Skips enchanting an item but progresses the order as if it was done successfully."}
+		"debug mockenchants - Skips enchanting an item but progresses the order as if it was done successfully",
+		"debug setstate [Player Name] [Valid State] - Forces the order for the given player to transition to the given state",
+		"debug free - Allows all recipes to be given free of mats from the customer",
+		"debug global [Var] - Exposes the AddOn's namespace variable to global scope by saving a reference in the given variable"
+	},
+	config = {
+		"config loglevel [level] - Sets the logger to the given log level",
+		"config setMoney [value] - Sets the currently active trade money balance to the given value (in copper)",
+		"config adjustMoney [value] - Adjusts the currently active trade money balance by the given value (in copper)"
 	}
 }
 
@@ -165,10 +173,10 @@ ns.L.enUS = {
 	ORDER_LIMIT = "I only support ordering 1 item at a time. Try again.",
 	MULTIPLE_SEARCH_RESULTS = "I found %i recipes that match \"%s\". Please be more specific.",
 	ORDER_IN_PROGRESS = "I can not add a new item to your order right now. Please finish your order before requesting another.",
-	INACTIVE_CUSTOMER = "You have no active orders to cancel.",
+	INACTIVE_CUSTOMER = "You have no active orders.",
 	NO_ORDERS_TO_CANCEL = "You do not have any active orders to cancel.",
 	CANCELLED_ITEM = "I cancelled the following items from your order: ",
-	FAILED_CANCELLED_ITEM = "I could not cancel the following items from your order:",
+	FAILED_CANCELLED_ITEM = "I could not cancel the following items from your order: ",
 	FAILED_CANCEL_ITEM_INVALID = "not in your order",
 	FAILED_CANCEL_CRAFT_LATE = "too late",
 	BUY_FIRST = "Use command !buy before opening trade.",
