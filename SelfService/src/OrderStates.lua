@@ -372,9 +372,9 @@ ns.OrderStates = {
 
 		ENTER_STATE = function(customer)
 			customer:whisper(ns.L.enUS.TRANSACTION_COMPLETE);
+			SelfServiceData.CurrentCustomer = nil;
 			customer.CurrentOrder = nil;
 			ns.CurrentOrder = nil;
-			SelfServiceData.CurrentCustomer = nil;
 		end
 	}),
 

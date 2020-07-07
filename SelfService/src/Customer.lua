@@ -100,7 +100,7 @@ function CustomerClass:removeFromOrder(recipeIds)
 		end
 	end
 
-	if ns.isEmpty(self.CurrentOrder.ItemBalance) then self.CurrentOrder = nil end
+	if ns.isEmpty(self.CurrentOrder.ItemBalance) then self.CurrentOrder = nil; SelfServiceData.CurrentCustomer = nil end
 	if not ns.isEmpty(successful) then self:replyJoin(ns.L.enUS.CANCELLED_ITEM, successful)	end
 	if not ns.isEmpty(failed) then self:replyJoin(ns.L.enUS.FAILED_CANCELLED_ITEM, failed)	end
 end
@@ -127,7 +127,7 @@ function CustomerClass:addToOrder(recipeIds)
 
 	for _, recipeId in ipairs(recipeIds) do
 		ns.CurrentOrder = self.CurrentOrder; -- HACK: Enforces exclusivity.
-		SelfServiceData.CurrentCustomer = self.Name; -- HACK: Allows recovery of current customer
+		SelfServiceData.CurrentCustomer = ns.CurrentOrder.CustomerName; -- HACK: Allows recovery of current customer
 		self.CurrentOrder:addToOrder(ns.Recipes[recipeId]);
 		table.insert(addedLinks, ns.Recipes[recipeId].Link);
 	end
