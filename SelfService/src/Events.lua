@@ -17,13 +17,13 @@ local ADDON_NAME, ns = ...;
 ns.EVENT = {
 	ENABLE = "ENABLED",
 	DISABLE = "DISABLED",
-	POST_ENABLE = "POST_ENABLE"
+	DATA_LOADED = "DATA_LOADED"
 }
 
 local handlers = {
 	[ns.EVENT.ENABLE] = {},
 	[ns.EVENT.DISABLE] = {},
-	[ns.EVENT.POST_ENABLE] = {}
+	[ns.EVENT.DATA_LOADED] = {}
 }
 
 function ns.registerEvent(name, handler)
@@ -42,8 +42,6 @@ end
 function ns.enableAddon()
 	if not ns.Enabled then
 		fireEvent(ns.EVENT.ENABLE);
-		ns.Enabled = true;
-		ns.print(ns.LOG_ENABLED);
 	else
 		ns.print(ns.LOG_ALREADY_ENABLED);
 	end
@@ -59,6 +57,8 @@ function ns.disableAddon()
 	end
 end
 
-function ns.postEnable()
-	fireEvent(ns.EVENT.POST_ENABLE);
+function ns.dataLoaded()
+	fireEvent(ns.EVENT.DATA_LOADED);
+	ns.Enabled = true;
+	ns.print(ns.LOG_ENABLED);
 end
