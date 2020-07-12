@@ -39,9 +39,24 @@ local function fireEvent(event, ...)
 	end
 end
 
+
+local continueLoading = false;
+ns.registerEvent(ns.EVENT.DATA_LOADED, function()
+	if continueLoading then
+		continueLoading = false;
+		CloseCraft();
+		ns.enableAddon();
+end)
+
 function ns.enableAddon()
 	if not ns.Enabled then
-		fireEvent(ns.EVENT.ENABLE);
+		if ns.Loaded.Enchanting then
+			fireEvent(ns.EVENT.ENABLE);
+			ns.Enabled = true;
+			ns.print(ns.LOG_ENABLED);
+		else
+			continueLoading = true;
+			CastSpellByName("Enchanting");
 	else
 		ns.print(ns.LOG_ALREADY_ENABLED);
 	end
@@ -57,8 +72,6 @@ function ns.disableAddon()
 	end
 end
 
-function ns.dataLoaded()
+function ns.dataLoaded(profession)
 	fireEvent(ns.EVENT.DATA_LOADED);
-	ns.Enabled = true;
-	ns.print(ns.LOG_ENABLED);
 end

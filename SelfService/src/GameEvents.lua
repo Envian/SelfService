@@ -76,7 +76,6 @@ eventFrame:SetScript("OnEvent", function(_, event, ...)
 end);
 
 -- Loading events are always captured.
-local closeOnLoad = false;
 local loadingFrame = CreateFrame("Frame");
 loadingFrame:RegisterEvent("CRAFT_SHOW");
 loadingFrame:SetScript("OnEvent", function(_, event, ...)
@@ -100,13 +99,9 @@ loadingFrame:SetScript("OnEvent", function(_, event, ...)
 				recipe.ProductId = productId;
 			end
 
-			if closeOnLoad then
-				CloseCraft();
-			end
-
 			ns.Loaded.Enchanting = true;
 			ns.infof(ns.LOG_LOADED, "Enchanting");
-			ns.dataLoaded();
+			ns.dataLoaded("Enchanting");
 		end
 	end
 end);
@@ -120,22 +115,6 @@ ns.registerEvent(ns.EVENT.ENABLE, function()
 	-- ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER", filterInbound);
 	-- ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER_INFORM", filterOutbound);
 
-	if not ns.Loaded.Enchanting then
-		CastSpellByName("Enchanting");
-		closeOnLoad = true;
-	end
-end);
-
-ns.registerEvent(ns.EVENT.DISABLE, function()
-	for event, _ in pairs(eventHandlers) do
-		eventFrame:UnregisterEvent(event);
-	end
-	-- ChatFrame_RemoveMessageEventFilter("CHAT_MSG_WHISPER", filterInbound);
-	-- ChatFrame_RemoveMessageEventFilter("CHAT_MSG_WHISPER_INFORM", filterOutbound);
-	SelfService_ActionQueueButton:Hide();
-end);
-
-ns.registerEvent(ns.EVENT.DATA_LOADED, function()
 	SelfService_ActionQueueButton:Show();
 
 	-- Reloads customer information after log in or reload
@@ -147,4 +126,13 @@ ns.registerEvent(ns.EVENT.DATA_LOADED, function()
 	end
 
 	if ns.CurrentOrder then ns.CurrentOrder:handleEvent("ENTER_STATE") end
-end)
+end);
+
+ns.registerEvent(ns.EVENT.DISABLE, function()
+	for event, _ in pairs(eventHandlers) do
+		eventFrame:UnregisterEvent(event);
+	end
+	-- ChatFrame_RemoveMessageEventFilter("CHAT_MSG_WHISPER", filterInbound);
+	-- ChatFrame_RemoveMessageEventFilter("CHAT_MSG_WHISPER_INFORM", filterOutbound);
+	SelfService_ActionQueueButton:Hide();
+end);
