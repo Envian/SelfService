@@ -1,44 +1,118 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ../FrameXML/UI.xsd">
 	<Frame name="SelfService_ControlPanel" frameStrata="HIGH" movable="true">
 		<Size>
-			<AbsDimension x="300" y="400" />
+			<AbsDimension x="360" y="310" />
 		</Size>
 		<Anchors>
 			<Anchor point="CENTER" />
 		</Anchors>
-		<Backdrop bgFile="Interface\PaperDollInfoFrame\UI-GearManager-Title-Background" edgeFile="Interface\PaperDollInfoFrame\UI-GearManager-Border" tile="true">
-			<BackgroundInsets>
-				<AbsInset left="4" right="4" top="1" bottom="1"/>
-			</BackgroundInsets>
-			<EdgeSize>
-				<AbsValue val="48"/>
-			</EdgeSize>
-			<TileSize>
-				<AbsValue val="32"/>
-			</TileSize>
-		</Backdrop>
 		<Frames>
 			<Frame name="SelfService_ControlPanel_Header">
-				<Size y="22"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" x="0" y="0" />
-					<Anchor point="TOPRIGHT" x="0" y="0" />
+					<Anchor point="TOPLEFT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+					<Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT">
+						<Offset>
+							<AbsDimension x="0" y="-16"/>
+						</Offset>
+					</Anchor>
 				</Anchors>
 				<Layers>
-					<Layer>
-						<FontString text="SelfService Control Panel" inherits="GameFontNormal" justifyH="CENTER">
-							<Size y="22" />
+					<Layer level="BACKGROUND">
+						<Texture file="Interface\PaperDollInfoFrame\UI-GearManager-Title-Background" alphaMode="BLEND">
 							<Anchors>
-								<Anchor point="TOPLEFT" x="0" y="0" />
-								<Anchor point="TOPRIGHT" x="0" y="0" />
+								<Anchor point="TOPLEFT">
+									<Offset>
+										<AbsDimension x="0" y="0"/>
+									</Offset>
+								</Anchor>
+								<Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT">
+									<Offset>
+										<AbsDimension x="0" y="-16"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+						</Texture>
+					</Layer>
+					<Layer level="BORDER">
+						<Texture file="Interface\PaperDollInfoFrame\UI-GearManager-Border" alphaMode="BLEND">
+							<Anchors>
+								<Anchor point="TOPLEFT">
+									<Offset>
+										<AbsDimension x="-7" y="4"/>
+									</Offset>
+								</Anchor>
+								<Anchor point="BOTTOMRIGHT" relativePoint="TOPLEFT">
+									<Offset>
+										<AbsDimension x="48" y="-48"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+							<TexCoords left="0.501953125" right="0.625" top="0" bottom="1" />
+						</Texture>
+					</Layer>
+					<Layer level="BORDER">
+						<Texture file="Interface\PaperDollInfoFrame\UI-GearManager-Border" alphaMode="BLEND">
+							<Anchors>
+								<Anchor point="TOPLEFT" relativePoint="TOPLEFT">
+									<Offset>
+										<AbsDimension x="5" y="4"/>
+									</Offset>
+								</Anchor>
+								<Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT">
+									<Offset>
+										<AbsDimension x="-48" y="-48"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+							<TexCoords left="0.25" right="0.369140625" top="0" bottom="1" />
+						</Texture>
+					</Layer>
+					<Layer level="BORDER">
+						<Texture file="Interface\PaperDollInfoFrame\UI-GearManager-Border" alphaMode="BLEND">
+							<Anchors>
+								<Anchor point="TOPRIGHT" relativePoint="TOPRIGHT">
+									<Offset>
+										<AbsDimension x="5" y="4"/>
+									</Offset>
+								</Anchor>
+								<Anchor point="BOTTOMLEFT" relativePoint="TOPRIGHT">
+									<Offset>
+										<AbsDimension x="-48" y="-48"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+							<TexCoords left="0.625" right="0.75" top="0" bottom="1" />
+						</Texture>
+					</Layer>
+					<Layer level="OVERLAY">
+						<FontString text="SelfService Control Panel" inherits="GameFontNormal" justifyH="CENTER" jusitfyV="MIDDLE">
+							<FontHeight val="8" /> <!-- This field evidently does jack shit -->
+							<Anchors>
+								<Anchor point="TOPLEFT">
+									<Offset>
+										<AbsDimension x="0" y="-3"/>
+									</Offset>
+								</Anchor>
+								<Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT">
+									<Offset>
+										<AbsDimension x="0" y="-16" />
+									</Offset>
+								</Anchor>
 							</Anchors>
 						</FontString>
 					</Layer>
 				</Layers>
 				<Frames>
 					<Button name="SelfService_ControlPanel_Header_CloseButton" inherits="UIPanelCloseButton">
+						<Size>
+							<AbsDimension x="26" y="26" />
+						</Size>
 						<Anchors>
-							<Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" x="4" y="4" />
+							<Anchor point="TOPRIGHT" x="6" y="5" />
 						</Anchors>
 					</Button>
 				</Frames>
@@ -49,14 +123,93 @@
 				</Scripts>
 			</Frame>
 			<Frame name="SelfService_ControlPanel_OrderList">
-				<Size x="180" y="220" />
 				<Anchors>
-					<Anchor point="TOPLEFT" relativePoint="TOPLEFT" x="10" y="-40" />
+					<Anchor point="TOPLEFT" relativePoint="TOPLEFT">
+						<Offset>
+							<AbsDimension x="0" y="-16"/>
+						</Offset>
+					</Anchor>
+					<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="180" y="0"/>
+						</Offset>
+					</Anchor>
 				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture file="Interface\PaperDollInfoFrame\UI-Character-CharacterTab-L1" alphaMode="BLEND">
+							<Anchors>
+								<Anchor point="TOPLEFT" relativePoint="TOPLEFT">
+									<Offset>
+										<AbsDimension x="0" y="0"/>
+									</Offset>
+								</Anchor>
+								<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT">
+									<Offset>
+										<AbsDimension x="0" y="0"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+							<TexCoords left="0.6" right="1" top="0.295" bottom="1" />
+						</Texture>
+					</Layer>
+					<Layer level="BORDER">
+						<Texture file="Interface\PaperDollInfoFrame\UI-GearManager-Border" alphaMode="BLEND">
+							<Size x="64" y="210" />
+							<Anchors>
+								<Anchor point="TOPLEFT" relativePoint="TOPLEFT">
+									<Offset>
+										<AbsDimension x="-8" y="-32"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+							<TexCoords left="0.00195312" right="0.125" top="0" bottom="1" />
+						</Texture>
+					</Layer>
+					<Layer level="BORDER">
+						<Texture file="Interface\PaperDollInfoFrame\UI-GearManager-Border" alphaMode="BLEND">
+							<Size x="64" y="64"/>
+							<Anchors>
+								<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMLEFT">
+									<Offset>
+										<AbsDimension x="-8" y="-7"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+							<TexCoords left="0.751953125" right="0.875" top="0" bottom="1" />
+						</Texture>
+					</Layer>
+					<Layer level="BORDER">
+						<Texture file="Interface\PaperDollInfoFrame\UI-GearManager-Border" alphaMode="BLEND">
+							<Size x="64" y="64"/>
+							<Anchors>
+								<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT">
+									<Offset>
+										<AbsDimension x="5" y="-7"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+							<TexCoords left="0.875" right="1" top="0" bottom="1" />
+						</Texture>
+					</Layer>
+					<Layer level="BORDER">
+						<Texture file="Interface\PaperDollInfoFrame\UI-GearManager-Border" alphaMode="BLEND">
+							<Size x="65" y="64"/>
+							<Anchors>
+								<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMLEFT">
+									<Offset>
+										<AbsDimension x="56" y="-7"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+							<TexCoords left="0.376953125" right="0.498046875" top="0" bottom="1" />
+						</Texture>
+					</Layer>
+				</Layers>
 			</Frame>
 			<Button name="SelfService_ActionQueueButton" inherits="SecureActionButtonTemplate" text="No Action">
 				<Size>
-					<AbsDimension x="42" y="42" />
+					<AbsDimension x="36" y="36" />
 				</Size>
 				<NormalTexture file="Interface\Glues\CharacterCreate\UI-CharacterCreate-Factions.blp" />
 				<Anchors>
@@ -79,16 +232,6 @@
 				</Scripts>
 			</Button>
 		</Frames>
-		<Layers>
-			<Layer>
-				<FontString text="Orders" inherits="GameFontNormalSmall" justifyH="CENTER">
-					<Size x="180" y="22" />
-					<Anchors>
-						<Anchor point="BOTTOM" relativePoint="TOP" relativeTo="SelfService_ControlPanel_OrderList" x="0" y="0" />
-					</Anchors>
-				</FontString>
-			</Layer>
-		</Layers>
 	</Frame>
 	<Script file="ui/ControlPanel.lua" />
 </Ui>
