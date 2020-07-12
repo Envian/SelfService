@@ -46,6 +46,7 @@ ns.registerEvent(ns.EVENT.DATA_LOADED, function()
 		continueLoading = false;
 		CloseCraft();
 		ns.enableAddon();
+	end
 end)
 
 function ns.enableAddon()
@@ -57,6 +58,7 @@ function ns.enableAddon()
 		else
 			continueLoading = true;
 			CastSpellByName("Enchanting");
+		end
 	else
 		ns.print(ns.LOG_ALREADY_ENABLED);
 	end
