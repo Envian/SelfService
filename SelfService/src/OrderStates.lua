@@ -52,6 +52,7 @@ end
 
 local orderPhaseState = baseOrderState:new({
 	Phase = "ORDER",
+	RestoreState = "WAIT_FOR_MATS",
 
 	ORDER_REQUEST = function(customer, recipes)
 		customer:addToOrder(recipes);
@@ -65,6 +66,7 @@ local orderPhaseState = baseOrderState:new({
 
 local craftPhaseState = baseOrderState:new({
 	Phase = "CRAFT",
+	RestoreState = "CRAFT_ORDER",
 
 	ENTER_STATE = checkDeliverable,
 	INVENTORY_CHANGED = checkDeliverable,
@@ -124,6 +126,7 @@ ns.OrderStates = {
 
 	ACCEPT_MATS = orderPhaseState:new({
 		Name = "ACCEPT_MATS",
+		RestoreState = "WAIT_FOR_MATS",
 
 		ENTER_STATE = function(customer)
 			ns.ActionQueue.acceptTrade();
@@ -166,8 +169,8 @@ ns.OrderStates = {
 			end
 		end,
 		TRADE_SHOW = function(customer)
-			if customer.CurrentOrder.Enchants[customer.CurrentOrder.EnchantIndex] then
-				customer:whisperf(ns.L.enUS.ADD_ENCHANTABLE_ITEM, customer.CurrentOrder.Enchants[customer.CurrentOrder.EnchantIndex].Link);
+			if #customer.CurrentOrder.Enchants > 0 then
+				customer:whisperf(ns.L.enUS.ADD_ENCHANTABLE_ITEM, customer.CurrentOrder:nextEnchant().Link);
 			end
 
 			return ns.OrderStates.DELIVER_ORDER;
@@ -176,6 +179,7 @@ ns.OrderStates = {
 
 	DELIVER_ORDER = deliveryPhaseState:new({
 		Name = "DELIVER_ORDER",
+		RestoreState = "READY_FOR_DELIVERY",
 
 		ENTER_STATE = function(customer)
 			local returnables = {};
@@ -189,7 +193,7 @@ ns.OrderStates = {
 			if not ns.isEmpty(returnables) then
 				ns.breakStacksForReturn(returnables);
 			else
-				if customer.CurrentOrder.Enchants[customer.CurrentOrder.EnchantIndex] then
+				if #customer.CurrentOrder.Enchants > 0 then
 					return ns.OrderStates.WAIT_FOR_ENCHANTABLE;
 				else
 					return ns.OrderStates.AWAIT_PAYMENT;
@@ -203,7 +207,7 @@ ns.OrderStates = {
 				UseContainerItem(returnable.container, returnable.slot);
 			end
 
-			if customer.CurrentOrder.Enchants[customer.CurrentOrder.EnchantIndex] then
+			if #customer.CurrentOrder.Enchants > 0 then
 				return ns.OrderStates.WAIT_FOR_ENCHANTABLE;
 			else
 				return ns.OrderStates.AWAIT_PAYMENT;
@@ -219,6 +223,7 @@ ns.OrderStates = {
 
 	WAIT_FOR_ENCHANTABLE = deliveryPhaseState:new({
 		Name = "WAIT_FOR_ENCHANTABLE",
+		RestoreState = "READY_FOR_DELIVERY",
 
 		TRADE_ITEM_CHANGED = function(customer, enteredItems)
 			if enteredItems[7].Id then
@@ -231,16 +236,17 @@ ns.OrderStates = {
 
 	CAST_ENCHANT = deliveryPhaseState:new({
 		Name = "CAST_ENCHANT",
+		RestoreState = "READY_FOR_DELIVERY",
 
 		ENTER_STATE = function(customer)
-			ns.ActionQueue.castEnchant(customer.CurrentOrder.Enchants[customer.CurrentOrder.EnchantIndex].Name);
+			ns.ActionQueue.castEnchant(customer.CurrentOrder:nextEnchant().Name);
 		end,
 		SPELLCAST_CHANGED = function(customer, cancelledCast)
-			if IsCurrentSpell(customer.CurrentOrder.Enchants[customer.CurrentOrder.EnchantIndex].Id) then
+			if IsCurrentSpell(customer.CurrentOrder:nextEnchant().Id) then
 				ns.ActionQueue.clearTradeAction();
 				return ns.OrderStates.APPLY_ENCHANT;
 			else
-				ns.ActionQueue.castEnchant(customer.CurrentOrder.Enchants[customer.CurrentOrder.EnchantIndex].Name);
+				ns.ActionQueue.castEnchant(customer.CurrentOrder:nextEnchant().Name);
 			end
 		end,
 		TRADE_ITEM_CHANGED = function(customer, enteredItems)
@@ -254,6 +260,7 @@ ns.OrderStates = {
 
 	APPLY_ENCHANT = deliveryPhaseState:new({
 		Name = "APPLY_ENCHANT",
+		RestoreState = "READY_FOR_DELIVERY",
 
 		ENTER_STATE = function(customer)
 			ns.ActionQueue.applyEnchant();
@@ -265,16 +272,16 @@ ns.OrderStates = {
 			else
 				local givenEnchant = select(6, GetTradeTargetItemInfo(7));
 
-				if givenEnchant == customer.CurrentOrder.Enchants[customer.CurrentOrder.EnchantIndex].Name then
+				if givenEnchant == customer.CurrentOrder:nextEnchant().Name then
 					ns.ActionQueue.clearTradeAction();
 					return ns.OrderStates.AWAIT_PAYMENT;
 				end
 			end
 		end,
 		SPELLCAST_FAILED = function(customer, spellId)
-			if spellId == customer.CurrentOrder.Enchants[customer.CurrentOrder.EnchantIndex].Id then
-				ns.warningf(ns.LOG_INVALID_ENCHANTABLE, customer.CurrentOrder.Enchants[customer.CurrentOrder.EnchantIndex].Link);
-				customer:whisperf(ns.L.enUS.INVALID_ITEM, customer.CurrentOrder.Enchants[customer.CurrentOrder.EnchantIndex].Link);
+			if spellId == customer.CurrentOrder:nextEnchant().Id then
+				ns.warningf(ns.LOG_INVALID_ENCHANTABLE, customer.CurrentOrder:nextEnchant().Link);
+				customer:whisperf(ns.L.enUS.INVALID_ITEM, customer.CurrentOrder:nextEnchant().Link);
 				ns.ActionQueue.clearTradeAction();
 				return ns.OrderStates.WAIT_FOR_ENCHANTABLE;
 			else
@@ -291,6 +298,7 @@ ns.OrderStates = {
 
 	AWAIT_PAYMENT = deliveryPhaseState:new({
 		Name = "AWAIT_PAYMENT",
+		RestoreState = "READY_FOR_DELIVERY",
 
 		ENTER_STATE = function(customer)
 			if customer.CurrentOrder.MoneyBalance > 0 then
@@ -319,6 +327,7 @@ ns.OrderStates = {
 
 	ACCEPT_DELIVERY = deliveryPhaseState:new({
 		Name = "ACCEPT_DELIVERY",
+		RestoreState = "READY_FOR_DELIVERY",
 
 		ENTER_STATE = function(customer)
 			ns.ActionQueue.acceptTrade();
@@ -332,21 +341,22 @@ ns.OrderStates = {
 			else
 				local givenEnchant = select(6, GetTradeTargetItemInfo(7));
 
-				if givenEnchant ~= customer.CurrentOrder.Enchants[customer.CurrentOrder.EnchantIndex].Name then
+				if givenEnchant ~= customer.CurrentOrder:nextEnchant().Name then
 					ns.ActionQueue.clearTradeAction();
 					return ns.OrderStates.CAST_ENCHANT;
 				end
 			end
 		end,
 		-- ENCHANT_SUCCEEDED = function(customer, spellId) -- This is just an extra error checking tool. May not be needed.
-		-- 	if spellId == customer.CurrentOrder.Enchants[customer.CurrentOrder.EnchantIndex].Id then
+		-- 	if spellId == customer.CurrentOrder:nextEnchant().Id then
 		-- 		ns.ActionQueue.clearTradeAction();
 		-- 	end
 		-- end,
 		TRADE_COMPLETED = function(customer)
-			customer.CurrentOrder.EnchantIndex = customer.CurrentOrder.EnchantIndex + 1;
+			-- BUG: Also credits the customer for the materials used for the enchant.
+			customer.CurrentOrder:finishEnchant(customer.CurrentOrder:nextEnchant().Id);
 
-			if not customer.CurrentOrder.Enchants[customer.CurrentOrder.EnchantIndex] and ns.isEmpty(customer.CurrentOrder.ItemBalance) then
+			if not customer.CurrentOrder:nextEnchant() and ns.isEmpty(customer.CurrentOrder.ItemBalance) then
 				ns.ActionQueue.clearTradeAction();
 				return ns.OrderStates.TRANSACTION_COMPLETE;
 			else
@@ -362,6 +372,7 @@ ns.OrderStates = {
 
 		ENTER_STATE = function(customer)
 			customer:whisper(ns.L.enUS.TRANSACTION_COMPLETE);
+			SelfServiceData.CurrentCustomer = nil;
 			customer.CurrentOrder = nil;
 			ns.CurrentOrder = nil;
 		end
@@ -373,7 +384,7 @@ ns.OrderStates = {
 
 			ENTER_STATE = function(customer)
 				ns.print(ns.DEBUG_SKIPPED_ENCHANT);
-				customer.CurrentOrder:credit(customer.CurrentOrder.Enchants[customer.CurrentOrder.EnchantIndex].Mats);
+				customer.CurrentOrder:credit(customer.CurrentOrder:nextEnchant().Mats);
 				customer:whisper(ns.L.enUS.DEBUG_SKIPPED_ENCHANT);
 				return ns.OrderStates.AWAIT_PAYMENT;
 			end

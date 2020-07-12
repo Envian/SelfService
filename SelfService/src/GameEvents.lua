@@ -76,7 +76,6 @@ eventFrame:SetScript("OnEvent", function(_, event, ...)
 end);
 
 -- Loading events are always captured.
-local closeOnLoad = false;
 local loadingFrame = CreateFrame("Frame");
 loadingFrame:RegisterEvent("CRAFT_SHOW");
 loadingFrame:SetScript("OnEvent", function(_, event, ...)
@@ -100,12 +99,9 @@ loadingFrame:SetScript("OnEvent", function(_, event, ...)
 				recipe.ProductId = productId;
 			end
 
-			if closeOnLoad then
-				CloseCraft();
-			end
-
 			ns.Loaded.Enchanting = true;
 			ns.infof(ns.LOG_LOADED, "Enchanting");
+			ns.dataLoaded("Enchanting");
 		end
 	end
 end);
@@ -121,10 +117,15 @@ ns.registerEvent(ns.EVENT.ENABLE, function()
 
 	SelfService_ActionQueueButton:Show();
 
-	if not ns.Loaded.Enchanting then
-		CastSpellByName("Enchanting");
-		closeOnLoad = true;
+	-- Reloads customer information after log in or reload
+	for name, data in pairs(SelfServiceData.Customers) do
+		if data.CurrentOrder then
+			ns.getCustomer(name);
+			ns.CurrentOrder = ns.CurrentOrder or (SelfServiceData.CurrentCustomer and ns.Customers[name].CurrentOrder or nil);
+		end
 	end
+
+	if ns.CurrentOrder then ns.CurrentOrder:handleEvent("ENTER_STATE") end
 end);
 
 ns.registerEvent(ns.EVENT.DISABLE, function()

@@ -62,6 +62,7 @@ end
 
 local doWipeCustomers = function()
 	SelfServiceData.Customers = {};
+	SelfServiceData.CurrentCustomer = nil;
 	ns.Customers = {};
 	ns.CurrentOrder = nil;
 
@@ -118,6 +119,7 @@ local slashCommands = {
 				end
 				customer.CurrentOrder = nil;
 				if ns.CurrentOrder and ns.CurrentOrder.CustomerName == customer.Name then
+					SelfServiceData.CurrentCustomer = nil;
 					ns.CurrentOrder = nil;
 				end
 				ns.printf(ns.CMD_RESET_ORDER, customer.Name);
@@ -128,6 +130,7 @@ local slashCommands = {
 		currentorder = function()
 			if ns.CurrentOrder then
 				local customerName = ns.CurrentOrder.CustomerName
+				SelfServiceData.CurrentCustomer = nil;
 				ns.Customers[customerName].CurrentOrder = nil;
 				ns.CurrentOrder = nil;
 				ns.printf(ns.CMD_RESET_CURRENT_ORDER, customerName);

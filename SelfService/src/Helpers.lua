@@ -47,9 +47,9 @@ end
 
 ns.getOrderLinks = function(recipes)
 	local links = {};
-
-	for _, recipe in ipairs(recipes) do
-		table.insert(links, recipe.Link);
+	
+	for recipeId, count in pairs(recipes) do
+		table.insert(links, ns.Recipes[recipeId].Link);
 	end
 
 	return links;

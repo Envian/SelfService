@@ -27,10 +27,9 @@ function ns.OrderClass:new(data, customerName)
 		Enchants = {},
 		ItemBalance = {},
 		MoneyBalance = 0,
-		TradeAttempted = false,
-		EnchantIndex = 1
+		TradeAttempted = false
 	}
-	data.State = ns.OrderStates[data.State.Name];
+	data.State = ns.OrderStates[data.State.RestoreState or data.State.Name];
 	setmetatable(data, ns.OrderClass);
 	return data;
 end
@@ -51,20 +50,10 @@ end
 
 function ns.OrderClass:removeFromOrder(recipe)
 	if recipe.IsCrafted then
-		for i, craftable in ipairs(self.Craftables) do
-			if recipe == craftable then
-				self:debit({{Id = recipe.ProductId, Count = 1}});
-				table.remove(self.Craftables, i);
-				break;
-			end
-		end
+		self:debit({{Id = recipe.ProductId, Count = 1}});
+		self.Craftables[recipe.Id] = self.Craftables[recipe.Id] ~= 1 and self.Craftables[recipe.Id] - 1 or nil;
 	else
-		for i, enchant in ipairs(self.Enchants) do
-			if recipe == enchant then
-				table.remove(self.Enchants, i);
-				break;
-			end
-		end
+		self.Enchants[recipe.Id] = self.Enchants[recipe.Id] ~= 1 and self.Enchants[recipe.Id] - 1 or nil;
 	end
 
 	self:credit(recipe.Mats);
@@ -72,10 +61,10 @@ end
 
 function ns.OrderClass:addToOrder(recipe)
 	if recipe.IsCrafted then
-		table.insert(self.Craftables, recipe);
 		self:credit({{Id = recipe.ProductId, Count = 1}});
+		self.Craftables[recipe.Id] = (self.Craftables[recipe.Id] or 0) + 1;
 	else
-		table.insert(self.Enchants, recipe);
+		self.Enchants[recipe.Id] = (self.Enchants[recipe.Id] or 0) + 1;
 	end
 
 	self:debit(recipe.Mats);
@@ -122,7 +111,9 @@ function ns.OrderClass:isOrderCraftable()
 end
 
 function ns.OrderClass:isDeliverable()
-	for _, craftable in ipairs(self.Craftables) do
+	for craftable in pairs(self.Craftables) do
+		craftable = ns.Recipes[craftable];
+
 		if GetItemCount(craftable.ProductId) < -self.ItemBalance[craftable.ProductId] then
 			if craftable.CraftFocusId and GetItemCount(craftable.CraftFocusId) < 1 then
 				ns.errorf(ns.LOG_CRAFT_FOCUS_NOT_FOUND, craftable.CraftFocusName);
@@ -135,7 +126,9 @@ function ns.OrderClass:isDeliverable()
 		end
 	end
 
-	for _, enchant in ipairs(self.Enchants) do
+	for enchant in pairs(self.Enchants) do
+		enchant = ns.Recipes[enchant];
+
 		if GetItemCount(enchant.CraftFocusId) < 1 then
 			ns.errorf(ns.LOG_CRAFT_FOCUS_NOT_FOUND, enchant.CraftFocusName);
 			return false;
@@ -172,6 +165,15 @@ function ns.OrderClass:_modifyBalance(matList, factor, count)
 			end
 		end
 	end
+end
+
+function ns.OrderClass:nextEnchant()
+	local recipeId = next(self.Enchants, nil);
+	return ns.Recipes[recipeId];
+end
+
+function ns.OrderClass:finishEnchant(recipeId)
+	self.Enchants[recipeId] = self.Enchants[recipeId] ~= 1 and self.Enchants[recipeId] - 1 or nil;
 end
 
 function ns.OrderClass:closeTrade()

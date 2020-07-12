@@ -16,12 +16,14 @@ local ADDON_NAME, ns = ...;
 
 ns.EVENT = {
 	ENABLE = "ENABLED",
-	DISABLE = "DISABLED"
+	DISABLE = "DISABLED",
+	DATA_LOADED = "DATA_LOADED"
 }
 
 local handlers = {
 	[ns.EVENT.ENABLE] = {},
 	[ns.EVENT.DISABLE] = {},
+	[ns.EVENT.DATA_LOADED] = {}
 }
 
 function ns.registerEvent(name, handler)
@@ -37,11 +39,26 @@ local function fireEvent(event, ...)
 	end
 end
 
+
+local continueLoading = false;
+ns.registerEvent(ns.EVENT.DATA_LOADED, function()
+	if continueLoading then
+		continueLoading = false;
+		CloseCraft();
+		ns.enableAddon();
+	end
+end)
+
 function ns.enableAddon()
 	if not ns.Enabled then
-		fireEvent(ns.EVENT.ENABLE);
-		ns.Enabled = true;
-		ns.print(ns.LOG_ENABLED);
+		if ns.Loaded.Enchanting then
+			fireEvent(ns.EVENT.ENABLE);
+			ns.Enabled = true;
+			ns.print(ns.LOG_ENABLED);
+		else
+			continueLoading = true;
+			CastSpellByName("Enchanting");
+		end
 	else
 		ns.print(ns.LOG_ALREADY_ENABLED);
 	end
@@ -55,4 +72,8 @@ function ns.disableAddon()
 	else
 		ns.print(ns.LOG_ALREADY_DISABLED);
 	end
+end
+
+function ns.dataLoaded(profession)
+	fireEvent(ns.EVENT.DATA_LOADED);
 end

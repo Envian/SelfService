@@ -89,39 +89,21 @@ function CustomerClass:removeFromOrder(recipeIds)
 		local recipe = ns.Recipes[recipeId];
 		local ordered = false;
 
-		if recipe.IsCrafted then
-			-- Additional tracking/checks needed to cancel crafted items during craft/delivery phases
-			if self.CurrentOrder.State.Phase ~= "ORDER" then
-				table.insert(failed, recipe.Link);
-			else
-				for _, craftable in ipairs(self.CurrentOrder.Craftables) do
-					if recipe == craftable then
-						ordered = true;
-						self.CurrentOrder:removeFromOrder(recipe);
-						table.insert(successful, recipe.Link);
-						break;
-					end
-				end
-			end
-		else
-			if self.CurrentOrder.State.Phase == "DELIVERY" then
-				table.insert(failed, recipe.Link);
-			else
-				for _, enchant in ipairs(self.CurrentOrder.Enchants) do
-					if recipe == enchant then
-						ordered = true;
-						self.CurrentOrder:removeFromOrder(recipe);
-						table.insert(successful, recipe.Link);
-						break;
-					end
-				end
-			end
+		if self.CurrentOrder.Craftables[recipe.Id] or self.CurrentOrder.Enchants[recipe.Id] then
+			ordered = true;
+			self.CurrentOrder:removeFromOrder(recipe);
+			table.insert(successful, recipe.Link);
 		end
 
 		if not ordered then
 			table.insert(failed, recipe.Link);
 		end
 	end
+
+	if ns.isEmpty(self.CurrentOrder.ItemBalance) then
+		self.CurrentOrder = nil;
+		SelfServiceData.CurrentCustomer = nil;
+	 end
 
 	if not ns.isEmpty(successful) then self:replyJoin(ns.L.enUS.CANCELLED_ITEM, successful)	end
 	if not ns.isEmpty(failed) then self:replyJoin(ns.L.enUS.FAILED_CANCELLED_ITEM, failed)	end
@@ -147,8 +129,12 @@ function CustomerClass:addToOrder(recipeIds)
 	local addedLinks = {};
 	if not self.CurrentOrder then self.CurrentOrder = ns.OrderClass:new(nil, self.Name) end;
 
-	for _, recipeId in ipairs(recipeIds) do
+	if #recipeIds > 0 then
 		ns.CurrentOrder = self.CurrentOrder; -- HACK: Enforces exclusivity.
+		SelfServiceData.CurrentCustomer = ns.CurrentOrder.CustomerName; -- HACK: Allows recovery of current customer
+	end
+
+	for _, recipeId in ipairs(recipeIds) do
 		self.CurrentOrder:addToOrder(ns.Recipes[recipeId]);
 		table.insert(addedLinks, ns.Recipes[recipeId].Link);
 	end
