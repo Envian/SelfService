@@ -37,4 +37,4 @@ src/CustomerCommands.lua
 
 # UI
 ui/TradeFrameModifications.xml
-ui/SecureButton.xml
+ui/ControlPanel.xml

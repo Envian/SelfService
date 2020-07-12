@@ -1,0 +1,94 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ../FrameXML/UI.xsd">
+	<Frame name="SelfService_ControlPanel" frameStrata="HIGH" movable="true">
+		<Size>
+			<AbsDimension x="300" y="400" />
+		</Size>
+		<Anchors>
+			<Anchor point="CENTER" />
+		</Anchors>
+		<Backdrop bgFile="Interface\PaperDollInfoFrame\UI-GearManager-Title-Background" edgeFile="Interface\PaperDollInfoFrame\UI-GearManager-Border" tile="true">
+			<BackgroundInsets>
+				<AbsInset left="4" right="4" top="1" bottom="1"/>
+			</BackgroundInsets>
+			<EdgeSize>
+				<AbsValue val="48"/>
+			</EdgeSize>
+			<TileSize>
+				<AbsValue val="32"/>
+			</TileSize>
+		</Backdrop>
+		<Frames>
+			<Frame name="SelfService_ControlPanel_Header">
+				<Size y="22"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" x="0" y="0" />
+					<Anchor point="TOPRIGHT" x="0" y="0" />
+				</Anchors>
+				<Layers>
+					<Layer>
+						<FontString text="SelfService Control Panel" inherits="GameFontNormal" justifyH="CENTER">
+							<Size y="22" />
+							<Anchors>
+								<Anchor point="TOPLEFT" x="0" y="0" />
+								<Anchor point="TOPRIGHT" x="0" y="0" />
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Frames>
+					<Button name="SelfService_ControlPanel_Header_CloseButton" inherits="UIPanelCloseButton">
+						<Anchors>
+							<Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" x="4" y="4" />
+						</Anchors>
+					</Button>
+				</Frames>
+				<Scripts>
+					<OnLoad> self:RegisterForDrag("LeftButton"); </OnLoad>
+					<OnDragStart> SelfService_ControlPanel:StartMoving(); </OnDragStart>
+					<OnDragStop> SelfService_ControlPanel:StopMovingOrSizing(); </OnDragStop>
+				</Scripts>
+			</Frame>
+			<Frame name="SelfService_ControlPanel_OrderList">
+				<Size x="180" y="220" />
+				<Anchors>
+					<Anchor point="TOPLEFT" relativePoint="TOPLEFT" x="10" y="-40" />
+				</Anchors>
+			</Frame>
+			<Button name="SelfService_ActionQueueButton" inherits="SecureActionButtonTemplate" text="No Action">
+				<Size>
+					<AbsDimension x="42" y="42" />
+				</Size>
+				<NormalTexture file="Interface\Glues\CharacterCreate\UI-CharacterCreate-Factions.blp" />
+				<Anchors>
+					<Anchor point="CENTER">
+						<Offset>
+							<AbsDimension x="0" y="0" />
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnEnter>
+						GameTooltip:SetOwner(self, "ANCHOR_CURSOR");
+						GameTooltip:AddLine(self:GetText());
+						GameTooltip:Show();
+					</OnEnter>
+					<OnLeave>
+						GameTooltip:Hide();
+					</OnLeave>
+					<OnLeave> GameTooltip:Hide(); </OnLeave>
+				</Scripts>
+			</Button>
+		</Frames>
+		<Layers>
+			<Layer>
+				<FontString text="Orders" inherits="GameFontNormalSmall" justifyH="CENTER">
+					<Size x="180" y="22" />
+					<Anchors>
+						<Anchor point="BOTTOM" relativePoint="TOP" relativeTo="SelfService_ControlPanel_OrderList" x="0" y="0" />
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+	</Frame>
+	<Script file="ui/ControlPanel.lua" />
+</Ui>
